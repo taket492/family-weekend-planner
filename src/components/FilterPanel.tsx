@@ -152,6 +152,35 @@ export default function FilterPanel() {
         </div>
 
         <div>
+          <h3 className="text-sm font-medium text-gray-700 mb-3">対象年齢</h3>
+          <select
+            value={filters.ageGroup || ''}
+            onChange={(e) => setFilters({ ...filters, ageGroup: e.target.value as 'baby' | 'toddler' | 'child' || undefined })}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 mb-3"
+          >
+            <option value="">全年齢</option>
+            <option value="baby">👶 赤ちゃん (0-2歳)</option>
+            <option value="toddler">🧒 幼児 (2-5歳)</option>
+            <option value="child">👦 小学生 (5-12歳)</option>
+          </select>
+        </div>
+
+        <div>
+          <h3 className="text-sm font-medium text-gray-700 mb-3">子連れ適性</h3>
+          <select
+            value={filters.minChildScore || 30}
+            onChange={(e) => setFilters({ ...filters, minChildScore: parseInt(e.target.value) })}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 mb-3"
+          >
+            <option value={0}>すべて表示</option>
+            <option value={30}>30点以上</option>
+            <option value={50}>50点以上 (推奨)</option>
+            <option value={70}>70点以上 (高評価)</option>
+            <option value={90}>90点以上 (最高評価)</option>
+          </select>
+        </div>
+
+        <div>
           <h3 className="text-sm font-medium text-gray-700 mb-3">検索範囲</h3>
           <select
             value={filters.radius || 5}

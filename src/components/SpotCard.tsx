@@ -34,15 +34,34 @@ export default function SpotCard({ spot, onAddToPlan, isSelected }: SpotCardProp
   if (spot.hasDiaperChanging) facilities.push('おむつ交換台')
   if (spot.hasPlayArea) facilities.push('キッズスペース')
 
+  // 拡張情報の取得
+  const extendedSpot = spot as any
+  const childScore = extendedSpot.childFriendlyScore
+  const crowdLevel = extendedSpot.crowdLevel
+  const isOpen = extendedSpot.isCurrentlyOpen
+  const todayHours = extendedSpot.todayHours
+  const ageScores = extendedSpot.ageAppropriate
+
   return (
     <div className={`border rounded-lg p-4 transition-colors ${
       isSelected ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-gray-300'
     }`}>
       <div className="flex justify-between items-start mb-2">
         <h3 className="font-medium text-gray-900">{spot.name}</h3>
-        <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">
-          {categoryLabels[spot.category]}
-        </span>
+        <div className="flex gap-1">
+          <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">
+            {categoryLabels[spot.category]}
+          </span>
+          {childScore && (
+            <span className={`text-xs px-2 py-1 rounded font-medium ${
+              childScore >= 80 ? 'bg-green-100 text-green-700' :
+              childScore >= 60 ? 'bg-yellow-100 text-yellow-700' :
+              'bg-gray-100 text-gray-600'
+            }`}>
+              子連れ度{childScore}
+            </span>
+          )}
+        </div>
       </div>
       
       {spot.description && (
@@ -50,6 +69,38 @@ export default function SpotCard({ spot, onAddToPlan, isSelected }: SpotCardProp
       )}
       
       <p className="text-sm text-gray-500 mb-2">{spot.address}</p>
+      
+      {/* 営業状況・混雑度表示 */}
+      <div className="flex items-center gap-4 mb-2 text-sm">
+        {isOpen !== undefined && (
+          <span className={`font-medium ${isOpen ? 'text-green-600' : 'text-red-600'}`}>
+            {isOpen ? '営業中' : '営業時間外'}
+          </span>
+        )}
+        {crowdLevel && (
+          <span className="text-sm">{crowdLevel}</span>
+        )}
+        {todayHours && (
+          <span className="text-xs text-gray-500">{todayHours}</span>
+        )}
+      </div>
+
+      {/* 年齢別推奨度 */}
+      {ageScores && (
+        <div className="mb-2">
+          <div className="flex gap-1 text-xs">
+            <span className={`px-2 py-1 rounded ${ageScores.baby >= 70 ? 'bg-pink-100 text-pink-700' : 'bg-gray-100 text-gray-500'}`}>
+              👶 {ageScores.baby}
+            </span>
+            <span className={`px-2 py-1 rounded ${ageScores.toddler >= 70 ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-500'}`}>
+              🧒 {ageScores.toddler}
+            </span>
+            <span className={`px-2 py-1 rounded ${ageScores.child >= 70 ? 'bg-purple-100 text-purple-700' : 'bg-gray-100 text-gray-500'}`}>
+              👦 {ageScores.child}
+            </span>
+          </div>
+        </div>
+      )}
       
       {spot.rating && (
         <div className="flex items-center mb-2">
@@ -82,9 +133,23 @@ export default function SpotCard({ spot, onAddToPlan, isSelected }: SpotCardProp
       )}
       
       <div className="flex justify-between items-center">
-        {spot.openingHours && (
-          <span className="text-xs text-gray-500">{spot.openingHours}</span>
-        )}
+        <div className="flex items-center gap-2">
+          {extendedSpot.source && (
+            <span className="text-xs text-gray-400">
+              {extendedSpot.source}
+            </span>
+          )}
+          {spot.website && (
+            <a 
+              href={spot.website} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-xs text-blue-600 hover:underline"
+            >
+              詳細
+            </a>
+          )}
+        </div>
         
         <button
           onClick={onAddToPlan}

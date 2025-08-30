@@ -82,4 +82,6 @@ export interface SearchFilters {
   hasDiaperChanging?: boolean
   hasPlayArea?: boolean
   radius?: number // km
+  ageGroup?: 'baby' | 'toddler' | 'child'
+  minChildScore?: number
 }

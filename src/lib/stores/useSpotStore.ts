@@ -71,6 +71,10 @@ export const useSpotStore = create<SpotStore>((set, get) => ({
       if (filters.hasDiaperChanging) params.append('hasDiaperChanging', 'true')
       if (filters.hasPlayArea) params.append('hasPlayArea', 'true')
 
+      // 拡張フィルター
+      if (filters.ageGroup) params.append('ageGroup', filters.ageGroup)
+      if (filters.minChildScore) params.append('minChildScore', filters.minChildScore.toString())
+
       // 外部APIから実際のスポットデータを取得
       const response = await fetch(`/api/spots/external?${params}`)
       
