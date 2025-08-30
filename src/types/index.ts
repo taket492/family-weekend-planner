@@ -32,6 +32,19 @@ export interface Plan {
   spots: PlanSpot[]
 }
 
+export interface CreatePlanData {
+  title: string
+  description?: string
+  date: Date
+  region: string
+  spots: {
+    spotId: string
+    order: number
+    visitTime: Date | null
+    notes: string | null
+  }[]
+}
+
 export interface PlanSpot {
   id: string
   planId: string

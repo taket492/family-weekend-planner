@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
         date: new Date(body.date),
         region: body.region,
         spots: {
-          create: body.spots?.map((spot: any, index: number) => ({
+          create: body.spots?.map((spot: { spotId: string; visitTime?: string; notes?: string }, index: number) => ({
             spotId: spot.spotId,
             order: index,
             visitTime: spot.visitTime ? new Date(spot.visitTime) : null,

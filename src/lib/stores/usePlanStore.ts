@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { Plan, PlanSpot } from '@/types'
+import { Plan, CreatePlanData } from '@/types'
 
 interface PlanStore {
   plans: Plan[]
@@ -13,7 +13,7 @@ interface PlanStore {
   setError: (error: string | null) => void
   
   fetchPlans: () => Promise<void>
-  createPlan: (planData: Omit<Plan, 'id'>) => Promise<void>
+  createPlan: (planData: CreatePlanData) => Promise<void>
   updatePlan: (planId: string, updates: Partial<Plan>) => Promise<void>
   deletePlan: (planId: string) => Promise<void>
 }

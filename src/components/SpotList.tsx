@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react'
 import { useSpotStore } from '@/lib/stores/useSpotStore'
+import { Spot } from '@/types'
 import SpotCard from './SpotCard'
 
 interface SpotListProps {
@@ -24,7 +25,7 @@ export default function SpotList({ latitude, longitude }: SpotListProps) {
     searchSpots(latitude, longitude)
   }, [latitude, longitude, filters, searchSpots])
 
-  const handleAddToplan = (spot: any) => {
+  const handleAddToplan = (spot: Spot) => {
     if (!selectedSpots.find(s => s.id === spot.id)) {
       addSelectedSpot(spot)
     }

@@ -46,7 +46,7 @@ export default function LocationSelector({ onLocationSelect }: LocationSelectorP
             longitude,
             address: data.formattedAddress || `${latitude}, ${longitude}`
           })
-        } catch (error) {
+        } catch {
           onLocationSelect({
             latitude,
             longitude,
@@ -56,7 +56,7 @@ export default function LocationSelector({ onLocationSelect }: LocationSelectorP
         
         setIsLoading(false)
       },
-      (error) => {
+      () => {
         setError('位置情報の取得に失敗しました')
         setIsLoading(false)
       },
@@ -88,8 +88,8 @@ export default function LocationSelector({ onLocationSelect }: LocationSelectorP
         longitude: location.longitude,
         address: location.formattedAddress
       })
-    } catch (error) {
-      setError(error instanceof Error ? error.message : '住所の検索に失敗しました')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : '住所の検索に失敗しました')
     } finally {
       setIsLoading(false)
     }

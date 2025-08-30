@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
     const hasDiaperChanging = searchParams.get('hasDiaperChanging') === 'true'
     const hasPlayArea = searchParams.get('hasPlayArea') === 'true'
 
-    const whereClause: any = {}
+    const whereClause: Record<string, unknown> = {}
 
     if (categories?.length) {
       whereClause.category = { in: categories }
