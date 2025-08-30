@@ -85,7 +85,7 @@ export class AdvancedSpotSearch {
   }
 
   // AIによる子連れ適性スコアリング
-  static calculateChildFriendlyScore(element: any): number {
+  static calculateChildFriendlyScore(element: { tags: Record<string, string> }): number {
     let score = 0
     const tags = element.tags || {}
 
@@ -118,7 +118,7 @@ export class AdvancedSpotSearch {
   }
 
   // 混雑度予測（時間帯・曜日・季節要因）
-  static predictCrowdLevel(category: SpotCategory, openingInfo: any): string {
+  static predictCrowdLevel(category: SpotCategory): string {
     const now = new Date()
     const hour = now.getHours()
     const dayOfWeek = now.getDay()
@@ -229,7 +229,7 @@ export class AdvancedSpotSearch {
           const isOutdoor = tags.outdoor === 'yes' || tags.leisure === 'park'
           const weatherMultiplier = this.adjustForWeather(this.mapCategory(tags), isOutdoor)
           const openingInfo = this.parseOpeningHours(tags.opening_hours || '')
-          const crowdLevel = this.predictCrowdLevel(this.mapCategory(tags), openingInfo)
+          const crowdLevel = this.predictCrowdLevel(this.mapCategory(tags))
 
           return {
             id: `osm-${element.type}-${element.id}`,
@@ -291,7 +291,7 @@ export class AdvancedSpotSearch {
         
         childFriendlyScore: 60, // 観光スポットの基本スコア
         ageAppropriate: { baby: 40, toddler: 60, child: 80 },
-        crowdLevel: this.predictCrowdLevel(SpotCategory.TOURIST_SPOT, null),
+        crowdLevel: this.predictCrowdLevel(SpotCategory.TOURIST_SPOT),
         isCurrentlyOpen: true,
         
         rating: null,

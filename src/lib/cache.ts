@@ -6,12 +6,12 @@ interface CacheEntry<T> {
 }
 
 class AdvancedCache {
-  private cache = new Map<string, CacheEntry<any>>()
+  private cache = new Map<string, CacheEntry<unknown>>()
   private maxSize = 1000 // 最大キャッシュ数
   private defaultTTL = 300000 // 5分
 
   // インテリジェントキーの生成
-  generateKey(latitude: number, longitude: number, filters: any): string {
+  generateKey(latitude: number, longitude: number, filters: Record<string, unknown>): string {
     // 座標を100m単位で丸める（近隣検索の最適化）
     const roundedLat = Math.round(latitude * 1000) / 1000
     const roundedLng = Math.round(longitude * 1000) / 1000
@@ -54,7 +54,7 @@ class AdvancedCache {
   }
 
   get<T>(key: string): T | null {
-    const entry = this.cache.get(key)
+    const entry = this.cache.get(key) as CacheEntry<T> | undefined
     if (!entry) return null
     
     if (Date.now() > entry.expiry) {
@@ -85,7 +85,7 @@ class AdvancedCache {
     updateFunction: () => Promise<T>,
     threshold: number = 0.8
   ): Promise<T | null> {
-    const entry = this.cache.get(key)
+    const entry = this.cache.get(key) as CacheEntry<T> | undefined
     if (!entry) return null
     
     const timeLeft = entry.expiry - Date.now()
