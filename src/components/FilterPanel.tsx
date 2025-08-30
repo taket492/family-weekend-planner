@@ -46,117 +46,117 @@ export default function FilterPanel() {
   }
 
   return (
-    <div className="bg-white rounded-lg shadow p-6">
-      <h2 className="text-lg font-semibold text-gray-900 mb-4">
+    <div className="bg-white rounded-lg shadow p-4 md:p-6">
+      <h2 className="text-base md:text-lg font-semibold text-gray-900 mb-3 md:mb-4">
         フィルター
       </h2>
       
-      <div className="space-y-6">
+      <div className="space-y-4 md:space-y-6">
         <div>
-          <h3 className="text-sm font-medium text-gray-700 mb-3">カテゴリ</h3>
-          <div className="space-y-2">
+          <h3 className="text-sm font-medium text-gray-700 mb-2 md:mb-3">カテゴリ</h3>
+          <div className="grid grid-cols-2 md:grid-cols-1 gap-1 md:gap-2">
             {Object.entries(categoryLabels).map(([value, label]) => (
-              <label key={value} className="flex items-center">
+              <label key={value} className="flex items-center touch-none">
                 <input
                   type="checkbox"
                   checked={filters.category?.includes(value as SpotCategory) || false}
                   onChange={(e) => handleCategoryChange(value as SpotCategory, e.target.checked)}
-                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 focus:ring-2 w-4 h-4 md:w-auto md:h-auto"
                 />
-                <span className="ml-2 text-sm text-gray-700">{label}</span>
+                <span className="ml-2 text-xs md:text-sm text-gray-700 select-none">{label}</span>
               </label>
             ))}
           </div>
         </div>
 
         <div>
-          <h3 className="text-sm font-medium text-gray-700 mb-3">価格帯</h3>
-          <div className="space-y-2">
+          <h3 className="text-sm font-medium text-gray-700 mb-2 md:mb-3">価格帯</h3>
+          <div className="grid grid-cols-1 gap-1 md:gap-2">
             {Object.entries(priceRangeLabels).map(([value, label]) => (
-              <label key={value} className="flex items-center">
+              <label key={value} className="flex items-center touch-none">
                 <input
                   type="checkbox"
                   checked={filters.priceRange?.includes(value as PriceRange) || false}
                   onChange={(e) => handlePriceRangeChange(value as PriceRange, e.target.checked)}
-                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 focus:ring-2 w-4 h-4 md:w-auto md:h-auto"
                 />
-                <span className="ml-2 text-sm text-gray-700">{label}</span>
+                <span className="ml-2 text-xs md:text-sm text-gray-700 select-none">{label}</span>
               </label>
             ))}
           </div>
         </div>
 
         <div>
-          <h3 className="text-sm font-medium text-gray-700 mb-3">子連れ向け設備</h3>
-          <div className="space-y-2">
-            <label className="flex items-center">
+          <h3 className="text-sm font-medium text-gray-700 mb-2 md:mb-3">子連れ向け設備</h3>
+          <div className="grid grid-cols-2 md:grid-cols-1 gap-1 md:gap-2">
+            <label className="flex items-center touch-none">
               <input
                 type="checkbox"
                 checked={filters.hasKidsMenu || false}
                 onChange={(e) => handleFacilityChange('hasKidsMenu', e.target.checked)}
-                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 focus:ring-2 w-4 h-4 md:w-auto md:h-auto"
               />
-              <span className="ml-2 text-sm text-gray-700">キッズメニュー</span>
+              <span className="ml-2 text-xs md:text-sm text-gray-700 select-none">キッズメニュー</span>
             </label>
             
-            <label className="flex items-center">
+            <label className="flex items-center touch-none">
               <input
                 type="checkbox"
                 checked={filters.hasHighChair || false}
                 onChange={(e) => handleFacilityChange('hasHighChair', e.target.checked)}
-                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 focus:ring-2 w-4 h-4 md:w-auto md:h-auto"
               />
-              <span className="ml-2 text-sm text-gray-700">ハイチェア</span>
+              <span className="ml-2 text-xs md:text-sm text-gray-700 select-none">ハイチェア</span>
             </label>
             
-            <label className="flex items-center">
+            <label className="flex items-center touch-none">
               <input
                 type="checkbox"
                 checked={filters.hasNursingRoom || false}
                 onChange={(e) => handleFacilityChange('hasNursingRoom', e.target.checked)}
-                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 focus:ring-2 w-4 h-4 md:w-auto md:h-auto"
               />
-              <span className="ml-2 text-sm text-gray-700">授乳室</span>
+              <span className="ml-2 text-xs md:text-sm text-gray-700 select-none">授乳室</span>
             </label>
             
-            <label className="flex items-center">
+            <label className="flex items-center touch-none">
               <input
                 type="checkbox"
                 checked={filters.isStrollerFriendly || false}
                 onChange={(e) => handleFacilityChange('isStrollerFriendly', e.target.checked)}
-                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 focus:ring-2 w-4 h-4 md:w-auto md:h-auto"
               />
-              <span className="ml-2 text-sm text-gray-700">ベビーカー対応</span>
+              <span className="ml-2 text-xs md:text-sm text-gray-700 select-none">ベビーカー対応</span>
             </label>
             
-            <label className="flex items-center">
+            <label className="flex items-center touch-none">
               <input
                 type="checkbox"
                 checked={filters.hasDiaperChanging || false}
                 onChange={(e) => handleFacilityChange('hasDiaperChanging', e.target.checked)}
-                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 focus:ring-2 w-4 h-4 md:w-auto md:h-auto"
               />
-              <span className="ml-2 text-sm text-gray-700">おむつ交換台</span>
+              <span className="ml-2 text-xs md:text-sm text-gray-700 select-none">おむつ交換台</span>
             </label>
             
-            <label className="flex items-center">
+            <label className="flex items-center touch-none">
               <input
                 type="checkbox"
                 checked={filters.hasPlayArea || false}
                 onChange={(e) => handleFacilityChange('hasPlayArea', e.target.checked)}
-                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 focus:ring-2 w-4 h-4 md:w-auto md:h-auto"
               />
-              <span className="ml-2 text-sm text-gray-700">キッズスペース</span>
+              <span className="ml-2 text-xs md:text-sm text-gray-700 select-none">キッズスペース</span>
             </label>
           </div>
         </div>
 
         <div>
-          <h3 className="text-sm font-medium text-gray-700 mb-3">対象年齢</h3>
+          <h3 className="text-sm font-medium text-gray-700 mb-2 md:mb-3">対象年齢</h3>
           <select
             value={filters.ageGroup || ''}
             onChange={(e) => setFilters({ ...filters, ageGroup: e.target.value as 'baby' | 'toddler' | 'child' || undefined })}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 mb-3"
+            className="w-full px-3 py-2 text-sm md:text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 touch-manipulation"
           >
             <option value="">全年齢</option>
             <option value="baby">👶 赤ちゃん (0-2歳)</option>
@@ -166,11 +166,11 @@ export default function FilterPanel() {
         </div>
 
         <div>
-          <h3 className="text-sm font-medium text-gray-700 mb-3">子連れ適性</h3>
+          <h3 className="text-sm font-medium text-gray-700 mb-2 md:mb-3">子連れ適性</h3>
           <select
             value={filters.minChildScore || 30}
             onChange={(e) => setFilters({ ...filters, minChildScore: parseInt(e.target.value) })}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 mb-3"
+            className="w-full px-3 py-2 text-sm md:text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 touch-manipulation"
           >
             <option value={0}>すべて表示</option>
             <option value={30}>30点以上</option>
@@ -181,11 +181,11 @@ export default function FilterPanel() {
         </div>
 
         <div>
-          <h3 className="text-sm font-medium text-gray-700 mb-3">検索範囲</h3>
+          <h3 className="text-sm font-medium text-gray-700 mb-2 md:mb-3">検索範囲</h3>
           <select
             value={filters.radius || 5}
             onChange={(e) => setFilters({ ...filters, radius: parseInt(e.target.value) })}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-2 text-sm md:text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 touch-manipulation"
           >
             <option value={1}>1km以内</option>
             <option value={3}>3km以内</option>

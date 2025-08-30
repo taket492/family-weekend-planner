@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { AdvancedSpotSearch } from '@/lib/advanced-search'
 import { spotCache } from '@/lib/cache'
-import { SpotCategory } from '@/types'
+import { SpotCategory, ExtendedSpot } from '@/types'
 
 export async function GET(request: NextRequest) {
   try {
@@ -34,7 +34,7 @@ export async function GET(request: NextRequest) {
       radius, categories, minChildScore, ageGroup 
     })
     
-    let spots: any[] = spotCache.get(cacheKey) || []
+    let spots: ExtendedSpot[] = spotCache.get(cacheKey) || []
     
     if (spots.length === 0) {
       // キャッシュミス: 高度な統合検索実行
@@ -53,30 +53,30 @@ export async function GET(request: NextRequest) {
 
     // フィルター適用
     if (categories?.length) {
-      spots = spots.filter((spot: any) => categories.includes(spot.category))
+      spots = spots.filter((spot) => categories.includes(spot.category))
     }
 
     // 子連れ向けフィルター適用（厳密）
-    if (hasKidsMenu) spots = spots.filter((spot: any) => spot.hasKidsMenu)
-    if (hasHighChair) spots = spots.filter((spot: any) => spot.hasHighChair)
-    if (hasNursingRoom) spots = spots.filter((spot: any) => spot.hasNursingRoom)
-    if (isStrollerFriendly) spots = spots.filter((spot: any) => spot.isStrollerFriendly)
-    if (hasDiaperChanging) spots = spots.filter((spot: any) => spot.hasDiaperChanging)
-    if (hasPlayArea) spots = spots.filter((spot: any) => spot.hasPlayArea)
+    if (hasKidsMenu) spots = spots.filter((spot) => spot.hasKidsMenu)
+    if (hasHighChair) spots = spots.filter((spot) => spot.hasHighChair)
+    if (hasNursingRoom) spots = spots.filter((spot) => spot.hasNursingRoom)
+    if (isStrollerFriendly) spots = spots.filter((spot) => spot.isStrollerFriendly)
+    if (hasDiaperChanging) spots = spots.filter((spot) => spot.hasDiaperChanging)
+    if (hasPlayArea) spots = spots.filter((spot) => spot.hasPlayArea)
 
     // 年齢グループ別ソート
     if (ageGroup && spots.length > 0) {
-      spots.sort((a: any, b: any) => {
-        const scoreA = a.ageAppropriate?.[ageGroup] || 0
-        const scoreB = b.ageAppropriate?.[ageGroup] || 0
+      spots.sort((a, b) => {
+        const scoreA = a.ageAppropriate?.[ageGroup as keyof typeof a.ageAppropriate] || 0
+        const scoreB = b.ageAppropriate?.[ageGroup as keyof typeof b.ageAppropriate] || 0
         return scoreB - scoreA
       })
     }
 
     // 子連れ適性スコア＋距離の複合ソート
-    spots.sort((a: any, b: any) => {
+    spots.sort((a, b) => {
       const distA = Math.sqrt(Math.pow(a.latitude - latitude, 2) + Math.pow(a.longitude - longitude, 2))
-      const distB = Math.sqrt(Math.pow(b.latitude - longitude, 2) + Math.pow(b.longitude - longitude, 2))
+      const distB = Math.sqrt(Math.pow(b.latitude - latitude, 2) + Math.pow(b.longitude - longitude, 2))
       const scoreA = (a.childFriendlyScore || 0) - (distA * 1000)
       const scoreB = (b.childFriendlyScore || 0) - (distB * 1000)
       return scoreB - scoreA

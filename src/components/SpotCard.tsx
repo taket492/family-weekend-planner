@@ -1,6 +1,6 @@
 'use client'
 
-import { Spot, SpotCategory, PriceRange } from '@/types'
+import { Spot, SpotCategory, PriceRange, ExtendedSpot } from '@/types'
 
 interface SpotCardProps {
   spot: Spot
@@ -35,7 +35,7 @@ export default function SpotCard({ spot, onAddToPlan, isSelected }: SpotCardProp
   if (spot.hasPlayArea) facilities.push('キッズスペース')
 
   // 拡張情報の取得
-  const extendedSpot = spot as any
+  const extendedSpot = spot as ExtendedSpot
   const childScore = extendedSpot.childFriendlyScore
   const crowdLevel = extendedSpot.crowdLevel
   const isOpen = extendedSpot.isCurrentlyOpen
@@ -47,8 +47,15 @@ export default function SpotCard({ spot, onAddToPlan, isSelected }: SpotCardProp
       isSelected ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-gray-300'
     }`}>
       <div className="flex justify-between items-start mb-2">
-        <h3 className="font-medium text-gray-900">{spot.name}</h3>
-        <div className="flex gap-1">
+        <div className="flex-1">
+          <h3 className="font-medium text-gray-900">{spot.name}</h3>
+          {extendedSpot.isTrending && (
+            <span className="inline-flex items-center text-xs bg-red-100 text-red-700 px-2 py-1 rounded-full mt-1">
+              🔥 話題のスポット
+            </span>
+          )}
+        </div>
+        <div className="flex gap-1 flex-wrap">
           <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">
             {categoryLabels[spot.category]}
           </span>
@@ -132,13 +139,57 @@ export default function SpotCard({ spot, onAddToPlan, isSelected }: SpotCardProp
         </div>
       )}
       
-      <div className="flex justify-between items-center">
-        <div className="flex items-center gap-2">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           {extendedSpot.source && (
             <span className="text-xs text-gray-400">
               {extendedSpot.source}
             </span>
           )}
+          
+          {/* レビューサイトリンク */}
+          {extendedSpot.tabelogUrl && (
+            <a 
+              href={extendedSpot.tabelogUrl} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-xs bg-orange-100 text-orange-600 px-2 py-1 rounded hover:underline"
+            >
+              食べログ
+            </a>
+          )}
+          {extendedSpot.gurunaviUrl && (
+            <a 
+              href={extendedSpot.gurunaviUrl} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded hover:underline"
+            >
+              ぐるなび
+            </a>
+          )}
+          {extendedSpot.instagramUrl && (
+            <a 
+              href={extendedSpot.instagramUrl} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-xs bg-pink-100 text-pink-600 px-2 py-1 rounded hover:underline"
+            >
+              Instagram
+            </a>
+          )}
+          
+          {/* Google Maps ナビゲーションボタン */}
+          <button
+            onClick={() => {
+              const url = `https://www.google.com/maps/dir/?api=1&destination=${spot.latitude},${spot.longitude}&travelmode=driving`
+              window.open(url, '_blank')
+            }}
+            className="text-xs bg-green-100 text-green-600 px-2 py-1 rounded hover:bg-green-200 transition-colors"
+          >
+            🗺️ ここへ行く
+          </button>
+          
           {spot.website && (
             <a 
               href={spot.website} 

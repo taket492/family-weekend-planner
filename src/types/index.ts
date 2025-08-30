@@ -21,6 +21,17 @@ export interface Spot {
   
   rating?: number
   reviewCount: number
+  
+  // Social media and review URLs
+  tabelogUrl?: string
+  gurunaviUrl?: string
+  rettyUrl?: string
+  instagramUrl?: string
+  twitterUrl?: string
+  
+  // Trending status
+  isTrending?: boolean
+  trendingSource?: 'instagram' | 'twitter' | 'tabelog' | 'gurunavi'
 }
 
 export interface Plan {
@@ -84,4 +95,18 @@ export interface SearchFilters {
   radius?: number // km
   ageGroup?: 'baby' | 'toddler' | 'child'
   minChildScore?: number
+}
+
+// Extended Spot interface for API responses
+export interface ExtendedSpot extends Spot {
+  childFriendlyScore?: number
+  ageAppropriate?: {
+    baby: number
+    toddler: number
+    child: number
+  }
+  crowdLevel?: string
+  isCurrentlyOpen?: boolean
+  todayHours?: string
+  source?: string
 }
