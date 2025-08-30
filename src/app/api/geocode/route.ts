@@ -4,7 +4,34 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
     const address = searchParams.get('address')
+    const lat = searchParams.get('lat')
+    const lng = searchParams.get('lng')
     
+    // 逆ジオコーディング（座標から住所）
+    if (lat && lng) {
+      const nominatimUrl = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&accept-language=ja`
+      
+      const response = await fetch(nominatimUrl, {
+        headers: {
+          'User-Agent': 'Family Weekend Planner App'
+        }
+      })
+      
+      if (!response.ok) {
+        return NextResponse.json(
+          { error: 'Failed to reverse geocode coordinates' },
+          { status: 404 }
+        )
+      }
+      
+      const data = await response.json()
+      
+      return NextResponse.json({
+        formattedAddress: data.display_name || `${lat}, ${lng}`
+      })
+    }
+    
+    // ジオコーディング（住所から座標）
     if (!address) {
       return NextResponse.json(
         { error: 'Address parameter is required' },
@@ -12,34 +39,38 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
-    if (!apiKey) {
+    // OpenStreetMap Nominatim API（無料）を使用
+    const nominatimUrl = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}&countrycodes=jp&limit=1&accept-language=ja`
+    
+    const response = await fetch(nominatimUrl, {
+      headers: {
+        'User-Agent': 'Family Weekend Planner App'
+      }
+    })
+    
+    if (!response.ok) {
       return NextResponse.json(
-        { error: 'Google Maps API key not configured' },
-        { status: 500 }
+        { error: 'Geocoding service unavailable' },
+        { status: 503 }
       )
     }
-
-    const geocodeUrl = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(address)}&key=${apiKey}`
     
-    const response = await fetch(geocodeUrl)
     const data = await response.json()
 
-    if (data.status !== 'OK' || !data.results?.length) {
+    if (!data || data.length === 0) {
       return NextResponse.json(
-        { error: 'Failed to geocode address' },
+        { error: 'Address not found' },
         { status: 404 }
       )
     }
 
-    const result = data.results[0]
-    const location = result.geometry.location
+    const result = data[0]
 
     return NextResponse.json({
-      latitude: location.lat,
-      longitude: location.lng,
-      formattedAddress: result.formatted_address,
-      placeId: result.place_id
+      latitude: parseFloat(result.lat),
+      longitude: parseFloat(result.lon),
+      formattedAddress: result.display_name,
+      placeId: result.place_id || result.osm_id
     })
   } catch (error) {
     console.error('Error geocoding address:', error)
