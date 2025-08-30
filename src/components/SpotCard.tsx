@@ -43,12 +43,10 @@ export default function SpotCard({ spot, onAddToPlan, isSelected }: SpotCardProp
   const ageScores = extendedSpot.ageAppropriate
 
   return (
-    <div className={`border rounded-lg p-4 transition-colors ${
-      isSelected ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-gray-300'
-    }`}>
-      <div className="flex justify-between items-start mb-2">
+    <div className="border border-gray-200 rounded-lg p-5 transition-all hover:shadow-md hover:border-gray-300 bg-white">
+      <div className="flex justify-between items-start mb-3">
         <div className="flex-1">
-          <h3 className="font-medium text-gray-900">{spot.name}</h3>
+          <h3 className="text-lg font-bold text-gray-900 mb-1">{spot.name}</h3>
           {extendedSpot.isTrending && (
             <span className="inline-flex items-center text-xs bg-red-100 text-red-700 px-2 py-1 rounded-full mt-1">
               🔥 話題のスポット
@@ -75,7 +73,10 @@ export default function SpotCard({ spot, onAddToPlan, isSelected }: SpotCardProp
         <p className="text-sm text-gray-600 mb-2">{spot.description}</p>
       )}
       
-      <p className="text-sm text-gray-500 mb-2">{spot.address}</p>
+      <div className="flex items-start gap-2 mb-3">
+        <span className="text-gray-400 mt-1">📍</span>
+        <p className="text-sm text-gray-600 flex-1">{spot.address}</p>
+      </div>
       
       {/* 営業状況・混雑度表示 */}
       <div className="flex items-center gap-4 mb-2 text-sm">
@@ -110,14 +111,14 @@ export default function SpotCard({ spot, onAddToPlan, isSelected }: SpotCardProp
       )}
       
       {spot.rating && (
-        <div className="flex items-center mb-2">
+        <div className="flex items-center justify-between mb-3 p-2 bg-gray-50 rounded">
           <div className="flex items-center">
-            <span className="text-yellow-400">★</span>
-            <span className="text-sm font-medium ml-1">{spot.rating.toFixed(1)}</span>
-            <span className="text-sm text-gray-500 ml-1">({spot.reviewCount}件)</span>
+            <span className="text-yellow-400 text-lg">★</span>
+            <span className="text-base font-bold ml-1 text-gray-900">{spot.rating.toFixed(1)}</span>
+            <span className="text-sm text-gray-500 ml-2">({spot.reviewCount}件のレビュー)</span>
           </div>
           {spot.priceRange && (
-            <span className="text-sm text-gray-500 ml-4">
+            <span className="text-sm font-medium text-gray-700 bg-white px-2 py-1 rounded">
               {priceRangeLabels[spot.priceRange]}
             </span>
           )}
@@ -125,12 +126,13 @@ export default function SpotCard({ spot, onAddToPlan, isSelected }: SpotCardProp
       )}
       
       {facilities.length > 0 && (
-        <div className="mb-3">
-          <div className="flex flex-wrap gap-1">
+        <div className="mb-4">
+          <h4 className="text-sm font-medium text-gray-700 mb-2">🧸 子連れ向け設備</h4>
+          <div className="flex flex-wrap gap-2">
             {facilities.map((facility) => (
               <span
                 key={facility}
-                className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded"
+                className="text-xs bg-green-100 text-green-700 px-3 py-1 rounded-full font-medium"
               >
                 {facility}
               </span>
@@ -139,45 +141,9 @@ export default function SpotCard({ spot, onAddToPlan, isSelected }: SpotCardProp
         </div>
       )}
       
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-2">
-        <div className="flex flex-wrap items-center gap-2">
-          {extendedSpot.source && (
-            <span className="text-xs text-gray-400">
-              {extendedSpot.source}
-            </span>
-          )}
-          
-          {/* レビューサイトリンク */}
-          {extendedSpot.tabelogUrl && (
-            <a 
-              href={extendedSpot.tabelogUrl} 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="text-xs bg-orange-100 text-orange-600 px-2 py-1 rounded hover:underline"
-            >
-              食べログ
-            </a>
-          )}
-          {extendedSpot.gurunaviUrl && (
-            <a 
-              href={extendedSpot.gurunaviUrl} 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded hover:underline"
-            >
-              ぐるなび
-            </a>
-          )}
-          {extendedSpot.instagramUrl && (
-            <a 
-              href={extendedSpot.instagramUrl} 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="text-xs bg-pink-100 text-pink-600 px-2 py-1 rounded hover:underline"
-            >
-              Instagram
-            </a>
-          )}
+      <div className="border-t pt-4 mt-4">
+        <h4 className="text-sm font-medium text-gray-700 mb-3">🔗 詳細情報・アクション</h4>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-2 xl:grid-cols-3 gap-2">
           
           {/* Google Maps ナビゲーションボタン */}
           <button
@@ -185,34 +151,60 @@ export default function SpotCard({ spot, onAddToPlan, isSelected }: SpotCardProp
               const url = `https://www.google.com/maps/dir/?api=1&destination=${spot.latitude},${spot.longitude}&travelmode=driving`
               window.open(url, '_blank')
             }}
-            className="text-xs bg-green-100 text-green-600 px-2 py-1 rounded hover:bg-green-200 transition-colors"
+            className="flex items-center justify-center gap-1 bg-green-600 text-white px-3 py-2 rounded-md hover:bg-green-700 transition-colors text-sm font-medium"
           >
-            🗺️ ここへ行く
+            🗺️ ナビ開始
           </button>
+          
+          {/* レビューサイトリンク */}
+          {extendedSpot.tabelogUrl && (
+            <a 
+              href={extendedSpot.tabelogUrl} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="flex items-center justify-center gap-1 bg-orange-500 text-white px-3 py-2 rounded-md hover:bg-orange-600 transition-colors text-sm font-medium"
+            >
+              🍽️ 食べログ
+            </a>
+          )}
+          {extendedSpot.gurunaviUrl && (
+            <a 
+              href={extendedSpot.gurunaviUrl} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="flex items-center justify-center gap-1 bg-blue-500 text-white px-3 py-2 rounded-md hover:bg-blue-600 transition-colors text-sm font-medium"
+            >
+              🍴 ぐるなび
+            </a>
+          )}
+          {extendedSpot.instagramUrl && (
+            <a 
+              href={extendedSpot.instagramUrl} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="flex items-center justify-center gap-1 bg-pink-500 text-white px-3 py-2 rounded-md hover:bg-pink-600 transition-colors text-sm font-medium"
+            >
+              📸 Instagram
+            </a>
+          )}
           
           {spot.website && (
             <a 
               href={spot.website} 
               target="_blank" 
               rel="noopener noreferrer"
-              className="text-xs text-blue-600 hover:underline"
+              className="flex items-center justify-center gap-1 bg-gray-600 text-white px-3 py-2 rounded-md hover:bg-gray-700 transition-colors text-sm font-medium"
             >
-              詳細
+              🌐 公式サイト
             </a>
           )}
         </div>
         
-        <button
-          onClick={onAddToPlan}
-          disabled={isSelected}
-          className={`px-3 py-1 text-sm rounded transition-colors ${
-            isSelected
-              ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-              : 'bg-blue-600 text-white hover:bg-blue-700'
-          }`}
-        >
-          {isSelected ? '追加済み' : 'プランに追加'}
-        </button>
+        {extendedSpot.source && (
+          <div className="mt-3 text-xs text-gray-400 text-center">
+            データ提供: {extendedSpot.source}
+          </div>
+        )}
       </div>
     </div>
   )

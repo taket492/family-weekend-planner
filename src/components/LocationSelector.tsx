@@ -96,18 +96,27 @@ export default function LocationSelector({ onLocationSelect }: LocationSelectorP
   }
 
   return (
-    <div className="bg-white rounded-lg shadow p-6">
-      <h2 className="text-lg font-semibold text-gray-900 mb-4">
-        場所を選択
+    <div className="bg-white rounded-lg shadow p-6 sticky top-4">
+      <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+        📍 検索エリア設定
       </h2>
       
       <div className="space-y-4">
         <button
           onClick={getCurrentLocation}
           disabled={isLoading}
-          className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full bg-blue-600 text-white py-3 px-4 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed font-medium flex items-center justify-center gap-2"
         >
-          {isLoading ? '位置情報を取得中...' : '現在地を使用'}
+          {isLoading ? (
+            <>
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+              位置情報を取得中...
+            </>
+          ) : (
+            <>
+              📍 現在地を使用
+            </>
+          )}
         </button>
         
         <div className="relative">
@@ -138,9 +147,18 @@ export default function LocationSelector({ onLocationSelect }: LocationSelectorP
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full bg-gray-600 text-white py-2 px-4 rounded-md hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full bg-gray-600 text-white py-3 px-4 rounded-md hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed font-medium flex items-center justify-center gap-2"
           >
-            {isLoading ? '検索中...' : '住所で検索'}
+            {isLoading ? (
+              <>
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                検索中...
+              </>
+            ) : (
+              <>
+                🔍 住所で検索
+              </>
+            )}
           </button>
         </form>
         

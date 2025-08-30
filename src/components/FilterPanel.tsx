@@ -46,9 +46,9 @@ export default function FilterPanel() {
   }
 
   return (
-    <div className="bg-white rounded-lg shadow p-4 md:p-6">
-      <h2 className="text-base md:text-lg font-semibold text-gray-900 mb-3 md:mb-4">
-        フィルター
+    <div className="bg-white rounded-lg shadow p-4 md:p-6 sticky top-4">
+      <h2 className="text-base md:text-lg font-semibold text-gray-900 mb-3 md:mb-4 flex items-center">
+        🔧 検索フィルター
       </h2>
       
       <div className="space-y-4 md:space-y-6">
