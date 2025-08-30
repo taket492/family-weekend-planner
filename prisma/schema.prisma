@@ -1,0 +1,87 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model Spot {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  category    SpotCategory
+  address     String
+  latitude    Float
+  longitude   Float
+  
+  // 子連れ向け設備
+  hasKidsMenu       Boolean @default(false)
+  hasHighChair      Boolean @default(false)
+  hasNursingRoom    Boolean @default(false)
+  isStrollerFriendly Boolean @default(false)
+  hasDiaperChanging Boolean @default(false)
+  hasPlayArea       Boolean @default(false)
+  
+  // 基本情報
+  phoneNumber String?
+  website     String?
+  openingHours String?
+  priceRange  PriceRange?
+  
+  // 評価
+  rating      Float?
+  reviewCount Int    @default(0)
+  
+  // プラン関連
+  plans       PlanSpot[]
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Plan {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  date        DateTime
+  region      String
+  
+  // プランに含まれるスポット
+  spots       PlanSpot[]
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model PlanSpot {
+  id       String @id @default(cuid())
+  planId   String
+  spotId   String
+  order    Int
+  visitTime DateTime?
+  notes    String?
+  
+  plan     Plan @relation(fields: [planId], references: [id], onDelete: Cascade)
+  spot     Spot @relation(fields: [spotId], references: [id], onDelete: Cascade)
+  
+  @@unique([planId, spotId])
+}
+
+enum SpotCategory {
+  RESTAURANT
+  CAFE
+  PLAYGROUND
+  PARK
+  MUSEUM
+  SHOPPING
+  ENTERTAINMENT
+  TOURIST_SPOT
+}
+
+enum PriceRange {
+  BUDGET      // ~1000円
+  MODERATE    // 1000-3000円
+  EXPENSIVE   // 3000円以上
+}
