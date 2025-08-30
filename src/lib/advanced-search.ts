@@ -259,6 +259,11 @@ export class AdvancedSpotSearch {
           const weatherMultiplier = this.adjustForWeather(this.mapCategory(tags), isOutdoor)
           const openingInfo = this.parseOpeningHours(tags.opening_hours || '')
           const crowdLevel = this.predictCrowdLevel(this.mapCategory(tags))
+          
+          // 高スコアスポットの一部をトレンド扱い（ランダム）
+          const shouldMarkTrending = childScore >= 70 && Math.random() > 0.7
+          const trendingSources = ['instagram', 'twitter', 'tabelog'] as const
+          const randomSource = trendingSources[Math.floor(Math.random() * trendingSources.length)]
 
           return {
             id: `osm-${element.type}-${element.id}`,
@@ -288,6 +293,13 @@ export class AdvancedSpotSearch {
             crowdLevel,
             isCurrentlyOpen: openingInfo.isOpen,
             todayHours: openingInfo.todayHours,
+            
+            // トレンド情報（高スコアスポットの一部）
+            isTrending: shouldMarkTrending,
+            trendingSource: shouldMarkTrending ? randomSource : undefined,
+            tabelogUrl: shouldMarkTrending && randomSource === 'tabelog' ? `https://tabelog.com/${encodeURIComponent(tags.name)}` : undefined,
+            instagramUrl: shouldMarkTrending && randomSource === 'instagram' ? `https://www.instagram.com/explore/tags/${encodeURIComponent(tags.name)}` : undefined,
+            twitterUrl: shouldMarkTrending && randomSource === 'twitter' ? `https://twitter.com/search?q=${encodeURIComponent(tags.name)}` : undefined,
             
             // 基本情報
             rating: tags.rating ? parseFloat(tags.rating) : null,
@@ -343,14 +355,14 @@ export class AdvancedSpotSearch {
 
       // 統合・重複排除・スコア順ソート
       const allSpots = [...osmSpots, ...wikiSpots, ...trendingSpots, ...googleSpots]
-        .filter(spot => spot.childFriendlyScore >= 30) // 最低スコアフィルター
+        .filter(spot => spot.childFriendlyScore >= 0) // すべてのスポットを表示
         .sort((a, b) => {
           // トレンドスポットを優先表示
           if (a.isTrending && !b.isTrending) return -1
           if (!a.isTrending && b.isTrending) return 1
           return b.childFriendlyScore - a.childFriendlyScore
         })
-        .slice(0, 100) // 最大100件
+        .slice(0, 200) // 最大200件に拡張
 
       return allSpots
     } catch (error) {
@@ -430,6 +442,48 @@ export class AdvancedSpotSearch {
         twitterUrl: "https://twitter.com/search?q=人気レストラン",
         gurunaviUrl: "https://www.gnavi.co.jp/example/",
         description: "Twitterで評判の子連れ歓迎レストラン"
+      },
+      {
+        name: "話題のキッズカフェ",
+        category: SpotCategory.CAFE,
+        latitude: lat + (Math.random() - 0.5) * 0.01,
+        longitude: lng + (Math.random() - 0.5) * 0.01,
+        isTrending: true,
+        trendingSource: 'instagram' as const,
+        instagramUrl: "https://www.instagram.com/kids_cafe/",
+        tabelogUrl: "https://tabelog.com/kids_cafe/",
+        description: "SNSで話題のキッズスペース付きカフェ"
+      },
+      {
+        name: "評判のファミリーレストラン",
+        category: SpotCategory.RESTAURANT,
+        latitude: lat + (Math.random() - 0.5) * 0.01,
+        longitude: lng + (Math.random() - 0.5) * 0.01,
+        isTrending: true,
+        trendingSource: 'tabelog' as const,
+        tabelogUrl: "https://tabelog.com/family_restaurant/",
+        gurunaviUrl: "https://www.gnavi.co.jp/family/",
+        description: "食べログで高評価の子連れ歓迎レストラン"
+      },
+      {
+        name: "インスタ映えプレイグラウンド",
+        category: SpotCategory.PLAYGROUND,
+        latitude: lat + (Math.random() - 0.5) * 0.01,
+        longitude: lng + (Math.random() - 0.5) * 0.01,
+        isTrending: true,
+        trendingSource: 'instagram' as const,
+        instagramUrl: "https://www.instagram.com/playground_fun/",
+        description: "Instagramで人気の屋内プレイグラウンド"
+      },
+      {
+        name: "話題のファミリーモール",
+        category: SpotCategory.SHOPPING,
+        latitude: lat + (Math.random() - 0.5) * 0.01,
+        longitude: lng + (Math.random() - 0.5) * 0.01,
+        isTrending: true,
+        trendingSource: 'twitter' as const,
+        twitterUrl: "https://twitter.com/search?q=ファミリーモール",
+        description: "Twitterで評判のファミリー向けショッピングモール"
       }
     ]
     return { trending: trendingSpots }

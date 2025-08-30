@@ -82,7 +82,7 @@ export async function GET(request: NextRequest) {
       return scoreB - scoreA
     })
 
-    return NextResponse.json(spots.slice(0, 50))
+    return NextResponse.json(spots.slice(0, 100))
   } catch (error) {
     console.error('Error in advanced spot search:', error)
     return NextResponse.json(
