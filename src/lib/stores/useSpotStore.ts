@@ -71,10 +71,11 @@ export const useSpotStore = create<SpotStore>((set, get) => ({
       if (filters.hasDiaperChanging) params.append('hasDiaperChanging', 'true')
       if (filters.hasPlayArea) params.append('hasPlayArea', 'true')
 
-      const response = await fetch(`/api/spots?${params}`)
+      // 外部APIから実際のスポットデータを取得
+      const response = await fetch(`/api/spots/external?${params}`)
       
       if (!response.ok) {
-        throw new Error('Failed to fetch spots')
+        throw new Error('Failed to fetch spots from external API')
       }
       
       const spots = await response.json()
