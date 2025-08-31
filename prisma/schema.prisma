@@ -49,6 +49,15 @@ model Spot {
   hasTatamiSeating Boolean @default(false)
   seasonalEventType SeasonalEventType?
   
+  // SNSトレンド情報
+  isTrending      Boolean @default(false)
+  trendingSource  String?
+  instagramUrl    String?
+  twitterUrl      String?
+  tabelogUrl      String?
+  gurunaviUrl     String?
+  rettyUrl        String?
+  
   // リレーション
   plans       PlanSpot[]
   bookmarks   Bookmark[]

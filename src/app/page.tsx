@@ -6,6 +6,8 @@ import SpotList from '@/components/SpotList'
 import FilterPanel from '@/components/FilterPanel'
 import WeeklyRanking from '@/components/WeeklyRanking'
 import EventList from '@/components/EventList'
+import { ManualSpotForm } from '@/components/ManualSpotForm'
+import { ManualRestaurantForm } from '@/components/ManualRestaurantForm'
 
 export default function Home() {
   const [selectedLocation, setSelectedLocation] = useState<{
@@ -13,6 +15,7 @@ export default function Home() {
     longitude: number
     address: string
   } | null>(null)
+  const [activeTab, setActiveTab] = useState<'search' | 'add-spot' | 'add-restaurant'>('search')
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -24,42 +27,90 @@ export default function Home() {
           <p className="text-gray-600 mt-1">
             子連れ向けのお出かけスポットを簡単に見つけよう
           </p>
+          
+          {/* ナビゲーションタブ */}
+          <div className="mt-4 border-b border-gray-200">
+            <nav className="-mb-px flex space-x-8">
+              <button
+                onClick={() => setActiveTab('search')}
+                className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                  activeTab === 'search'
+                    ? 'border-blue-500 text-blue-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                🔍 スポット検索
+              </button>
+              
+              <button
+                onClick={() => setActiveTab('add-spot')}
+                className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                  activeTab === 'add-spot'
+                    ? 'border-orange-500 text-orange-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                📝 スポット登録
+              </button>
+              
+              <button
+                onClick={() => setActiveTab('add-restaurant')}
+                className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                  activeTab === 'add-restaurant'
+                    ? 'border-green-500 text-green-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                🍽️ レストラン登録
+              </button>
+            </nav>
+          </div>
         </div>
       </header>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {!selectedLocation ? (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-1">
-              <LocationSelector 
-                onLocationSelect={setSelectedLocation}
-              />
+        {activeTab === 'search' ? (
+          !selectedLocation ? (
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-1">
+                <LocationSelector 
+                  onLocationSelect={setSelectedLocation}
+                />
+              </div>
+              
+              <div className="lg:col-span-2 space-y-6">
+                <WeeklyRanking />
+                <EventList />
+              </div>
             </div>
-            
-            <div className="lg:col-span-2 space-y-6">
-              <WeeklyRanking />
-              <EventList />
+          ) : (
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+              <div className="lg:col-span-1 space-y-6">
+                <LocationSelector 
+                  onLocationSelect={setSelectedLocation}
+                />
+                <FilterPanel />
+              </div>
+              
+              <div className="lg:col-span-3 space-y-6">
+                <SpotList 
+                  latitude={selectedLocation.latitude}
+                  longitude={selectedLocation.longitude}
+                />
+                <EventList 
+                  latitude={selectedLocation.latitude}
+                  longitude={selectedLocation.longitude}
+                />
+              </div>
             </div>
+          )
+        ) : activeTab === 'add-spot' ? (
+          <div className="max-w-4xl mx-auto">
+            <ManualSpotForm />
           </div>
         ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-            <div className="lg:col-span-1 space-y-6">
-              <LocationSelector 
-                onLocationSelect={setSelectedLocation}
-              />
-              <FilterPanel />
-            </div>
-            
-            <div className="lg:col-span-3 space-y-6">
-              <SpotList 
-                latitude={selectedLocation.latitude}
-                longitude={selectedLocation.longitude}
-              />
-              <EventList 
-                latitude={selectedLocation.latitude}
-                longitude={selectedLocation.longitude}
-              />
-            </div>
+          <div className="max-w-4xl mx-auto">
+            <ManualRestaurantForm />
           </div>
         )}
       </main>
