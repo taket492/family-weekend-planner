@@ -4,6 +4,8 @@ import { useState } from 'react'
 import LocationSelector from '@/components/LocationSelector'
 import SpotList from '@/components/SpotList'
 import FilterPanel from '@/components/FilterPanel'
+import WeeklyRanking from '@/components/WeeklyRanking'
+import EventList from '@/components/EventList'
 
 export default function Home() {
   const [selectedLocation, setSelectedLocation] = useState<{
@@ -26,26 +28,40 @@ export default function Home() {
       </header>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          <div className="lg:col-span-1 space-y-6">
-            <LocationSelector 
-              onLocationSelect={setSelectedLocation}
-            />
+        {!selectedLocation ? (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-1">
+              <LocationSelector 
+                onLocationSelect={setSelectedLocation}
+              />
+            </div>
             
-            {selectedLocation && (
-              <FilterPanel />
-            )}
+            <div className="lg:col-span-2 space-y-6">
+              <WeeklyRanking />
+              <EventList />
+            </div>
           </div>
-          
-          <div className="lg:col-span-3">
-            {selectedLocation && (
+        ) : (
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            <div className="lg:col-span-1 space-y-6">
+              <LocationSelector 
+                onLocationSelect={setSelectedLocation}
+              />
+              <FilterPanel />
+            </div>
+            
+            <div className="lg:col-span-3 space-y-6">
               <SpotList 
                 latitude={selectedLocation.latitude}
                 longitude={selectedLocation.longitude}
               />
-            )}
+              <EventList 
+                latitude={selectedLocation.latitude}
+                longitude={selectedLocation.longitude}
+              />
+            </div>
           </div>
-        </div>
+        )}
       </main>
     </div>
   )

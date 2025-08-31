@@ -194,6 +194,45 @@ export default function FilterPanel() {
             <option value={20}>20km以内</option>
           </select>
         </div>
+
+        <div>
+          <h3 className="text-sm font-medium text-gray-700 mb-2 md:mb-3">並び替え</h3>
+          <select
+            value={filters.sortBy || 'distance'}
+            onChange={(e) => setFilters({ ...filters, sortBy: e.target.value as 'distance' | 'popularity' | 'rating' | 'recent' })}
+            className="w-full px-3 py-2 text-sm md:text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 touch-manipulation"
+          >
+            <option value="distance">📍 距離順（近い順）</option>
+            <option value="popularity">🔥 人気順</option>
+            <option value="rating">⭐ 評価順</option>
+            <option value="recent">🆕 新着順</option>
+          </select>
+        </div>
+
+        <div>
+          <h3 className="text-sm font-medium text-gray-700 mb-2 md:mb-3">静岡エリア</h3>
+          <div className="space-y-2">
+            <label className="flex items-center touch-none">
+              <input
+                type="checkbox"
+                checked={filters.showOnlyShizuoka || false}
+                onChange={(e) => setFilters({ ...filters, showOnlyShizuoka: e.target.checked })}
+                className="rounded border-gray-300 text-green-600 focus:ring-green-500 focus:ring-2 w-4 h-4 md:w-auto md:h-auto"
+              />
+              <span className="ml-2 text-xs md:text-sm text-gray-700 select-none">静岡県内のみ表示</span>
+            </label>
+            
+            <label className="flex items-center touch-none">
+              <input
+                type="checkbox"
+                checked={filters.showTrending || false}
+                onChange={(e) => setFilters({ ...filters, showTrending: e.target.checked })}
+                className="rounded border-gray-300 text-orange-600 focus:ring-orange-500 focus:ring-2 w-4 h-4 md:w-auto md:h-auto"
+              />
+              <span className="ml-2 text-xs md:text-sm text-gray-700 select-none">トレンドスポットを優先</span>
+            </label>
+          </div>
+        </div>
       </div>
     </div>
   )

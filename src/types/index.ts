@@ -32,6 +32,15 @@ export interface Spot {
   // Trending status
   isTrending?: boolean
   trendingSource?: 'instagram' | 'twitter' | 'tabelog' | 'gurunavi'
+  
+  // 静岡特化機能
+  region?: string
+  isShizuokaSpot?: boolean
+  weeklyRank?: number
+  popularityScore?: number
+  seasonalRecommendation?: SeasonalRecommendation
+  events?: Event[]
+  distance?: number
 }
 
 export interface Plan {
@@ -95,6 +104,10 @@ export interface SearchFilters {
   radius?: number // km
   ageGroup?: 'baby' | 'toddler' | 'child'
   minChildScore?: number
+  sortBy?: 'distance' | 'popularity' | 'rating' | 'recent'
+  region?: string
+  showOnlyShizuoka?: boolean
+  showTrending?: boolean
 }
 
 // Extended Spot interface for API responses
@@ -109,4 +122,70 @@ export interface ExtendedSpot extends Spot {
   isCurrentlyOpen?: boolean
   todayHours?: string
   source?: string
+  updatedAt?: Date
+}
+
+// 新しい型定義
+export interface Event {
+  id: string
+  title: string
+  description?: string
+  startDate: Date
+  endDate: Date
+  location?: string
+  spotId?: string
+  isChildFriendly: boolean
+  category: EventCategory
+  registrationRequired?: boolean
+  maxParticipants?: number
+  price?: number
+}
+
+export enum EventCategory {
+  FESTIVAL = 'FESTIVAL',
+  WORKSHOP = 'WORKSHOP',
+  EXHIBITION = 'EXHIBITION',
+  SEASONAL = 'SEASONAL',
+  SPORTS = 'SPORTS',
+  CULTURAL = 'CULTURAL'
+}
+
+export interface SeasonalRecommendation {
+  season: 'spring' | 'summer' | 'autumn' | 'winter'
+  reason: string
+  bestMonths: number[]
+  specialFeatures: string[]
+}
+
+export interface Bookmark {
+  id: string
+  userId: string
+  spotId: string
+  notes?: string
+  tags?: string[]
+  createdAt: Date
+}
+
+export interface Restaurant extends Spot {
+  cuisine: CuisineType[]
+  hasKidsChair: boolean
+  hasKidsMenu: boolean
+  hasDiaperChangingTable: boolean
+  hasNursingRoom: boolean
+  acceptsReservations: boolean
+  kidsFriendlyRating: number
+  averageMealTime: number
+  smokingPolicy: 'non_smoking' | 'smoking_section' | 'smoking_allowed'
+}
+
+export enum CuisineType {
+  JAPANESE = 'JAPANESE',
+  ITALIAN = 'ITALIAN',
+  CHINESE = 'CHINESE',
+  FRENCH = 'FRENCH',
+  AMERICAN = 'AMERICAN',
+  KOREAN = 'KOREAN',
+  FAST_FOOD = 'FAST_FOOD',
+  FAMILY_RESTAURANT = 'FAMILY_RESTAURANT',
+  BUFFET = 'BUFFET'
 }

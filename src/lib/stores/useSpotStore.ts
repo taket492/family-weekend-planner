@@ -74,6 +74,9 @@ export const useSpotStore = create<SpotStore>((set, get) => ({
       // 拡張フィルター
       if (filters.ageGroup) params.append('ageGroup', filters.ageGroup)
       if (filters.minChildScore) params.append('minChildScore', filters.minChildScore.toString())
+      if (filters.sortBy) params.append('sortBy', filters.sortBy)
+      if (filters.showOnlyShizuoka) params.append('showOnlyShizuoka', 'true')
+      if (filters.showTrending) params.append('showTrending', 'true')
 
       // 外部APIから実際のスポットデータを取得
       const response = await fetch(`/api/spots/external?${params}`)

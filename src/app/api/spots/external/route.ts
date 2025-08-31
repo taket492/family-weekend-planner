@@ -13,6 +13,9 @@ export async function GET(request: NextRequest) {
     const categories = searchParams.get('categories')?.split(',') as SpotCategory[]
     const minChildScore = parseInt(searchParams.get('minChildScore') || '30')
     const ageGroup = searchParams.get('ageGroup') as 'baby' | 'toddler' | 'child'
+    const sortBy = searchParams.get('sortBy') as 'distance' | 'popularity' | 'rating' | 'recent' || 'distance'
+    const showOnlyShizuoka = searchParams.get('showOnlyShizuoka') === 'true'
+    const showTrending = searchParams.get('showTrending') === 'true'
     
     // 子連れ向けフィルター
     const hasKidsMenu = searchParams.get('hasKidsMenu') === 'true'
@@ -73,14 +76,48 @@ export async function GET(request: NextRequest) {
       })
     }
 
-    // 子連れ適性スコア＋距離の複合ソート
-    spots.sort((a, b) => {
-      const distA = Math.sqrt(Math.pow(a.latitude - latitude, 2) + Math.pow(a.longitude - longitude, 2))
-      const distB = Math.sqrt(Math.pow(b.latitude - latitude, 2) + Math.pow(b.longitude - longitude, 2))
-      const scoreA = (a.childFriendlyScore || 0) - (distA * 1000)
-      const scoreB = (b.childFriendlyScore || 0) - (distB * 1000)
-      return scoreB - scoreA
-    })
+    // 静岡エリアフィルター
+    if (showOnlyShizuoka) {
+      spots = spots.filter(spot => 
+        spot.isShizuokaSpot || 
+        spot.address.includes('静岡') ||
+        spot.region?.includes('静岡')
+      )
+    }
+
+    // トレンドフィルター
+    if (showTrending) {
+      spots = spots.filter(spot => spot.isTrending)
+    }
+
+    // 距離計算を追加
+    spots = spots.map(spot => ({
+      ...spot,
+      distance: Math.sqrt(Math.pow(spot.latitude - latitude, 2) + Math.pow(spot.longitude - longitude, 2)) * 111000 // km to meters
+    }))
+
+    // ソート機能
+    switch (sortBy) {
+      case 'distance':
+        spots.sort((a, b) => (a.distance || 0) - (b.distance || 0))
+        break
+      case 'popularity':
+        spots.sort((a, b) => (b.popularityScore || 0) - (a.popularityScore || 0))
+        break
+      case 'rating':
+        spots.sort((a, b) => (b.rating || 0) - (a.rating || 0))
+        break
+      case 'recent':
+        spots.sort((a, b) => new Date(b.updatedAt || 0).getTime() - new Date(a.updatedAt || 0).getTime())
+        break
+      default:
+        // デフォルトは子連れ適性スコア＋距離の複合ソート
+        spots.sort((a, b) => {
+          const scoreA = (a.childFriendlyScore || 0) - ((a.distance || 0) / 1000)
+          const scoreB = (b.childFriendlyScore || 0) - ((b.distance || 0) / 1000)
+          return scoreB - scoreA
+        })
+    }
 
     return NextResponse.json(spots.slice(0, 100))
   } catch (error) {

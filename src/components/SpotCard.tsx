@@ -1,11 +1,14 @@
 'use client'
 
+import { useState } from 'react'
 import { Spot, SpotCategory, PriceRange, ExtendedSpot } from '@/types'
+import { useBookmarkStore } from '@/lib/stores/useBookmarkStore'
 
 interface SpotCardProps {
   spot: Spot
   onAddToPlan: () => void
   isSelected: boolean
+  userId?: string
 }
 
 const categoryLabels = {
@@ -25,7 +28,11 @@ const priceRangeLabels = {
   [PriceRange.EXPENSIVE]: '3,000円〜'
 }
 
-export default function SpotCard({ spot, onAddToPlan, isSelected }: SpotCardProps) {
+export default function SpotCard({ spot, onAddToPlan, isSelected, userId = 'default-user' }: SpotCardProps) {
+  const [showBookmarkForm, setShowBookmarkForm] = useState(false)
+  const [bookmarkNotes, setBookmarkNotes] = useState('')
+  const { addBookmark, removeBookmark, isBookmarked } = useBookmarkStore()
+  
   const facilities = []
   if (spot.hasKidsMenu) facilities.push('キッズメニュー')
   if (spot.hasHighChair) facilities.push('ハイチェア')
@@ -41,6 +48,21 @@ export default function SpotCard({ spot, onAddToPlan, isSelected }: SpotCardProp
   const isOpen = extendedSpot.isCurrentlyOpen
   const todayHours = extendedSpot.todayHours
   const ageScores = extendedSpot.ageAppropriate
+  const bookmarked = isBookmarked(spot.id)
+
+  const handleBookmarkToggle = async () => {
+    if (bookmarked) {
+      await removeBookmark(userId, spot.id)
+    } else {
+      setShowBookmarkForm(true)
+    }
+  }
+
+  const handleBookmarkSave = async () => {
+    await addBookmark(userId, spot, bookmarkNotes)
+    setShowBookmarkForm(false)
+    setBookmarkNotes('')
+  }
 
   return (
     <div className="border border-gray-200 rounded-lg p-5 transition-all hover:shadow-md hover:border-gray-300 bg-white">
@@ -143,7 +165,19 @@ export default function SpotCard({ spot, onAddToPlan, isSelected }: SpotCardProp
       
       <div className="border-t pt-4 mt-4">
         <h4 className="text-sm font-medium text-gray-700 mb-3">🔗 詳細情報・アクション</h4>
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-2 xl:grid-cols-3 gap-2">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-2 xl:grid-cols-3 gap-2 mb-3">
+          
+          {/* ブックマークボタン */}
+          <button
+            onClick={handleBookmarkToggle}
+            className={`flex items-center justify-center gap-1 px-3 py-2 rounded-md transition-colors text-sm font-medium ${
+              bookmarked 
+                ? 'bg-yellow-500 text-white hover:bg-yellow-600' 
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            }`}
+          >
+            {bookmarked ? '⭐ お気に入り済み' : '☆ お気に入り追加'}
+          </button>
           
           {/* Google Maps ナビゲーションボタン */}
           <button
@@ -154,6 +188,17 @@ export default function SpotCard({ spot, onAddToPlan, isSelected }: SpotCardProp
             className="flex items-center justify-center gap-1 bg-green-600 text-white px-3 py-2 rounded-md hover:bg-green-700 transition-colors text-sm font-medium"
           >
             🗺️ ナビ開始
+          </button>
+          
+          {/* 周辺レストラン検索ボタン */}
+          <button
+            onClick={() => {
+              const restaurantUrl = `/restaurants?lat=${spot.latitude}&lng=${spot.longitude}&spotName=${encodeURIComponent(spot.name)}`
+              window.open(restaurantUrl, '_blank')
+            }}
+            className="flex items-center justify-center gap-1 bg-purple-600 text-white px-3 py-2 rounded-md hover:bg-purple-700 transition-colors text-sm font-medium"
+          >
+            🍽️ 周辺レストラン
           </button>
           
           {/* レビューサイトリンク */}
@@ -203,6 +248,33 @@ export default function SpotCard({ spot, onAddToPlan, isSelected }: SpotCardProp
         {extendedSpot.source && (
           <div className="mt-3 text-xs text-gray-400 text-center">
             データ提供: {extendedSpot.source}
+          </div>
+        )}
+        
+        {/* ブックマーク追加フォーム */}
+        {showBookmarkForm && (
+          <div className="mt-3 p-3 bg-gray-50 rounded-md">
+            <textarea
+              placeholder="メモを追加（任意）"
+              value={bookmarkNotes}
+              onChange={(e) => setBookmarkNotes(e.target.value)}
+              className="w-full p-2 text-sm border border-gray-300 rounded resize-none"
+              rows={2}
+            />
+            <div className="flex gap-2 mt-2">
+              <button
+                onClick={handleBookmarkSave}
+                className="bg-yellow-500 text-white px-3 py-1 rounded text-sm hover:bg-yellow-600"
+              >
+                保存
+              </button>
+              <button
+                onClick={() => setShowBookmarkForm(false)}
+                className="bg-gray-300 text-gray-700 px-3 py-1 rounded text-sm hover:bg-gray-400"
+              >
+                キャンセル
+              </button>
+            </div>
           </div>
         )}
       </div>

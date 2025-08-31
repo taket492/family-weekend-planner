@@ -136,12 +136,46 @@ export default function LocationSelector({ onLocationSelect }: LocationSelectorP
             <input
               {...register('address', { required: '住所を入力してください' })}
               type="text"
-              placeholder="例: 東京都渋谷区"
+              placeholder="例: 静岡市葵区、浜松市中区"
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
             {errors.address && (
               <p className="text-red-500 text-sm mt-1">{errors.address.message}</p>
             )}
+          </div>
+          
+          <div className="mt-3">
+            <h4 className="text-sm font-medium text-gray-700 mb-2">静岡エリア クイック選択</h4>
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                onClick={() => onAddressSubmit({ address: '静岡市葵区' })}
+                className="bg-green-50 text-green-700 border border-green-200 py-2 px-3 rounded-md text-sm hover:bg-green-100"
+              >
+                静岡市
+              </button>
+              <button
+                type="button"
+                onClick={() => onAddressSubmit({ address: '浜松市中区' })}
+                className="bg-green-50 text-green-700 border border-green-200 py-2 px-3 rounded-md text-sm hover:bg-green-100"
+              >
+                浜松市
+              </button>
+              <button
+                type="button"
+                onClick={() => onAddressSubmit({ address: '沼津市' })}
+                className="bg-green-50 text-green-700 border border-green-200 py-2 px-3 rounded-md text-sm hover:bg-green-100"
+              >
+                沼津市
+              </button>
+              <button
+                type="button"
+                onClick={() => onAddressSubmit({ address: '富士市' })}
+                className="bg-green-50 text-green-700 border border-green-200 py-2 px-3 rounded-md text-sm hover:bg-green-100"
+              >
+                富士市
+              </button>
+            </div>
           </div>
           
           <button
