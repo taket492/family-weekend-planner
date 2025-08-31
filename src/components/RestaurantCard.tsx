@@ -3,6 +3,9 @@
 import { useState } from 'react'
 import { Restaurant, CuisineType, PriceRange } from '@/types'
 import { useBookmarkStore } from '@/lib/stores/useBookmarkStore'
+import AffiliateLinks from './AffiliateLinks'
+import CalendarIntegration from './CalendarIntegration'
+import ShareModal from './ShareModal'
 
 interface RestaurantCardProps {
   restaurant: Restaurant
@@ -35,6 +38,8 @@ const smokingPolicyLabels = {
 
 export default function RestaurantCard({ restaurant, userId = 'default-user' }: RestaurantCardProps) {
   const [showBookmarkForm, setShowBookmarkForm] = useState(false)
+  const [showCalendar, setShowCalendar] = useState(false)
+  const [showShare, setShowShare] = useState(false)
   const [bookmarkNotes, setBookmarkNotes] = useState('')
   const { addBookmark, removeBookmark, isBookmarked } = useBookmarkStore()
   
@@ -152,7 +157,7 @@ export default function RestaurantCard({ restaurant, userId = 'default-user' }: 
       )}
       
       <div className="border-t pt-4 mt-4">
-        <div className="grid grid-cols-2 gap-2 mb-3">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-3">
           <button
             onClick={handleBookmarkToggle}
             className={`flex items-center justify-center gap-1 px-3 py-2 rounded-md transition-colors text-sm font-medium ${
@@ -161,7 +166,21 @@ export default function RestaurantCard({ restaurant, userId = 'default-user' }: 
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
             }`}
           >
-            {bookmarked ? '⭐ お気に入り済み' : '☆ お気に入り追加'}
+            {bookmarked ? '⭐' : '☆'}
+          </button>
+          
+          <button
+            onClick={() => setShowCalendar(true)}
+            className="flex items-center justify-center gap-1 bg-blue-600 text-white px-3 py-2 rounded-md hover:bg-blue-700 transition-colors text-sm font-medium"
+          >
+            📅
+          </button>
+          
+          <button
+            onClick={() => setShowShare(true)}
+            className="flex items-center justify-center gap-1 bg-emerald-600 text-white px-3 py-2 rounded-md hover:bg-emerald-700 transition-colors text-sm font-medium"
+          >
+            📤
           </button>
           
           <button
@@ -171,7 +190,7 @@ export default function RestaurantCard({ restaurant, userId = 'default-user' }: 
             }}
             className="flex items-center justify-center gap-1 bg-green-600 text-white px-3 py-2 rounded-md hover:bg-green-700 transition-colors text-sm font-medium"
           >
-            🗺️ ナビ開始
+            🗺️
           </button>
         </div>
         
@@ -209,6 +228,9 @@ export default function RestaurantCard({ restaurant, userId = 'default-user' }: 
           )}
         </div>
         
+        {/* アフィリエイトリンク */}
+        <AffiliateLinks restaurant={restaurant} />
+        
         {/* ブックマーク追加フォーム */}
         {showBookmarkForm && (
           <div className="mt-3 p-3 bg-gray-50 rounded-md">
@@ -234,6 +256,22 @@ export default function RestaurantCard({ restaurant, userId = 'default-user' }: 
               </button>
             </div>
           </div>
+        )}
+        
+        {/* カレンダー連動モーダル */}
+        {showCalendar && (
+          <CalendarIntegration
+            restaurant={restaurant}
+            onClose={() => setShowCalendar(false)}
+          />
+        )}
+        
+        {/* 共有モーダル */}
+        {showShare && (
+          <ShareModal
+            restaurant={restaurant}
+            onClose={() => setShowShare(false)}
+          />
         )}
       </div>
     </div>

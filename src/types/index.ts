@@ -41,6 +41,15 @@ export interface Spot {
   seasonalRecommendation?: SeasonalRecommendation
   events?: Event[]
   distance?: number
+  
+  // 詳細施設情報
+  isIndoor?: boolean
+  isOutdoor?: boolean
+  hasParking?: boolean
+  isFree?: boolean
+  hasPrivateRoom?: boolean
+  hasTatamiSeating?: boolean
+  seasonalEventType?: SeasonalEventType
 }
 
 export interface Plan {
@@ -108,6 +117,26 @@ export interface SearchFilters {
   region?: string
   showOnlyShizuoka?: boolean
   showTrending?: boolean
+  // 新しい詳細フィルター
+  isIndoor?: boolean
+  isOutdoor?: boolean
+  hasParking?: boolean
+  isFree?: boolean
+  isPaid?: boolean
+  hasPrivateRoom?: boolean
+  hasTatamiSeating?: boolean
+  seasonalEvent?: SeasonalEventType
+}
+
+export enum SeasonalEventType {
+  FIREWORKS = 'FIREWORKS',
+  STRAWBERRY_PICKING = 'STRAWBERRY_PICKING',
+  SWIMMING_POOL = 'SWIMMING_POOL',
+  CHRISTMAS = 'CHRISTMAS',
+  CHERRY_BLOSSOM = 'CHERRY_BLOSSOM',
+  AUTUMN_LEAVES = 'AUTUMN_LEAVES',
+  SUMMER_FESTIVAL = 'SUMMER_FESTIVAL',
+  WINTER_ILLUMINATION = 'WINTER_ILLUMINATION'
 }
 
 // Extended Spot interface for API responses

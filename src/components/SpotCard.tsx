@@ -3,6 +3,9 @@
 import { useState } from 'react'
 import { Spot, SpotCategory, PriceRange, ExtendedSpot } from '@/types'
 import { useBookmarkStore } from '@/lib/stores/useBookmarkStore'
+import CalendarIntegration from './CalendarIntegration'
+import ShareModal from './ShareModal'
+import AffiliateLinks from './AffiliateLinks'
 
 interface SpotCardProps {
   spot: Spot
@@ -30,6 +33,8 @@ const priceRangeLabels = {
 
 export default function SpotCard({ spot, onAddToPlan, isSelected, userId = 'default-user' }: SpotCardProps) {
   const [showBookmarkForm, setShowBookmarkForm] = useState(false)
+  const [showCalendar, setShowCalendar] = useState(false)
+  const [showShare, setShowShare] = useState(false)
   const [bookmarkNotes, setBookmarkNotes] = useState('')
   const { addBookmark, removeBookmark, isBookmarked } = useBookmarkStore()
   
@@ -165,7 +170,7 @@ export default function SpotCard({ spot, onAddToPlan, isSelected, userId = 'defa
       
       <div className="border-t pt-4 mt-4">
         <h4 className="text-sm font-medium text-gray-700 mb-3">🔗 詳細情報・アクション</h4>
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-2 xl:grid-cols-3 gap-2 mb-3">
+        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-2 xl:grid-cols-4 gap-2 mb-3">
           
           {/* ブックマークボタン */}
           <button
@@ -188,6 +193,22 @@ export default function SpotCard({ spot, onAddToPlan, isSelected, userId = 'defa
             className="flex items-center justify-center gap-1 bg-green-600 text-white px-3 py-2 rounded-md hover:bg-green-700 transition-colors text-sm font-medium"
           >
             🗺️ ナビ開始
+          </button>
+          
+          {/* カレンダー追加ボタン */}
+          <button
+            onClick={() => setShowCalendar(true)}
+            className="flex items-center justify-center gap-1 bg-blue-600 text-white px-3 py-2 rounded-md hover:bg-blue-700 transition-colors text-sm font-medium"
+          >
+            📅 予定に追加
+          </button>
+          
+          {/* 共有ボタン */}
+          <button
+            onClick={() => setShowShare(true)}
+            className="flex items-center justify-center gap-1 bg-emerald-600 text-white px-3 py-2 rounded-md hover:bg-emerald-700 transition-colors text-sm font-medium"
+          >
+            📤 共有
           </button>
           
           {/* 周辺レストラン検索ボタン */}
@@ -251,6 +272,9 @@ export default function SpotCard({ spot, onAddToPlan, isSelected, userId = 'defa
           </div>
         )}
         
+        {/* アフィリエイトリンク */}
+        <AffiliateLinks spot={spot} />
+        
         {/* ブックマーク追加フォーム */}
         {showBookmarkForm && (
           <div className="mt-3 p-3 bg-gray-50 rounded-md">
@@ -276,6 +300,22 @@ export default function SpotCard({ spot, onAddToPlan, isSelected, userId = 'defa
               </button>
             </div>
           </div>
+        )}
+        
+        {/* カレンダー連動モーダル */}
+        {showCalendar && (
+          <CalendarIntegration
+            spot={spot}
+            onClose={() => setShowCalendar(false)}
+          />
+        )}
+        
+        {/* 共有モーダル */}
+        {showShare && (
+          <ShareModal
+            spot={spot}
+            onClose={() => setShowShare(false)}
+          />
         )}
       </div>
     </div>

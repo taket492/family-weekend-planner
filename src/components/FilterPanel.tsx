@@ -1,7 +1,7 @@
 'use client'
 
 import { useSpotStore } from '@/lib/stores/useSpotStore'
-import { SpotCategory, PriceRange, SearchFilters } from '@/types'
+import { SpotCategory, PriceRange, SearchFilters, SeasonalEventType } from '@/types'
 
 const categoryLabels = {
   [SpotCategory.RESTAURANT]: 'レストラン',
@@ -18,6 +18,17 @@ const priceRangeLabels = {
   [PriceRange.BUDGET]: '〜1,000円',
   [PriceRange.MODERATE]: '1,000〜3,000円',
   [PriceRange.EXPENSIVE]: '3,000円〜'
+}
+
+const seasonalEventLabels = {
+  [SeasonalEventType.FIREWORKS]: '🎆 花火大会',
+  [SeasonalEventType.STRAWBERRY_PICKING]: '🍓 いちご狩り',
+  [SeasonalEventType.SWIMMING_POOL]: '🏊 プール・海水浴',
+  [SeasonalEventType.CHRISTMAS]: '🎄 クリスマス',
+  [SeasonalEventType.CHERRY_BLOSSOM]: '🌸 桜・花見',
+  [SeasonalEventType.AUTUMN_LEAVES]: '🍁 紅葉',
+  [SeasonalEventType.SUMMER_FESTIVAL]: '🏮 夏祭り',
+  [SeasonalEventType.WINTER_ILLUMINATION]: '✨ イルミネーション'
 }
 
 export default function FilterPanel() {
@@ -230,6 +241,90 @@ export default function FilterPanel() {
                 className="rounded border-gray-300 text-orange-600 focus:ring-orange-500 focus:ring-2 w-4 h-4 md:w-auto md:h-auto"
               />
               <span className="ml-2 text-xs md:text-sm text-gray-700 select-none">トレンドスポットを優先</span>
+            </label>
+          </div>
+        </div>
+
+        <div>
+          <h3 className="text-sm font-medium text-gray-700 mb-2 md:mb-3">季節イベント</h3>
+          <select
+            value={filters.seasonalEvent || ''}
+            onChange={(e) => setFilters({ ...filters, seasonalEvent: e.target.value as SeasonalEventType || undefined })}
+            className="w-full px-3 py-2 text-sm md:text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 touch-manipulation"
+          >
+            <option value="">すべて表示</option>
+            {Object.entries(seasonalEventLabels).map(([value, label]) => (
+              <option key={value} value={value}>{label}</option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <h3 className="text-sm font-medium text-gray-700 mb-2 md:mb-3">施設タイプ</h3>
+          <div className="grid grid-cols-2 gap-2">
+            <label className="flex items-center touch-none">
+              <input
+                type="checkbox"
+                checked={filters.isIndoor || false}
+                onChange={(e) => setFilters({ ...filters, isIndoor: e.target.checked })}
+                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 focus:ring-2 w-4 h-4"
+              />
+              <span className="ml-2 text-xs text-gray-700 select-none">🏢 屋内</span>
+            </label>
+            
+            <label className="flex items-center touch-none">
+              <input
+                type="checkbox"
+                checked={filters.isOutdoor || false}
+                onChange={(e) => setFilters({ ...filters, isOutdoor: e.target.checked })}
+                className="rounded border-gray-300 text-green-600 focus:ring-green-500 focus:ring-2 w-4 h-4"
+              />
+              <span className="ml-2 text-xs text-gray-700 select-none">🌳 屋外</span>
+            </label>
+          </div>
+        </div>
+
+        <div>
+          <h3 className="text-sm font-medium text-gray-700 mb-2 md:mb-3">料金・設備</h3>
+          <div className="grid grid-cols-2 gap-2">
+            <label className="flex items-center touch-none">
+              <input
+                type="checkbox"
+                checked={filters.isFree || false}
+                onChange={(e) => setFilters({ ...filters, isFree: e.target.checked })}
+                className="rounded border-gray-300 text-green-600 focus:ring-green-500 focus:ring-2 w-4 h-4"
+              />
+              <span className="ml-2 text-xs text-gray-700 select-none">💰 無料</span>
+            </label>
+            
+            <label className="flex items-center touch-none">
+              <input
+                type="checkbox"
+                checked={filters.hasParking || false}
+                onChange={(e) => setFilters({ ...filters, hasParking: e.target.checked })}
+                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 focus:ring-2 w-4 h-4"
+              />
+              <span className="ml-2 text-xs text-gray-700 select-none">🚗 駐車場</span>
+            </label>
+            
+            <label className="flex items-center touch-none">
+              <input
+                type="checkbox"
+                checked={filters.hasPrivateRoom || false}
+                onChange={(e) => setFilters({ ...filters, hasPrivateRoom: e.target.checked })}
+                className="rounded border-gray-300 text-purple-600 focus:ring-purple-500 focus:ring-2 w-4 h-4"
+              />
+              <span className="ml-2 text-xs text-gray-700 select-none">🏠 個室</span>
+            </label>
+            
+            <label className="flex items-center touch-none">
+              <input
+                type="checkbox"
+                checked={filters.hasTatamiSeating || false}
+                onChange={(e) => setFilters({ ...filters, hasTatamiSeating: e.target.checked })}
+                className="rounded border-gray-300 text-amber-600 focus:ring-amber-500 focus:ring-2 w-4 h-4"
+              />
+              <span className="ml-2 text-xs text-gray-700 select-none">🥢 座敷</span>
             </label>
           </div>
         </div>

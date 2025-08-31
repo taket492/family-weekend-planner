@@ -40,6 +40,15 @@ model Spot {
   weeklyRank      Int?
   popularityScore Float?
   
+  // 詳細施設情報
+  isIndoor        Boolean @default(false)
+  isOutdoor       Boolean @default(false)
+  hasParking      Boolean @default(false)
+  isFree          Boolean @default(false)
+  hasPrivateRoom  Boolean @default(false)
+  hasTatamiSeating Boolean @default(false)
+  seasonalEventType SeasonalEventType?
+  
   // リレーション
   plans       PlanSpot[]
   bookmarks   Bookmark[]
@@ -135,4 +144,15 @@ enum EventCategory {
   SEASONAL
   SPORTS
   CULTURAL
+}
+
+enum SeasonalEventType {
+  FIREWORKS
+  STRAWBERRY_PICKING
+  SWIMMING_POOL
+  CHRISTMAS
+  CHERRY_BLOSSOM
+  AUTUMN_LEAVES
+  SUMMER_FESTIVAL
+  WINTER_ILLUMINATION
 }
