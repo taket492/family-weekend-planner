@@ -8,6 +8,7 @@ import WeeklyRanking from '@/components/WeeklyRanking'
 import EventList from '@/components/EventList'
 import { ManualSpotForm } from '@/components/ManualSpotForm'
 import { ManualRestaurantForm } from '@/components/ManualRestaurantForm'
+import { RecentSpots } from '@/components/RecentSpots'
 
 export default function Home() {
   const [selectedLocation, setSelectedLocation] = useState<{
@@ -79,6 +80,7 @@ export default function Home() {
               </div>
               
               <div className="lg:col-span-2 space-y-6">
+                <RecentSpots />
                 <WeeklyRanking />
                 <EventList />
               </div>

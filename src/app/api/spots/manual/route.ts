@@ -7,17 +7,9 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     
     // 必須フィールドの検証
-    if (!body.name || !body.address || !body.latitude || !body.longitude) {
+    if (!body.name || !body.address) {
       return NextResponse.json(
-        { error: '名前、住所、座標は必須です' },
-        { status: 400 }
-      )
-    }
-
-    // 座標の妥当性チェック（静岡県周辺）
-    if (body.latitude < 34 || body.latitude > 36 || body.longitude < 137 || body.longitude > 140) {
-      return NextResponse.json(
-        { error: '座標が静岡県周辺の範囲外です' },
+        { error: '名前、住所は必須です' },
         { status: 400 }
       )
     }
@@ -54,8 +46,8 @@ export async function POST(request: NextRequest) {
         description: body.description || '',
         category: body.category as SpotCategory,
         address: body.address,
-        latitude: body.latitude,
-        longitude: body.longitude,
+        latitude: body.latitude || 35.0,
+        longitude: body.longitude || 138.0,
         
         // 連絡先情報
         phoneNumber: body.phoneNumber || null,

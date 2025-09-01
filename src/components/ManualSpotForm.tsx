@@ -8,8 +8,6 @@ interface SpotFormData {
   description: string
   category: SpotCategory
   address: string
-  latitude: string
-  longitude: string
   phoneNumber: string
   website: string
   openingHours: string
@@ -34,8 +32,6 @@ const initialFormData: SpotFormData = {
   description: '',
   category: SpotCategory.RESTAURANT,
   address: '',
-  latitude: '',
-  longitude: '',
   phoneNumber: '',
   website: '',
   openingHours: '',
@@ -67,11 +63,7 @@ export function ManualSpotForm() {
       const response = await fetch('/api/spots/manual', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...formData,
-          latitude: parseFloat(formData.latitude),
-          longitude: parseFloat(formData.longitude)
-        })
+        body: JSON.stringify(formData)
       })
 
       if (response.ok) {
@@ -79,7 +71,7 @@ export function ManualSpotForm() {
         setFormData(initialFormData)
       } else {
         const error = await response.json()
-        setMessage(`❌ 登録に失敗しました: ${error.message}`)
+        setMessage(`❌ 登録に失敗しました: ${error.error || error.message || '不明なエラー'}`)
       }
     } catch (error) {
       setMessage('❌ 登録に失敗しました')
@@ -160,34 +152,6 @@ export function ManualSpotForm() {
           />
         </div>
 
-        {/* 位置情報 */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium mb-1">緯度 *</label>
-            <input
-              type="number"
-              step="any"
-              value={formData.latitude}
-              onChange={(e) => handleChange('latitude', e.target.value)}
-              className="w-full p-2 border rounded-md"
-              placeholder="35.123456"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium mb-1">経度 *</label>
-            <input
-              type="number"
-              step="any"
-              value={formData.longitude}
-              onChange={(e) => handleChange('longitude', e.target.value)}
-              className="w-full p-2 border rounded-md"
-              placeholder="138.123456"
-              required
-            />
-          </div>
-        </div>
 
         {/* 連絡先情報 */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
