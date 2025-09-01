@@ -1,0 +1,167 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Spot {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  category    SpotCategory
+  address     String
+  latitude    Float
+  longitude   Float
+  
+  // 子連れ向け設備
+  hasKidsMenu       Boolean @default(false)
+  hasHighChair      Boolean @default(false)
+  hasNursingRoom    Boolean @default(false)
+  isStrollerFriendly Boolean @default(false)
+  hasDiaperChanging Boolean @default(false)
+  hasPlayArea       Boolean @default(false)
+  
+  // 基本情報
+  phoneNumber String?
+  website     String?
+  openingHours String?
+  priceRange  PriceRange?
+  
+  // 評価
+  rating      Float?
+  reviewCount Int    @default(0)
+  
+  // 静岡特化機能
+  region          String?
+  isShizuokaSpot  Boolean @default(false)
+  weeklyRank      Int?
+  popularityScore Float?
+  
+  // 詳細施設情報
+  isIndoor        Boolean @default(false)
+  isOutdoor       Boolean @default(false)
+  hasParking      Boolean @default(false)
+  isFree          Boolean @default(false)
+  hasPrivateRoom  Boolean @default(false)
+  hasTatamiSeating Boolean @default(false)
+  seasonalEventType SeasonalEventType?
+  
+  // SNSトレンド情報
+  isTrending      Boolean @default(false)
+  trendingSource  String?
+  instagramUrl    String?
+  twitterUrl      String?
+  tabelogUrl      String?
+  gurunaviUrl     String?
+  rettyUrl        String?
+  
+  // リレーション
+  plans       PlanSpot[]
+  bookmarks   Bookmark[]
+  events      Event[]
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Plan {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  date        DateTime
+  region      String
+  
+  // プランに含まれるスポット
+  spots       PlanSpot[]
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model PlanSpot {
+  id       String @id @default(cuid())
+  planId   String
+  spotId   String
+  order    Int
+  visitTime DateTime?
+  notes    String?
+  
+  plan     Plan @relation(fields: [planId], references: [id], onDelete: Cascade)
+  spot     Spot @relation(fields: [spotId], references: [id], onDelete: Cascade)
+  
+  @@unique([planId, spotId])
+}
+
+model Bookmark {
+  id        String   @id @default(cuid())
+  userId    String
+  spotId    String
+  notes     String?
+  tags      String[]
+  
+  spot      Spot @relation(fields: [spotId], references: [id], onDelete: Cascade)
+  
+  createdAt DateTime @default(now())
+  
+  @@unique([userId, spotId])
+}
+
+model Event {
+  id              String   @id @default(cuid())
+  title           String
+  description     String?
+  startDate       DateTime
+  endDate         DateTime
+  location        String?
+  spotId          String?
+  isChildFriendly Boolean  @default(false)
+  category        EventCategory
+  registrationRequired Boolean @default(false)
+  maxParticipants Int?
+  price           Float?
+  
+  spot            Spot? @relation(fields: [spotId], references: [id], onDelete: SetNull)
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+enum SpotCategory {
+  RESTAURANT
+  CAFE
+  PLAYGROUND
+  PARK
+  MUSEUM
+  SHOPPING
+  ENTERTAINMENT
+  TOURIST_SPOT
+}
+
+enum PriceRange {
+  BUDGET      // ~1000円
+  MODERATE    // 1000-3000円
+  EXPENSIVE   // 3000円以上
+}
+
+enum EventCategory {
+  FESTIVAL
+  WORKSHOP
+  EXHIBITION
+  SEASONAL
+  SPORTS
+  CULTURAL
+}
+
+enum SeasonalEventType {
+  FIREWORKS
+  STRAWBERRY_PICKING
+  SWIMMING_POOL
+  CHRISTMAS
+  CHERRY_BLOSSOM
+  AUTUMN_LEAVES
+  SUMMER_FESTIVAL
+  WINTER_ILLUMINATION
+}
