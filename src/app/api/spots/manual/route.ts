@@ -93,6 +93,11 @@ export async function POST(request: NextRequest) {
 
   } catch (error) {
     console.error('Manual spot creation error:', error)
+    console.error('Error details:', {
+      message: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined,
+      body: body
+    })
     
     if (error instanceof Error && error.message.includes('Unique constraint')) {
       return NextResponse.json(
@@ -102,7 +107,7 @@ export async function POST(request: NextRequest) {
     }
     
     return NextResponse.json(
-      { error: 'スポットの登録に失敗しました' },
+      { error: `スポットの登録に失敗しました: ${error instanceof Error ? error.message : 'Unknown error'}` },
       { status: 500 }
     )
   }
