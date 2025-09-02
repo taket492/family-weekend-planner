@@ -31,10 +31,10 @@ export default function Home() {
           
           {/* ナビゲーションタブ */}
           <div className="mt-4 border-b border-gray-200">
-            <nav className="-mb-px flex space-x-8">
+            <nav className="-mb-px flex flex-wrap gap-2 sm:space-x-8 sm:gap-0">
               <button
                 onClick={() => setActiveTab('search')}
-                className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                className={`py-3 px-3 sm:px-1 border-b-2 font-medium text-sm rounded-t-md ${
                   activeTab === 'search'
                     ? 'border-blue-500 text-blue-600'
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
@@ -45,7 +45,7 @@ export default function Home() {
               
               <button
                 onClick={() => setActiveTab('add-spot')}
-                className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                className={`py-3 px-3 sm:px-1 border-b-2 font-medium text-sm rounded-t-md ${
                   activeTab === 'add-spot'
                     ? 'border-orange-500 text-orange-600'
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
@@ -56,7 +56,7 @@ export default function Home() {
               
               <button
                 onClick={() => setActiveTab('add-restaurant')}
-                className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                className={`py-3 px-3 sm:px-1 border-b-2 font-medium text-sm rounded-t-md ${
                   activeTab === 'add-restaurant'
                     ? 'border-green-500 text-green-600'
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'

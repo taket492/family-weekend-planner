@@ -104,14 +104,14 @@ export function ManualRestaurantForm() {
 
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* 基本情報 */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="space-y-4">
           <div>
             <label className="block text-sm font-medium mb-1">店舗名 *</label>
             <input
               type="text"
               value={formData.name}
               onChange={(e) => handleChange('name', e.target.value)}
-              className="w-full p-2 border rounded-md"
+              className="w-full p-3 border rounded-md text-base"
               required
             />
           </div>
@@ -122,7 +122,7 @@ export function ManualRestaurantForm() {
               type="text"
               value={formData.cuisine}
               onChange={(e) => handleChange('cuisine', e.target.value)}
-              className="w-full p-2 border rounded-md"
+              className="w-full p-3 border rounded-md text-base"
               placeholder="和食、洋食、中華、イタリアンなど"
             />
           </div>
@@ -152,14 +152,14 @@ export function ManualRestaurantForm() {
 
 
         {/* 連絡先・営業情報 */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="space-y-4">
           <div>
             <label className="block text-sm font-medium mb-1">電話番号</label>
             <input
               type="tel"
               value={formData.phoneNumber}
               onChange={(e) => handleChange('phoneNumber', e.target.value)}
-              className="w-full p-2 border rounded-md"
+              className="w-full p-3 border rounded-md text-base"
               placeholder="054-123-4567"
             />
           </div>
@@ -170,20 +170,20 @@ export function ManualRestaurantForm() {
               type="url"
               value={formData.website}
               onChange={(e) => handleChange('website', e.target.value)}
-              className="w-full p-2 border rounded-md"
+              className="w-full p-3 border rounded-md text-base"
               placeholder="https://restaurant-example.com"
             />
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="space-y-4">
           <div>
             <label className="block text-sm font-medium mb-1">営業時間</label>
             <input
               type="text"
               value={formData.openingHours}
               onChange={(e) => handleChange('openingHours', e.target.value)}
-              className="w-full p-2 border rounded-md"
+              className="w-full p-3 border rounded-md text-base"
               placeholder="11:00-22:00"
             />
           </div>
@@ -193,7 +193,7 @@ export function ManualRestaurantForm() {
             <select
               value={formData.priceRange || ''}
               onChange={(e) => handleChange('priceRange', e.target.value || undefined)}
-              className="w-full p-2 border rounded-md"
+              className="w-full p-3 border rounded-md text-base"
             >
               <option value="">選択してください</option>
               <option value={PriceRange.BUDGET}>💰 〜1,000円</option>
@@ -220,7 +220,7 @@ export function ManualRestaurantForm() {
         {/* 子連れ向け設備 */}
         <div>
           <h3 className="font-medium mb-3">👶 子連れ向け設備</h3>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {[
               { key: 'hasKidsMenu', label: '🍽️ キッズメニュー' },
               { key: 'hasHighChair', label: '🪑 ハイチェア' },
@@ -245,7 +245,7 @@ export function ManualRestaurantForm() {
         {/* 店舗設備 */}
         <div>
           <h3 className="font-medium mb-3">🏪 店舗設備</h3>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {[
               { key: 'hasPrivateRoom', label: '🚪 個室' },
               { key: 'hasTatamiSeating', label: '🌾 座敷' },
@@ -268,11 +268,11 @@ export function ManualRestaurantForm() {
           </div>
         </div>
 
-        <div className="flex justify-end space-x-4 pt-4">
+        <div className="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-4 pt-4">
           <button
             type="button"
             onClick={() => setFormData(initialFormData)}
-            className="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50"
+            className="w-full sm:w-auto px-4 py-3 border border-gray-300 rounded-md hover:bg-gray-50 text-base"
             disabled={isSubmitting}
           >
             リセット
@@ -281,7 +281,7 @@ export function ManualRestaurantForm() {
           <button
             type="submit"
             disabled={isSubmitting}
-            className="px-6 py-2 bg-orange-600 text-white rounded-md hover:bg-orange-700 disabled:opacity-50"
+            className="w-full sm:w-auto px-6 py-3 bg-orange-600 text-white rounded-md hover:bg-orange-700 disabled:opacity-50 text-base font-medium"
           >
             {isSubmitting ? '登録中...' : '🍽️ レストラン登録'}
           </button>
