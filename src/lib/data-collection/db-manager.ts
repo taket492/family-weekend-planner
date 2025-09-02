@@ -60,15 +60,7 @@ export class DataCollectionManager {
 
           const existing = await prisma.spot.findFirst({
             where: {
-              OR: [
-                { name: spot.name },
-                {
-                  AND: [
-                    { latitude: { gte: spot.latitude - 0.001, lte: spot.latitude + 0.001 } },
-                    { longitude: { gte: spot.longitude - 0.001, lte: spot.longitude + 0.001 } }
-                  ]
-                }
-              ]
+              name: spot.name
             }
           })
 
@@ -76,9 +68,7 @@ export class DataCollectionManager {
             // 既存スポットの更新（品質スコアが向上した場合のみ）
             const existingQuality = await DataQualityChecker.checkSpotQuality({
               name: existing.name,
-              description: existing.description || undefined,
-              latitude: existing.latitude,
-              longitude: existing.longitude
+              description: existing.description || undefined
             })
 
             if (qualityCheck.score > existingQuality.score) {
@@ -108,8 +98,6 @@ export class DataCollectionManager {
                 description: spot.description,
                 category: spot.category,
                 address: spot.address,
-                latitude: spot.latitude,
-                longitude: spot.longitude,
                 
                 hasKidsMenu: spot.hasKidsMenu || false,
                 hasHighChair: spot.hasHighChair || false,
