@@ -15,18 +15,21 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // 重複チェック
+    // 座標の検証
+    const latitude = parseFloat(body.latitude)
+    const longitude = parseFloat(body.longitude)
+    
+    if (isNaN(latitude) || isNaN(longitude)) {
+      return NextResponse.json(
+        { error: '正しい座標が必要です' },
+        { status: 400 }
+      )
+    }
+
+    // 重複チェック（名前のみ）
     const existing = await prisma.spot.findFirst({
       where: {
-        OR: [
-          { name: body.name },
-          {
-            AND: [
-              { latitude: { gte: body.latitude - 0.001, lte: body.latitude + 0.001 } },
-              { longitude: { gte: body.longitude - 0.001, lte: body.longitude + 0.001 } }
-            ]
-          }
-        ]
+        name: body.name
       }
     })
 
@@ -47,8 +50,8 @@ export async function POST(request: NextRequest) {
         description: body.description || '',
         category: body.category as SpotCategory,
         address: body.address,
-        latitude: body.latitude || 35.0,
-        longitude: body.longitude || 138.0,
+        latitude: latitude,
+        longitude: longitude,
         
         // 連絡先情報
         phoneNumber: body.phoneNumber || null,
