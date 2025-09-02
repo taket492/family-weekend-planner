@@ -3,8 +3,9 @@ import { prisma } from '@/lib/prisma'
 import { SpotCategory, SeasonalEventType, PriceRange } from '@/types'
 
 export async function POST(request: NextRequest) {
+  let body: any
   try {
-    const body = await request.json()
+    body = await request.json()
     
     // 必須フィールドの検証
     if (!body.name || !body.address) {
