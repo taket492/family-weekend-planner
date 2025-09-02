@@ -31,11 +31,10 @@ interface GooglePlace {
 export class GoogleMapsService {
   private static apiKey: string = process.env.GOOGLE_MAPS_API_KEY || ''
   
-  // Places API - 近隣検索（高精度）
-  static async searchNearbyPlaces(
-    latitude: number,
-    longitude: number,
-    radius: number = 5000,
+  // Places API - 地域ベース検索
+  static async searchPlacesByRegion(
+    region: string,
+    prefectureName: string = '静岡県',
     type?: string
   ): Promise<GooglePlace[]> {
     if (!this.apiKey) {
@@ -45,7 +44,8 @@ export class GoogleMapsService {
 
     try {
       const types = type || 'restaurant|cafe|amusement_park|tourist_attraction|park'
-      const url = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${latitude},${longitude}&radius=${radius}&type=${types}&key=${this.apiKey}&language=ja`
+      const query = `${prefectureName}${region} ${types.replace('|', ' ')}`
+      const url = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${encodeURIComponent(query)}&key=${this.apiKey}&language=ja`
       
       const response = await fetch(url)
       const data = await response.json()
@@ -88,8 +88,8 @@ export class GoogleMapsService {
       description: `Google Maps掲載スポット`,
       category: this.mapGoogleTypeToCategory(place.types),
       address: place.formatted_address,
-      latitude: place.geometry.location.lat,
-      longitude: place.geometry.location.lng,
+      region: this.extractRegion(place.formatted_address),
+      isShizuokaSpot: place.formatted_address.includes('静岡'),
       
       // 基本設備（Google APIからは詳細取得困難、推定値）
       hasKidsMenu: place.types.includes('restaurant') && place.rating && place.rating >= 4.0,
@@ -129,6 +129,16 @@ export class GoogleMapsService {
     return SpotCategory.TOURIST_SPOT
   }
 
+  // Backward compatibility wrapper
+  static async searchNearbyPlaces(
+    region: string,
+    prefectureName: string = '静岡県',
+    _radius?: number,
+    type?: string
+  ): Promise<GooglePlace[]> {
+    return this.searchPlacesByRegion(region, prefectureName, type)
+  }
+
   // APIキー設定確認
   static isConfigured(): boolean {
     return !!this.apiKey && this.apiKey.length > 0
@@ -142,6 +152,19 @@ export class GoogleMapsService {
     const jpyCost = usdCost * 150 // 概算レート
     
     return { jpy: Math.round(jpyCost), usd: Math.round(usdCost * 100) / 100 }
+  }
+
+  // 住所から地域抽出
+  private static extractRegion(address: string): string {
+    const shizuokaCities = ['静岡市', '浜松市', '沼津市', '熱海市', '三島市', '富士宮市', '伊東市', '島田市', '富士市', '磐田市', '焼津市', '掛川市', '藤枝市', '御殿場市', '袋井市', '下田市', '裾野市', '湖西市', '伊豆市', '御前崎市', '菊川市', '伊豆の国市', '牧之原市']
+    
+    for (const city of shizuokaCities) {
+      if (address.includes(city)) {
+        return city.replace('市', '')
+      }
+    }
+    
+    return '静岡' // デフォルト
   }
 }
 

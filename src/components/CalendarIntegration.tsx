@@ -25,7 +25,7 @@ ${notes ? `メモ: ${notes}` : ''}
 ${item.phoneNumber ? `電話: ${item.phoneNumber}` : ''}
 ${item.website ? `サイト: ${item.website}` : ''}
 
-Google Mapsで開く: https://www.google.com/maps/dir/?api=1&destination=${item.latitude},${item.longitude}
+Google Mapsで開く: https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(item.address)}
     `.trim()
 
     const startDateTime = new Date(`${eventDate}T${eventTime}`)

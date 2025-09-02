@@ -6,11 +6,11 @@ import { Spot } from '@/types'
 import SpotCard from './SpotCard'
 
 interface SpotListProps {
-  latitude: number
-  longitude: number
+  region: string
+  prefecture: string
 }
 
-export default function SpotList({ latitude, longitude }: SpotListProps) {
+export default function SpotList({ region, prefecture }: SpotListProps) {
   const { 
     spots, 
     filters, 
@@ -20,8 +20,8 @@ export default function SpotList({ latitude, longitude }: SpotListProps) {
   } = useSpotStore()
 
   useEffect(() => {
-    searchSpots(latitude, longitude)
-  }, [latitude, longitude, filters, searchSpots])
+    searchSpots(region, prefecture)
+  }, [region, prefecture, filters, searchSpots])
 
   if (isLoading) {
     return (
@@ -64,7 +64,7 @@ export default function SpotList({ latitude, longitude }: SpotListProps) {
         
         {spots.length > 0 && (
           <div className="flex items-center gap-2 text-sm text-gray-600">
-            <span>📍 {latitude.toFixed(3)}, {longitude.toFixed(3)} 周辺</span>
+            <span>📍 {prefecture} {region} 周辺</span>
           </div>
         )}
       </div>

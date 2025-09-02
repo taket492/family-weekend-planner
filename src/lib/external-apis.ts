@@ -44,23 +44,22 @@ function mapToSpotCategory(tags: Record<string, string>): SpotCategory {
 }
 
 export async function searchNearbySpots(
-  latitude: number,
-  longitude: number,
-  radius: number = 5000 // メートル
+  region: string,
+  prefectureName: string = '静岡県'
 ) {
   try {
-    // Overpass APIクエリ（レストラン、カフェ、公園、遊び場など）
+    // Overpass APIクエリ（地域名ベースでの検索）
     const overpassQuery = `
       [out:json][timeout:25];
       (
-        node["amenity"~"^(restaurant|cafe|fast_food|playground|museum)$"](around:${radius},${latitude},${longitude});
-        way["amenity"~"^(restaurant|cafe|fast_food|playground|museum)$"](around:${radius},${latitude},${longitude});
-        node["leisure"~"^(playground|park)$"](around:${radius},${latitude},${longitude});
-        way["leisure"~"^(playground|park)$"](around:${radius},${latitude},${longitude});
-        node["tourism"~"^(museum|attraction)$"](around:${radius},${latitude},${longitude});
-        way["tourism"~"^(museum|attraction)$"](around:${radius},${latitude},${longitude});
-        node["shop"](around:${radius},${latitude},${longitude});
-        way["shop"](around:${radius},${latitude},${longitude});
+        node["amenity"~"^(restaurant|cafe|fast_food|playground|museum)$"]["addr:city"~"${region}|${prefectureName}"];
+        way["amenity"~"^(restaurant|cafe|fast_food|playground|museum)$"]["addr:city"~"${region}|${prefectureName}"];
+        node["leisure"~"^(playground|park)$"]["addr:city"~"${region}|${prefectureName}"];
+        way["leisure"~"^(playground|park)$"]["addr:city"~"${region}|${prefectureName}"];
+        node["tourism"~"^(museum|attraction)$"]["addr:city"~"${region}|${prefectureName}"];
+        way["tourism"~"^(museum|attraction)$"]["addr:city"~"${region}|${prefectureName}"];
+        node["shop"]["addr:city"~"${region}|${prefectureName}"];
+        way["shop"]["addr:city"~"${region}|${prefectureName}"];
       );
       out center meta;
     `
@@ -81,7 +80,7 @@ export async function searchNearbySpots(
 
     // データを変換
     const spots = data.elements
-      .filter(element => element.lat && element.lon && element.tags.name)
+      .filter(element => element.tags.name)
       .map(element => {
         const childFeatures = parseChildFriendlyFeatures(element.tags)
         
@@ -96,8 +95,6 @@ export async function searchNearbySpots(
             element.tags['addr:city'],
             element.tags['addr:postcode']
           ].filter(Boolean).join(' ') || '住所不明',
-          latitude: element.lat!,
-          longitude: element.lon!,
           
           ...childFeatures,
           
@@ -107,6 +104,9 @@ export async function searchNearbySpots(
           
           rating: element.tags.rating ? parseFloat(element.tags.rating) : null,
           reviewCount: 0,
+          
+          region: region,
+          isShizuokaSpot: prefectureName.includes('静岡'),
           
           createdAt: new Date(),
           updatedAt: new Date()

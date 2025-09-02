@@ -4,34 +4,8 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
     const address = searchParams.get('address')
-    const lat = searchParams.get('lat')
-    const lng = searchParams.get('lng')
     
-    // 逆ジオコーディング（座標から住所）
-    if (lat && lng) {
-      const nominatimUrl = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&accept-language=ja`
-      
-      const response = await fetch(nominatimUrl, {
-        headers: {
-          'User-Agent': 'Family Weekend Planner App'
-        }
-      })
-      
-      if (!response.ok) {
-        return NextResponse.json(
-          { error: 'Failed to reverse geocode coordinates' },
-          { status: 404 }
-        )
-      }
-      
-      const data = await response.json()
-      
-      return NextResponse.json({
-        formattedAddress: data.display_name || `${lat}, ${lng}`
-      })
-    }
-    
-    // ジオコーディング（住所から座標）
+    // 住所から地域情報を抽出
     if (!address) {
       return NextResponse.json(
         { error: 'Address parameter is required' },
@@ -39,38 +13,48 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // OpenStreetMap Nominatim API（無料）を使用
-    const nominatimUrl = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}&countrycodes=jp&limit=1&accept-language=ja`
+    // 住所から都道府県と市区町村を抽出
+    const addressParts = address.split('')
+    let prefecture = ''
+    let city = ''
     
-    const response = await fetch(nominatimUrl, {
-      headers: {
-        'User-Agent': 'Family Weekend Planner App'
+    // 静岡県の主要都市リスト
+    const shizuokaCities = ['静岡市', '浜松市', '沼津市', '熱海市', '三島市', '富士宮市', '伊東市', '島田市', '富士市', '磐田市', '焼津市', '掛川市', '藤枝市', '御殿場市', '袋井市', '下田市', '裾野市', '湖西市', '伊豆市', '御前崎市', '菊川市', '伊豆の国市', '牧之原市']
+    
+    // 地域情報を抽出
+    if (address.includes('静岡県') || address.includes('静岡')) {
+      prefecture = '静岡県'
+      
+      // 市区町村を特定
+      for (const cityName of shizuokaCities) {
+        if (address.includes(cityName)) {
+          city = cityName
+          break
+        }
       }
-    })
-    
-    if (!response.ok) {
-      return NextResponse.json(
-        { error: 'Geocoding service unavailable' },
-        { status: 503 }
-      )
+      
+      if (!city) {
+        city = '静岡市' // デフォルト
+      }
+    } else {
+      // その他の県の場合の簡易処理
+      const prefectureMatch = address.match(/(.+[都道府県])/)
+      if (prefectureMatch) {
+        prefecture = prefectureMatch[1]
+      }
+      
+      const cityMatch = address.match(/[都道府県](.+[市区町村])/)
+      if (cityMatch) {
+        city = cityMatch[1]
+      }
     }
-    
-    const data = await response.json()
-
-    if (!data || data.length === 0) {
-      return NextResponse.json(
-        { error: 'Address not found' },
-        { status: 404 }
-      )
-    }
-
-    const result = data[0]
 
     return NextResponse.json({
-      latitude: parseFloat(result.lat),
-      longitude: parseFloat(result.lon),
-      formattedAddress: result.display_name,
-      placeId: result.place_id || result.osm_id
+      formattedAddress: address,
+      prefecture: prefecture || '静岡県',
+      city: city || '静岡市',
+      region: city.replace(/[市区町村]/g, '') || '静岡',
+      isShizuokaAddress: address.includes('静岡')
     })
   } catch (error) {
     console.error('Error geocoding address:', error)

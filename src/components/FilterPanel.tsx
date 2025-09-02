@@ -209,11 +209,10 @@ export default function FilterPanel() {
         <div>
           <h3 className="text-sm font-medium text-gray-700 mb-2 md:mb-3">並び替え</h3>
           <select
-            value={filters.sortBy || 'distance'}
-            onChange={(e) => setFilters({ ...filters, sortBy: e.target.value as 'distance' | 'popularity' | 'rating' | 'recent' })}
+            value={filters.sortBy || 'popularity'}
+            onChange={(e) => setFilters({ ...filters, sortBy: e.target.value as 'popularity' | 'rating' | 'recent' })}
             className="w-full px-3 py-2 text-sm md:text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 touch-manipulation"
           >
-            <option value="distance">📍 距離順（近い順）</option>
             <option value="popularity">🔥 人気順</option>
             <option value="rating">⭐ 評価順</option>
             <option value="recent">🆕 新着順</option>

@@ -16,7 +16,7 @@ interface SpotStore {
   setLoading: (loading: boolean) => void
   setError: (error: string | null) => void
   
-  searchSpots: (latitude: number, longitude: number) => Promise<void>
+  searchSpots: (region: string, prefecture: string) => Promise<void>
 }
 
 export const useSpotStore = create<SpotStore>((set, get) => ({
@@ -44,15 +44,14 @@ export const useSpotStore = create<SpotStore>((set, get) => ({
   
   setError: (error) => set({ error }),
 
-  searchSpots: async (latitude: number, longitude: number) => {
+  searchSpots: async (region: string, prefecture: string) => {
     const { filters } = get()
     set({ isLoading: true, error: null })
     
     try {
       const params = new URLSearchParams({
-        lat: latitude.toString(),
-        lng: longitude.toString(),
-        radius: (filters.radius || 5).toString()
+        region: region,
+        prefecture: prefecture
       })
 
       if (filters.category?.length) {

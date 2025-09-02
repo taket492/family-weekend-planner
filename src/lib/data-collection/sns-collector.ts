@@ -205,7 +205,7 @@ export class SNSDataCollector {
     }
     
     for (const spot of spots.slice(0, 50)) { // API制限対策で50件まで
-      if (!spot.latitude || !spot.longitude) continue
+      if (!spot.address || !spot.name) continue
       
       let retryCount = 0
       const maxRetries = 2
@@ -221,7 +221,7 @@ export class SNSDataCollector {
           const timeoutId = setTimeout(() => controller.abort(), 8000)
           
           const response = await fetch(
-            `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${spot.latitude},${spot.longitude}&radius=100&key=${process.env.GOOGLE_PLACES_API_KEY}`,
+            `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${encodeURIComponent(spot.name + ' ' + spot.address)}&key=${process.env.GOOGLE_PLACES_API_KEY}`,
             { signal: controller.signal }
           )
           
@@ -254,8 +254,8 @@ export class SNSDataCollector {
               description: spot.description,
               category: this.categorizePlace(place.types),
               address: place.formatted_address || spot.address || '',
-              latitude: place.geometry.location.lat,
-              longitude: place.geometry.location.lng,
+              region: this.extractRegion(place.formatted_address || ''),
+              isShizuokaSpot: (place.formatted_address || '').includes('静岡'),
               
               // Google Placesから取得
               rating: place.rating,
@@ -273,7 +273,6 @@ export class SNSDataCollector {
               // SNSから推定
               isTrending: true,
               trendingSource: spot.trendingSource as any,
-              isShizuokaSpot: true,
               popularityScore: this.calculatePopularityFromSNS(spot)
             }
             
@@ -345,8 +344,8 @@ export class SNSDataCollector {
     
     return {
       description: text,
-      latitude: place?.geo?.coordinates?.[1],
-      longitude: place?.geo?.coordinates?.[0],
+      region: this.extractRegion(place?.full_name || ''),
+      isShizuokaSpot: (place?.full_name || '').includes('静岡'),
       address: place?.full_name,
       trendingSource: 'twitter',
       isTrending: true,
@@ -396,5 +395,18 @@ export class SNSDataCollector {
     if (priceLevel <= 1) return PriceRange.BUDGET
     if (priceLevel <= 2) return PriceRange.MODERATE
     return PriceRange.EXPENSIVE
+  }
+
+  // 住所から地域抽出
+  private static extractRegion(address: string): string {
+    const shizuokaCities = ['静岡市', '浜松市', '沼津市', '熱海市', '三島市', '富士宮市', '伊東市', '島田市', '富士市', '磐田市', '焼津市', '掛川市', '藤枝市', '御殿場市', '袋井市', '下田市', '裾野市', '湖西市', '伊豆市', '御前崎市', '菊川市', '伊豆の国市', '牧之原市']
+    
+    for (const city of shizuokaCities) {
+      if (address.includes(city)) {
+        return city.replace('市', '')
+      }
+    }
+    
+    return '静岡' // デフォルト
   }
 }

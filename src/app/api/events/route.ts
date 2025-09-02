@@ -5,15 +5,14 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
     
-    const latitude = parseFloat(searchParams.get('lat') || '0')
-    const longitude = parseFloat(searchParams.get('lng') || '0')
-    const radius = parseInt(searchParams.get('radius') || '10') * 1000
+    const region = searchParams.get('region') || '静岡市'
+    const prefecture = searchParams.get('prefecture') || '静岡県'
     const category = searchParams.get('category') as EventCategory
     const startDate = searchParams.get('startDate')
     const endDate = searchParams.get('endDate')
     const isChildFriendly = searchParams.get('isChildFriendly') === 'true'
 
-    let events: Event[] = generateMockEvents(latitude, longitude)
+    let events: Event[] = generateMockEvents(region, prefecture)
 
     // フィルター適用
     if (category) {
@@ -34,13 +33,9 @@ export async function GET(request: NextRequest) {
       events = events.filter(e => new Date(e.endDate) <= end)
     }
 
-    // 距離でフィルターとソート
+    // 地域でフィルターして日付順でソート
     events = events
-      .map(e => ({
-        ...e,
-        distance: Math.sqrt(Math.pow((e.spotId ? 0 : Math.random() * 0.02) + latitude - latitude, 2) + Math.pow((e.spotId ? 0 : Math.random() * 0.02) + longitude - longitude, 2)) * 111000
-      }))
-      .filter(e => e.distance <= radius)
+      .filter(e => e.location?.includes(region) || e.location?.includes(prefecture))
       .sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime())
 
     return NextResponse.json(events)
@@ -53,7 +48,7 @@ export async function GET(request: NextRequest) {
   }
 }
 
-function generateMockEvents(_baseLat: number, _baseLng: number): Event[] {
+function generateMockEvents(region: string, prefecture: string): Event[] {
   const currentDate = new Date()
   const events: Event[] = [
     {

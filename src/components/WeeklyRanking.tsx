@@ -114,7 +114,7 @@ export default function WeeklyRanking() {
               
               <button
                 onClick={() => {
-                  const url = `https://www.google.com/maps/dir/?api=1&destination=${spot.latitude},${spot.longitude}`
+                  const url = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(spot.address)}`
                   window.open(url, '_blank')
                 }}
                 className="bg-green-600 text-white px-3 py-2 rounded-md hover:bg-green-700 text-sm"

@@ -23,24 +23,22 @@ function RestaurantsContent() {
     radius: 5
   })
 
-  const lat = searchParams.get('lat')
-  const lng = searchParams.get('lng')
+  const region = searchParams.get('region') || '静岡市'
   const spotName = searchParams.get('spotName')
 
   useEffect(() => {
-    if (lat && lng) {
-      searchRestaurants(parseFloat(lat), parseFloat(lng))
+    if (region) {
+      searchRestaurants(region)
     }
-  }, [lat, lng, filters])
+  }, [region, filters])
 
-  const searchRestaurants = async (latitude: number, longitude: number) => {
+  const searchRestaurants = async (searchRegion: string) => {
     setIsLoading(true)
     setError(null)
 
     try {
       const params = new URLSearchParams({
-        lat: latitude.toString(),
-        lng: longitude.toString(),
+        region: searchRegion,
         radius: filters.radius.toString()
       })
 

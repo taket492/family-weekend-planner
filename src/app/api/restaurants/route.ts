@@ -5,8 +5,7 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
     
-    const latitude = parseFloat(searchParams.get('lat') || '0')
-    const longitude = parseFloat(searchParams.get('lng') || '0')
+    const region = searchParams.get('region') || '静岡市'
     const radius = parseInt(searchParams.get('radius') || '5') * 1000
     const cuisine = searchParams.get('cuisine')?.split(',') as CuisineType[]
     const priceRange = searchParams.get('priceRange')?.split(',') as PriceRange[]
@@ -18,15 +17,15 @@ export async function GET(request: NextRequest) {
     const hasNursingRoom = searchParams.get('hasNursingRoom') === 'true'
     const acceptsReservations = searchParams.get('acceptsReservations') === 'true'
 
-    if (!latitude || !longitude) {
+    if (!region) {
       return NextResponse.json(
-        { error: 'Latitude and longitude are required' },
+        { error: 'Region is required' },
         { status: 400 }
       )
     }
 
     // モックデータ（実際の実装では外部APIから取得）
-    let restaurants: Restaurant[] = generateMockRestaurants(latitude, longitude)
+    let restaurants: Restaurant[] = generateMockRestaurants(region)
 
     // フィルター適用
     if (cuisine?.length) {
@@ -50,14 +49,10 @@ export async function GET(request: NextRequest) {
       restaurants = restaurants.filter(r => r.kidsFriendlyRating >= minKidsFriendlyRating)
     }
 
-    // 距離でソート
+    // 地域でフィルタリングして人気順でソート
     restaurants = restaurants
-      .map(r => ({
-        ...r,
-        distance: Math.sqrt(Math.pow(r.latitude - latitude, 2) + Math.pow(r.longitude - longitude, 2)) * 111000
-      }))
-      .filter(r => r.distance <= radius)
-      .sort((a, b) => a.distance - b.distance)
+      .filter(r => r.address.includes(region) || r.region === region)
+      .sort((a, b) => (b.kidsFriendlyRating || 0) - (a.kidsFriendlyRating || 0))
 
     return NextResponse.json(restaurants.slice(0, 50))
   } catch (error) {
@@ -69,7 +64,7 @@ export async function GET(request: NextRequest) {
   }
 }
 
-function generateMockRestaurants(baseLat: number, baseLng: number): Restaurant[] {
+function generateMockRestaurants(region: string): Restaurant[] {
   const mockRestaurants: Restaurant[] = []
   
   const restaurantNames = [
@@ -86,9 +81,9 @@ function generateMockRestaurants(baseLat: number, baseLng: number): Restaurant[]
       name: restaurantNames[i],
       description: '子連れ歓迎のファミリーレストランです',
       category: SpotCategory.RESTAURANT,
-      address: `静岡県静岡市${i + 1}-${i + 1}-${i + 1}`,
-      latitude: baseLat + (Math.random() - 0.5) * 0.02,
-      longitude: baseLng + (Math.random() - 0.5) * 0.02,
+      address: `静岡県${region}${i + 1}-${i + 1}-${i + 1}`,
+      region: region,
+      isShizuokaSpot: true,
       
       hasKidsMenu: Math.random() > 0.3,
       hasHighChair: Math.random() > 0.4,

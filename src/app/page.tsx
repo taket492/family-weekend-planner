@@ -12,8 +12,8 @@ import { RecentSpots } from '@/components/RecentSpots'
 
 export default function Home() {
   const [selectedLocation, setSelectedLocation] = useState<{
-    latitude: number
-    longitude: number
+    region: string
+    prefecture: string
     address: string
   } | null>(null)
   const [activeTab, setActiveTab] = useState<'search' | 'add-spot' | 'add-restaurant'>('search')
@@ -96,12 +96,12 @@ export default function Home() {
               
               <div className="lg:col-span-3 space-y-6">
                 <SpotList 
-                  latitude={selectedLocation.latitude}
-                  longitude={selectedLocation.longitude}
+                  region={selectedLocation.region}
+                  prefecture={selectedLocation.prefecture}
                 />
                 <EventList 
-                  latitude={selectedLocation.latitude}
-                  longitude={selectedLocation.longitude}
+                  region={selectedLocation.region}
+                  prefecture={selectedLocation.prefecture}
                 />
               </div>
             </div>

@@ -7,13 +7,12 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
     
-    const latitude = parseFloat(searchParams.get('lat') || '0')
-    const longitude = parseFloat(searchParams.get('lng') || '0')
-    const radius = parseInt(searchParams.get('radius') || '5') * 1000 // kmをmに変換
+    const region = searchParams.get('region') || '静岡市'
+    const prefecture = searchParams.get('prefecture') || '静岡県'
     const categories = searchParams.get('categories')?.split(',') as SpotCategory[]
     const minChildScore = parseInt(searchParams.get('minChildScore') || '30')
     const ageGroup = searchParams.get('ageGroup') as 'baby' | 'toddler' | 'child'
-    const sortBy = searchParams.get('sortBy') as 'distance' | 'popularity' | 'rating' | 'recent' || 'distance'
+    const sortBy = searchParams.get('sortBy') as 'popularity' | 'rating' | 'recent' || 'popularity'
     const showOnlyShizuoka = searchParams.get('showOnlyShizuoka') === 'true'
     const showTrending = searchParams.get('showTrending') === 'true'
     
@@ -25,16 +24,16 @@ export async function GET(request: NextRequest) {
     const hasDiaperChanging = searchParams.get('hasDiaperChanging') === 'true'
     const hasPlayArea = searchParams.get('hasPlayArea') === 'true'
 
-    if (!latitude || !longitude) {
+    if (!region) {
       return NextResponse.json(
-        { error: 'Latitude and longitude are required' },
+        { error: 'Region is required' },
         { status: 400 }
       )
     }
 
     // キャッシュチェック
-    const cacheKey = spotCache.generateKey(latitude, longitude, { 
-      radius, categories, minChildScore, ageGroup 
+    const cacheKey = spotCache.generateKey(region, prefecture, { 
+      categories, minChildScore, ageGroup 
     })
     
     let spots: ExtendedSpot[] = spotCache.get(cacheKey) || []
@@ -42,9 +41,8 @@ export async function GET(request: NextRequest) {
     if (spots.length === 0) {
       // キャッシュミス: 高度な統合検索実行
       spots = await AdvancedSpotSearch.comprehensiveSearch(
-        latitude, 
-        longitude, 
-        radius, 
+        region, 
+        prefecture, 
         { categories, minChildScore, ageGroup }
       )
       
@@ -90,17 +88,15 @@ export async function GET(request: NextRequest) {
       spots = spots.filter(spot => spot.isTrending)
     }
 
-    // 距離計算を追加
-    spots = spots.map(spot => ({
-      ...spot,
-      distance: Math.sqrt(Math.pow(spot.latitude - latitude, 2) + Math.pow(spot.longitude - longitude, 2)) * 111000 // km to meters
-    }))
+    // 地域フィルタリング
+    spots = spots.filter(spot => 
+      spot.region === region || 
+      spot.address.includes(region) || 
+      spot.address.includes(prefecture)
+    )
 
     // ソート機能
     switch (sortBy) {
-      case 'distance':
-        spots.sort((a, b) => (a.distance || 0) - (b.distance || 0))
-        break
       case 'popularity':
         spots.sort((a, b) => (b.popularityScore || 0) - (a.popularityScore || 0))
         break
@@ -111,10 +107,10 @@ export async function GET(request: NextRequest) {
         spots.sort((a, b) => new Date(b.updatedAt || 0).getTime() - new Date(a.updatedAt || 0).getTime())
         break
       default:
-        // デフォルトは子連れ適性スコア＋距離の複合ソート
+        // デフォルトは子連れ適性スコアでソート
         spots.sort((a, b) => {
-          const scoreA = (a.childFriendlyScore || 0) - ((a.distance || 0) / 1000)
-          const scoreB = (b.childFriendlyScore || 0) - ((b.distance || 0) / 1000)
+          const scoreA = (a.childFriendlyScore || 0)
+          const scoreB = (b.childFriendlyScore || 0)
           return scoreB - scoreA
         })
     }

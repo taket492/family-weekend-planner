@@ -4,8 +4,6 @@ export interface Spot {
   description?: string
   category: SpotCategory
   address: string
-  latitude: number
-  longitude: number
   
   hasKidsMenu: boolean
   hasHighChair: boolean
@@ -40,7 +38,6 @@ export interface Spot {
   popularityScore?: number
   seasonalRecommendation?: SeasonalRecommendation
   events?: Event[]
-  distance?: number
   
   // 詳細施設情報
   isIndoor?: boolean
@@ -113,7 +110,7 @@ export interface SearchFilters {
   radius?: number // km
   ageGroup?: 'baby' | 'toddler' | 'child'
   minChildScore?: number
-  sortBy?: 'distance' | 'popularity' | 'rating' | 'recent'
+  sortBy?: 'popularity' | 'rating' | 'recent'
   region?: string
   showOnlyShizuoka?: boolean
   showTrending?: boolean

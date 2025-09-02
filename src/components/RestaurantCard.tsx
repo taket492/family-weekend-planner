@@ -102,11 +102,6 @@ export default function RestaurantCard({ restaurant, userId = 'default-user' }: 
         <p className="text-sm text-gray-600 flex-1">{restaurant.address}</p>
       </div>
       
-      {restaurant.distance && (
-        <div className="text-sm text-gray-500 mb-2">
-          📏 約 {(restaurant.distance / 1000).toFixed(1)}km
-        </div>
-      )}
       
       <div className="flex items-center justify-between mb-3 p-2 bg-gray-50 rounded">
         <div className="flex items-center">
@@ -185,7 +180,7 @@ export default function RestaurantCard({ restaurant, userId = 'default-user' }: 
           
           <button
             onClick={() => {
-              const url = `https://www.google.com/maps/dir/?api=1&destination=${restaurant.latitude},${restaurant.longitude}&travelmode=driving`
+              const url = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(restaurant.address)}`
               window.open(url, '_blank')
             }}
             className="flex items-center justify-center gap-1 bg-green-600 text-white px-3 py-2 rounded-md hover:bg-green-700 transition-colors text-sm font-medium"

@@ -5,8 +5,8 @@ import { useForm } from 'react-hook-form'
 
 interface LocationSelectorProps {
   onLocationSelect: (location: {
-    latitude: number
-    longitude: number
+    region: string
+    prefecture: string
     address: string
   }) => void
 }
@@ -21,51 +21,18 @@ export default function LocationSelector({ onLocationSelect }: LocationSelectorP
   
   const { register, handleSubmit, formState: { errors } } = useForm<FormData>()
 
-  const getCurrentLocation = () => {
+  const useDefaultLocation = () => {
     setIsLoading(true)
     setError(null)
 
-    if (!navigator.geolocation) {
-      setError('位置情報がサポートされていません')
-      setIsLoading(false)
-      return
-    }
-
-    navigator.geolocation.getCurrentPosition(
-      async (position) => {
-        const { latitude, longitude } = position.coords
-        
-        try {
-          const response = await fetch(
-            `/api/geocode?lat=${latitude}&lng=${longitude}`
-          )
-          const data = await response.json()
-          
-          onLocationSelect({
-            latitude,
-            longitude,
-            address: data.formattedAddress || `${latitude}, ${longitude}`
-          })
-        } catch {
-          onLocationSelect({
-            latitude,
-            longitude,
-            address: `${latitude}, ${longitude}`
-          })
-        }
-        
-        setIsLoading(false)
-      },
-      () => {
-        setError('位置情報の取得に失敗しました')
-        setIsLoading(false)
-      },
-      {
-        enableHighAccuracy: true,
-        timeout: 10000,
-        maximumAge: 600000
-      }
-    )
+    // デフォルトで静岡市を使用
+    onLocationSelect({
+      region: '静岡',
+      prefecture: '静岡県',
+      address: '静岡県静岡市'
+    })
+    
+    setIsLoading(false)
   }
 
   const onAddressSubmit = async (data: FormData) => {
@@ -84,9 +51,9 @@ export default function LocationSelector({ onLocationSelect }: LocationSelectorP
       const location = await response.json()
       
       onLocationSelect({
-        latitude: location.latitude,
-        longitude: location.longitude,
-        address: location.formattedAddress
+        region: location.region || '静岡',
+        prefecture: location.prefecture || '静岡県',
+        address: location.formattedAddress || data.address
       })
     } catch (err) {
       setError(err instanceof Error ? err.message : '住所の検索に失敗しました')
@@ -103,18 +70,18 @@ export default function LocationSelector({ onLocationSelect }: LocationSelectorP
       
       <div className="space-y-4">
         <button
-          onClick={getCurrentLocation}
+          onClick={useDefaultLocation}
           disabled={isLoading}
           className="w-full bg-blue-600 text-white py-3 px-4 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed font-medium flex items-center justify-center gap-2"
         >
           {isLoading ? (
             <>
               <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-              位置情報を取得中...
+              設定中...
             </>
           ) : (
             <>
-              📍 現在地を使用
+              🏠 静岡市を使用
             </>
           )}
         </button>

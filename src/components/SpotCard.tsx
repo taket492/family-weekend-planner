@@ -187,7 +187,7 @@ export default function SpotCard({ spot, onAddToPlan, isSelected, userId = 'defa
           {/* Google Maps ナビゲーションボタン */}
           <button
             onClick={() => {
-              const url = `https://www.google.com/maps/dir/?api=1&destination=${spot.latitude},${spot.longitude}&travelmode=driving`
+              const url = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(spot.address)}`
               window.open(url, '_blank')
             }}
             className="flex items-center justify-center gap-1 bg-green-600 text-white px-3 py-2 rounded-md hover:bg-green-700 transition-colors text-sm font-medium"
@@ -214,7 +214,7 @@ export default function SpotCard({ spot, onAddToPlan, isSelected, userId = 'defa
           {/* 周辺レストラン検索ボタン */}
           <button
             onClick={() => {
-              const restaurantUrl = `/restaurants?lat=${spot.latitude}&lng=${spot.longitude}&spotName=${encodeURIComponent(spot.name)}`
+              const restaurantUrl = `/restaurants?region=${encodeURIComponent(spot.region || '静岡')}&spotName=${encodeURIComponent(spot.name)}`
               window.open(restaurantUrl, '_blank')
             }}
             className="flex items-center justify-center gap-1 bg-purple-600 text-white px-3 py-2 rounded-md hover:bg-purple-700 transition-colors text-sm font-medium"

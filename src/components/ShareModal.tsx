@@ -23,11 +23,11 @@ ${item.description || ''}
 ${item.rating ? `評価: ⭐ ${item.rating.toFixed(1)} (${item.reviewCount}件)` : ''}
 ${item.phoneNumber ? `電話: ${item.phoneNumber}` : ''}
 
-Google Maps: https://www.google.com/maps/search/?api=1&query=${item.latitude},${item.longitude}
+Google Maps: https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(item.address)}
 
 #ファミリーおでかけ #静岡 #子連れ`
 
-  const shareUrl = `${window.location.origin}${spot ? '/' : '/restaurants'}?lat=${item.latitude}&lng=${item.longitude}&highlight=${item.id}`
+  const shareUrl = `${window.location.origin}${spot ? '/' : '/restaurants'}?region=${encodeURIComponent(item.region || 'static')}&highlight=${item.id}`
 
   const copyToClipboard = async () => {
     try {

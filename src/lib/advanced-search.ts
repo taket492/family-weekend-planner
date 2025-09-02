@@ -1,39 +1,32 @@
 import { SpotCategory } from '@/types'
-import { GoogleMapsService } from './google-maps'
 
 interface GooglePlace {
   place_id: string
   name: string
   formatted_address: string
-  geometry: {
-    location: {
-      lat: number
-      lng: number
-    }
-  }
   rating?: number
   user_ratings_total?: number
   price_level?: number
   types: string[]
 }
 
-// 複数の無料APIを統合した高度検索システム
+// 複数の無料APIを統合した高度検索システム（地域ベース）
 export class AdvancedSpotSearch {
   
-  // OpenStreetMap Overpass API
-  static async searchOSM(lat: number, lng: number, radius: number) {
+  // OpenStreetMap Overpass API (地域ベース検索)
+  static async searchOSM(region: string, prefectureName: string = '静岡県') {
     const query = `
       [out:json][timeout:25];
       (
-        node["amenity"~"^(restaurant|cafe|fast_food|playground|museum|cinema|library|park)$"](around:${radius},${lat},${lng});
-        way["amenity"~"^(restaurant|cafe|fast_food|playground|museum|cinema|library|park)$"](around:${radius},${lat},${lng});
-        relation["amenity"~"^(restaurant|cafe|fast_food|playground|museum|cinema|library|park)$"](around:${radius},${lat},${lng});
-        node["leisure"~"^(playground|park|sports_centre|swimming_pool|amusement_arcade)$"](around:${radius},${lat},${lng});
-        way["leisure"~"^(playground|park|sports_centre|swimming_pool|amusement_arcade)$"](around:${radius},${lat},${lng});
-        node["tourism"~"^(museum|attraction|zoo|aquarium|theme_park)$"](around:${radius},${lat},${lng});
-        way["tourism"~"^(museum|attraction|zoo|aquarium|theme_park)$"](around:${radius},${lat},${lng});
-        node["shop"~"^(mall|supermarket|department_store|toys|books)$"](around:${radius},${lat},${lng});
-        way["shop"~"^(mall|supermarket|department_store|toys|books)$"](around:${radius},${lat},${lng});
+        node["amenity"~"^(restaurant|cafe|fast_food|playground|museum|cinema|library|park)$"]["addr:city"~"${region}|${prefectureName}"];
+        way["amenity"~"^(restaurant|cafe|fast_food|playground|museum|cinema|library|park)$"]["addr:city"~"${region}|${prefectureName}"];
+        relation["amenity"~"^(restaurant|cafe|fast_food|playground|museum|cinema|library|park)$"]["addr:city"~"${region}|${prefectureName}"];
+        node["leisure"~"^(playground|park|sports_centre|swimming_pool|amusement_arcade)$"]["addr:city"~"${region}|${prefectureName}"];
+        way["leisure"~"^(playground|park|sports_centre|swimming_pool|amusement_arcade)$"]["addr:city"~"${region}|${prefectureName}"];
+        node["tourism"~"^(museum|attraction|zoo|aquarium|theme_park)$"]["addr:city"~"${region}|${prefectureName}"];
+        way["tourism"~"^(museum|attraction|zoo|aquarium|theme_park)$"]["addr:city"~"${region}|${prefectureName}"];
+        node["shop"~"^(mall|supermarket|department_store|toys|books)$"]["addr:city"~"${region}|${prefectureName}"];
+        way["shop"~"^(mall|supermarket|department_store|toys|books)$"]["addr:city"~"${region}|${prefectureName}"];
       );
       out center meta tags;
     `
@@ -47,16 +40,17 @@ export class AdvancedSpotSearch {
     return response.json()
   }
 
-  // Wikipedia Places API (近隣の観光スポット・有名場所)
-  static async searchWikipedia(lat: number, lng: number, radius: number) {
+  // Wikipedia Places API (地域の観光スポット・有名場所)
+  static async searchWikipedia(region: string, prefectureName: string = '静岡県') {
     try {
-      const kmRadius = radius / 1000
-      const url = `https://ja.wikipedia.org/api/rest_v1/page/nearby/${lat}/${lng}/${kmRadius * 1000}`
+      const searchQuery = `${prefectureName} ${region} 観光 スポット`
+      const url = `https://ja.wikipedia.org/api/rest_v1/page/search/${encodeURIComponent(searchQuery)}`
       
       const response = await fetch(url)
       if (!response.ok) return { pages: [] }
       
-      return await response.json()
+      const data = await response.json()
+      return { pages: data.pages || [] }
     } catch {
       return { pages: [] }
     }
@@ -147,72 +141,83 @@ export class AdvancedSpotSearch {
       return '🟢 空いている'
     }
 
-    if (category === SpotCategory.PARK || category === SpotCategory.PLAYGROUND) {
-      if (isWeekend && hour >= 10 && hour <= 16) return '🔴 混雑'
-      if (hour >= 15 && hour <= 17) return '🟡 やや混雑'
-      return '🟢 空いている'
-    }
-
-    if (category === SpotCategory.SHOPPING) {
-      if (isWeekend && hour >= 14 && hour <= 18) return '🔴 混雑'
-      if (hour >= 19 && hour <= 21) return '🟡 やや混雑'
+    if (category === SpotCategory.PLAYGROUND || category === SpotCategory.PARK) {
+      if (isWeekend && hour >= 9 && hour <= 17) return '🔴 混雑'
+      if (hour >= 15 && hour <= 18) return '🟡 やや混雑'
       return '🟢 空いている'
     }
 
     return '🟢 空いている'
   }
 
-  // 天気に基づく推奨度調整
-  static adjustForWeather(category: SpotCategory, isOutdoor: boolean): number {
-    // 実際の天気APIは有料なので、季節・時間で簡易判定
-    const now = new Date()
-    const month = now.getMonth() + 1
-    const hour = now.getHours()
-    
-    let weatherScore = 1.0
-
-    // 屋外施設の場合
-    if (isOutdoor) {
-      // 雨季 (6-7月)
-      if (month >= 6 && month <= 7) weatherScore *= 0.7
-      // 冬季 (12-2月)
-      if (month >= 12 || month <= 2) weatherScore *= 0.8
-      // 夜間
-      if (hour < 8 || hour > 18) weatherScore *= 0.6
-    }
-
-    return weatherScore
+  // カテゴリマッピング
+  static mapCategory(tags: Record<string, string>): SpotCategory {
+    if (tags.amenity === 'restaurant' || tags.amenity === 'fast_food') return SpotCategory.RESTAURANT
+    if (tags.amenity === 'cafe') return SpotCategory.CAFE
+    if (tags.leisure === 'playground' || tags.amenity === 'playground') return SpotCategory.PLAYGROUND
+    if (tags.leisure === 'park') return SpotCategory.PARK
+    if (tags.tourism === 'museum' || tags.amenity === 'museum') return SpotCategory.MUSEUM
+    if (tags.shop) return SpotCategory.SHOPPING
+    if (tags.leisure === 'amusement_arcade' || tags.amenity === 'cinema') return SpotCategory.ENTERTAINMENT
+    if (tags.tourism) return SpotCategory.TOURIST_SPOT
+    return SpotCategory.RESTAURANT
   }
 
-  // 年齢別推奨度計算
-  static calculateAgeAppropriate(tags: Record<string, string>): {
-    baby: number    // 0-2歳
-    toddler: number // 2-5歳
-    child: number   // 5-12歳
-  } {
-    let baby = 50, toddler = 50, child = 50
+  // 住所フォーマット
+  static formatAddress(tags: Record<string, string>): string {
+    return [
+      tags['addr:full'],
+      tags['addr:country'] || '日本',
+      tags['addr:state'] || tags['addr:prefecture'],
+      tags['addr:city'],
+      tags['addr:suburb'],
+      tags['addr:street'],
+      tags['addr:housenumber']
+    ].filter(Boolean).join(' ') || '住所不明'
+  }
 
+  // 天候による調整係数
+  static adjustForWeather(category: SpotCategory, isOutdoor: boolean): number {
+    // 簡単な季節・天候調整（実際の天気APIは使用しない）
+    const month = new Date().getMonth()
+    const isRainySeason = month >= 5 && month <= 7 // 梅雨時期
+    const isSummer = month >= 6 && month <= 8
+
+    if (isOutdoor) {
+      if (isRainySeason) return 0.7 // 屋外スポットは梅雨時期に不向き
+      if (isSummer && (category === SpotCategory.PLAYGROUND || category === SpotCategory.PARK)) return 0.8
+    }
+
+    return 1.0
+  }
+
+  // 年齢層別適性計算
+  static calculateAgeAppropriate(tags: Record<string, string>): {
+    baby: number
+    toddler: number
+    child: number
+  } {
+    let baby = 30, toddler = 30, child = 30
+
+    // 基本設備による加点
+    if (tags.changing_table === 'yes') baby += 25
+    if (tags.baby_feeding === 'yes') baby += 20
+    if (tags.highchair === 'yes') { baby += 15; toddler += 10 }
+    if (tags.kids_menu === 'yes') { toddler += 20; child += 15 }
+    if (tags.playground === 'yes') { toddler += 30; child += 25 }
+
+    // カテゴリ別調整
     const amenity = tags.amenity
     const leisure = tags.leisure
-
-    // 年齢別スコア調整
-    if (amenity === 'playground') {
-      baby += 10; toddler += 40; child += 30
+    if (amenity === 'playground' || leisure === 'playground') {
+      toddler += 40; child += 35
     }
     if (leisure === 'park') {
-      baby += 30; toddler += 35; child += 25
+      baby += 20; toddler += 30; child += 25
     }
-    if (amenity === 'restaurant') {
-      baby += 20; toddler += 25; child += 30
+    if (tags.tourism === 'zoo' || tags.tourism === 'aquarium') {
+      toddler += 35; child += 40
     }
-    if (amenity === 'museum') {
-      baby -= 10; toddler += 10; child += 40
-    }
-
-    // 設備による調整
-    if (tags.changing_table === 'yes') baby += 30
-    if (tags.kids_menu === 'yes') { toddler += 20; child += 25 }
-    if (tags.playground === 'yes') { toddler += 30; child += 35 }
 
     return {
       baby: Math.max(0, Math.min(100, baby)),
@@ -221,37 +226,120 @@ export class AdvancedSpotSearch {
     }
   }
 
-  // 統合検索メイン関数
+  // スマート説明文生成
+  static generateSmartDescription(tags: Record<string, string>, childScore: number, ageScores: { baby: number; toddler: number; child: number }): string {
+    const amenity = tags.amenity
+    const leisure = tags.leisure
+    const tourism = tags.tourism
+    
+    let base = ''
+    if (amenity === 'restaurant') base = 'ファミリーレストラン'
+    else if (amenity === 'cafe') base = 'ファミリーカフェ'
+    else if (leisure === 'playground') base = '遊び場・公園'
+    else if (tourism === 'museum') base = '博物館・美術館'
+    else base = '子連れスポット'
+
+    let features = []
+    if (childScore >= 70) features.push('子連れに優しい')
+    if (ageScores.baby >= 60) features.push('赤ちゃん向け')
+    if (ageScores.toddler >= 60) features.push('幼児向け')
+    if (tags.parking === 'yes') features.push('駐車場完備')
+    if (tags.outdoor_seating === 'yes') features.push('テラス席あり')
+
+    return `${base}${features.length ? ' - ' + features.join('、') : ''}`
+  }
+
+  // トレンドスポット生成（地域ベース）
+  static async searchTrendingSpots(region: string, _prefectureName: string = '静岡県') {
+    // モックデータとして地域に基づいたトレンドスポットを生成
+    const trendingSpots = [
+      {
+        name: "話題のファミリーカフェ",
+        category: SpotCategory.CAFE,
+        isTrending: true,
+        trendingSource: 'instagram' as const,
+        hasKidsMenu: true,
+        hasHighChair: true,
+        childFriendlyScore: 85
+      },
+      {
+        name: "人気の子連れレストラン",
+        category: SpotCategory.RESTAURANT,
+        isTrending: true,
+        trendingSource: 'twitter' as const,
+        hasKidsMenu: true,
+        hasNursingRoom: true,
+        childFriendlyScore: 90
+      },
+      {
+        name: "話題のキッズカフェ",
+        category: SpotCategory.CAFE,
+        isTrending: true,
+        trendingSource: 'instagram' as const,
+        hasPlayArea: true,
+        hasKidsMenu: true,
+        childFriendlyScore: 95
+      },
+      {
+        name: "評判のファミリーレストラン",
+        category: SpotCategory.RESTAURANT,
+        isTrending: true,
+        trendingSource: 'tabelog' as const,
+        hasKidsMenu: true,
+        hasDiaperChanging: true,
+        childFriendlyScore: 88
+      },
+      {
+        name: "インスタ映えプレイグラウンド",
+        category: SpotCategory.PLAYGROUND,
+        isTrending: true,
+        trendingSource: 'instagram' as const,
+        hasPlayArea: true,
+        isStrollerFriendly: true,
+        childFriendlyScore: 92
+      },
+      {
+        name: "話題のファミリーモール",
+        category: SpotCategory.SHOPPING,
+        isTrending: true,
+        trendingSource: 'twitter' as const,
+        hasNursingRoom: true,
+        hasDiaperChanging: true,
+        childFriendlyScore: 80
+      }
+    ]
+
+    return { 
+      trending: trendingSpots.map(spot => ({
+        ...spot,
+        address: `${region}の人気スポット`,
+        region: region,
+        description: `${region}で話題の${spot.category === SpotCategory.CAFE ? 'カフェ' : spot.category === SpotCategory.RESTAURANT ? 'レストラン' : 'スポット'}`
+      }))
+    }
+  }
+
+  // 統合検索メイン関数（地域ベース）
   static async comprehensiveSearch(
-    latitude: number,
-    longitude: number,
-    radius: number,
-    filters: { categories?: SpotCategory[]; minChildScore?: number; ageGroup?: string }
+    region: string,
+    prefectureName: string = '静岡県',
+    filters: { categories?: SpotCategory[]; minChildScore?: number; ageGroup?: string } = {}
   ) {
     try {
-      // 並列でAPI呼び出し（Google Maps APIが利用可能な場合は含める）
+      // 並列でAPI呼び出し
       const apiCalls = [
-        this.searchOSM(latitude, longitude, radius),
-        this.searchWikipedia(latitude, longitude, radius),
-        this.searchTrendingSpots(latitude, longitude, radius)
+        this.searchOSM(region, prefectureName),
+        this.searchWikipedia(region, prefectureName),
+        this.searchTrendingSpots(region, prefectureName)
       ]
 
-      // Google Maps APIが設定されている場合は追加
-      if (GoogleMapsService.isConfigured()) {
-        apiCalls.push(
-          GoogleMapsService.searchNearbyPlaces(latitude, longitude, radius)
-            .then(places => ({ googlePlaces: places }))
-            .catch(() => ({ googlePlaces: [] }))
-        )
-      }
-
       const results = await Promise.all(apiCalls)
-      const [osmData, wikiData, trendingData, googleData] = results
+      const [osmData, wikiData, trendingData] = results
 
       // OSMデータの処理
-      const osmSpots = osmData.elements
-        .filter((el: { lat?: number; lon?: number; tags?: Record<string, string> }) => el.lat && el.lon && el.tags?.name)
-        .map((element: { type: string; id: number; lat: number; lon: number; tags: Record<string, string> }) => {
+      const osmSpots = (osmData.elements || [])
+        .filter((el: { tags?: Record<string, string> }) => el.tags?.name)
+        .map((element: { type: string; id: number; tags: Record<string, string> }) => {
           const tags = element.tags
           const childScore = this.calculateChildFriendlyScore(element)
           const ageScores = this.calculateAgeAppropriate(tags)
@@ -271,8 +359,6 @@ export class AdvancedSpotSearch {
             description: this.generateSmartDescription(tags, childScore, ageScores),
             category: this.mapCategory(tags),
             address: this.formatAddress(tags),
-            latitude: element.lat,
-            longitude: element.lon,
             
             // 子連れ向け設備（高精度判定）
             hasKidsMenu: tags.kids_menu === 'yes' || childScore >= 60,
@@ -305,6 +391,8 @@ export class AdvancedSpotSearch {
             rating: tags.rating ? parseFloat(tags.rating) : null,
             reviewCount: 0,
             source: 'OpenStreetMap',
+            region: region,
+            isShizuokaSpot: prefectureName.includes('静岡'),
             
             createdAt: new Date(),
             updatedAt: new Date()
@@ -312,14 +400,14 @@ export class AdvancedSpotSearch {
         })
 
       // Wikipediaの観光スポット追加
-      const wikiSpots = (wikiData.pages || []).map((page: { pageid: number; title: string; extract?: string; coordinates?: { lat: number; lon: number } }) => ({
+      const wikiSpots = (wikiData.pages || []).map((page: { pageid: number; title: string; extract?: string }) => ({
         id: `wiki-${page.pageid}`,
         name: page.title,
         description: `Wikipedia掲載の観光スポット - ${page.extract || ''}`,
         category: SpotCategory.TOURIST_SPOT,
-        address: `緯度 ${page.coordinates?.lat}, 経度 ${page.coordinates?.lon}`,
-        latitude: page.coordinates?.lat || latitude,
-        longitude: page.coordinates?.lon || longitude,
+        address: `${prefectureName}${region}`,
+        region: region,
+        isShizuokaSpot: prefectureName.includes('静岡'),
         
         hasKidsMenu: false,
         hasHighChair: false,
@@ -328,12 +416,9 @@ export class AdvancedSpotSearch {
         hasDiaperChanging: false,
         hasPlayArea: false,
         
-        website: `https://ja.wikipedia.org/wiki/${encodeURIComponent(page.title)}`,
-        
-        childFriendlyScore: 60, // 観光スポットの基本スコア
+        childFriendlyScore: 60,
         ageAppropriate: { baby: 40, toddler: 60, child: 80 },
         crowdLevel: this.predictCrowdLevel(SpotCategory.TOURIST_SPOT),
-        isCurrentlyOpen: true,
         
         rating: null,
         reviewCount: 0,
@@ -344,224 +429,73 @@ export class AdvancedSpotSearch {
       }))
 
       // トレンドスポットのマージ
-      const trendingSpots = this.processTrendingSpots(trendingData, latitude, longitude)
+      const trendingSpots = (trendingData.trending || []).map((spot: any) => ({
+        id: `trending-${Date.now()}-${Math.random()}`,
+        name: spot.name,
+        description: spot.description,
+        category: spot.category,
+        address: spot.address,
+        
+        hasKidsMenu: spot.hasKidsMenu || false,
+        hasHighChair: spot.hasHighChair || false,
+        hasNursingRoom: spot.hasNursingRoom || false,
+        isStrollerFriendly: spot.isStrollerFriendly || false,
+        hasDiaperChanging: spot.hasDiaperChanging || false,
+        hasPlayArea: spot.hasPlayArea || false,
+        
+        childFriendlyScore: spot.childFriendlyScore,
+        ageAppropriate: { baby: 60, toddler: 80, child: 70 },
+        crowdLevel: this.predictCrowdLevel(spot.category),
+        
+        isTrending: spot.isTrending,
+        trendingSource: spot.trendingSource,
+        
+        rating: null,
+        reviewCount: 0,
+        source: 'TrendingData',
+        region: spot.region,
+        isShizuokaSpot: prefectureName.includes('静岡'),
+        
+        createdAt: new Date(),
+        updatedAt: new Date()
+      }))
 
-      // Google Mapsデータの処理
-      const googleSpots = googleData?.googlePlaces 
-        ? googleData.googlePlaces.map((place: GooglePlace) => 
-            GoogleMapsService.convertGooglePlaceToSpot(place, this.calculateChildFriendlyScore({ tags: {} }))
-          )
-        : []
+      // 全スポットをマージ
+      let allSpots = [...osmSpots, ...wikiSpots, ...trendingSpots]
 
-      // 統合・重複排除・スコア順ソート
-      const allSpots = [...osmSpots, ...wikiSpots, ...trendingSpots, ...googleSpots]
-        .filter(spot => spot.childFriendlyScore >= 0) // すべてのスポットを表示
-        .sort((a, b) => {
-          // トレンドスポットを優先表示
-          if (a.isTrending && !b.isTrending) return -1
-          if (!a.isTrending && b.isTrending) return 1
-          return b.childFriendlyScore - a.childFriendlyScore
-        })
-        .slice(0, 200) // 最大200件に拡張
-
-      return allSpots
-    } catch (error) {
-      console.error('Advanced search error:', error)
-      throw error
-    }
-  }
-
-  // カテゴリマッピング（強化版）
-  static mapCategory(tags: Record<string, string>): SpotCategory {
-    const { amenity, leisure, tourism, shop } = tags
-
-    // レストラン・カフェ
-    if (amenity === 'restaurant' || amenity === 'fast_food') return SpotCategory.RESTAURANT
-    if (amenity === 'cafe' || amenity === 'bar') return SpotCategory.CAFE
-    
-    // 遊び場・公園
-    if (leisure === 'playground' || amenity === 'playground') return SpotCategory.PLAYGROUND
-    if (leisure === 'park' || amenity === 'park') return SpotCategory.PARK
-    
-    // 文化・エンタメ
-    if (tourism === 'museum' || amenity === 'museum') return SpotCategory.MUSEUM
-    if (leisure === 'amusement_arcade' || amenity === 'cinema') return SpotCategory.ENTERTAINMENT
-    if (tourism === 'zoo' || tourism === 'aquarium') return SpotCategory.ENTERTAINMENT
-    
-    // ショッピング
-    if (shop || amenity === 'marketplace') return SpotCategory.SHOPPING
-    
-    // 観光スポット
-    if (tourism === 'attraction' || tourism === 'viewpoint') return SpotCategory.TOURIST_SPOT
-
-    return SpotCategory.TOURIST_SPOT
-  }
-
-  // 住所フォーマット
-  static formatAddress(tags: Record<string, string>): string {
-    const parts = [
-      tags['addr:postcode'],
-      tags['addr:city'],
-      tags['addr:town'],
-      tags['addr:suburb'],
-      tags['addr:street'],
-      tags['addr:housenumber']
-    ].filter(Boolean)
-
-    return parts.length > 0 ? parts.join(' ') : '住所情報なし'
-  }
-
-  // ソーシャルメディアトレンド検索（疑似実装）
-  static async searchTrendingSpots(lat: number, lng: number, radius: number) {
-    // 実際のSNS APIは有料/制限があるため、疑似的なトレンドデータを生成
-    // 実装時はInstagram Basic Display API、Twitter API v2などを使用
-    return this.generateTrendingSpots(lat, lng, radius)
-  }
-
-  // トレンドスポット疑似生成（実際のAPI実装用のテンプレート）
-  static generateTrendingSpots(lat: number, lng: number, _radius: number) {
-    const trendingSpots = [
-      {
-        name: "話題のファミリーカフェ",
-        category: SpotCategory.CAFE,
-        latitude: lat + (Math.random() - 0.5) * 0.01,
-        longitude: lng + (Math.random() - 0.5) * 0.01,
-        isTrending: true,
-        trendingSource: 'instagram' as const,
-        instagramUrl: "https://www.instagram.com/example_cafe/",
-        tabelogUrl: "https://tabelog.com/example/",
-        description: "Instagramで話題のおしゃれなファミリーカフェ"
-      },
-      {
-        name: "人気の子連れレストラン",
-        category: SpotCategory.RESTAURANT,
-        latitude: lat + (Math.random() - 0.5) * 0.01,
-        longitude: lng + (Math.random() - 0.5) * 0.01,
-        isTrending: true,
-        trendingSource: 'twitter' as const,
-        twitterUrl: "https://twitter.com/search?q=人気レストラン",
-        gurunaviUrl: "https://www.gnavi.co.jp/example/",
-        description: "Twitterで評判の子連れ歓迎レストラン"
-      },
-      {
-        name: "話題のキッズカフェ",
-        category: SpotCategory.CAFE,
-        latitude: lat + (Math.random() - 0.5) * 0.01,
-        longitude: lng + (Math.random() - 0.5) * 0.01,
-        isTrending: true,
-        trendingSource: 'instagram' as const,
-        instagramUrl: "https://www.instagram.com/kids_cafe/",
-        tabelogUrl: "https://tabelog.com/kids_cafe/",
-        description: "SNSで話題のキッズスペース付きカフェ"
-      },
-      {
-        name: "評判のファミリーレストラン",
-        category: SpotCategory.RESTAURANT,
-        latitude: lat + (Math.random() - 0.5) * 0.01,
-        longitude: lng + (Math.random() - 0.5) * 0.01,
-        isTrending: true,
-        trendingSource: 'tabelog' as const,
-        tabelogUrl: "https://tabelog.com/family_restaurant/",
-        gurunaviUrl: "https://www.gnavi.co.jp/family/",
-        description: "食べログで高評価の子連れ歓迎レストラン"
-      },
-      {
-        name: "インスタ映えプレイグラウンド",
-        category: SpotCategory.PLAYGROUND,
-        latitude: lat + (Math.random() - 0.5) * 0.01,
-        longitude: lng + (Math.random() - 0.5) * 0.01,
-        isTrending: true,
-        trendingSource: 'instagram' as const,
-        instagramUrl: "https://www.instagram.com/playground_fun/",
-        description: "Instagramで人気の屋内プレイグラウンド"
-      },
-      {
-        name: "話題のファミリーモール",
-        category: SpotCategory.SHOPPING,
-        latitude: lat + (Math.random() - 0.5) * 0.01,
-        longitude: lng + (Math.random() - 0.5) * 0.01,
-        isTrending: true,
-        trendingSource: 'twitter' as const,
-        twitterUrl: "https://twitter.com/search?q=ファミリーモール",
-        description: "Twitterで評判のファミリー向けショッピングモール"
+      // フィルタリング適用
+      if (filters.categories && filters.categories.length > 0) {
+        allSpots = allSpots.filter(spot => filters.categories!.includes(spot.category))
       }
-    ]
-    return { trending: trendingSpots }
-  }
 
-  // トレンドデータ処理
-  static processTrendingSpots(trendingData: { trending?: Array<{ name: string; category: SpotCategory; latitude: number; longitude: number; isTrending: boolean; trendingSource: string; [key: string]: unknown }> }, _lat: number, _lng: number) {
-    if (!trendingData?.trending) return []
-    
-    return trendingData.trending.map((spot) => ({
-      id: `trending-${Math.random().toString(36).substr(2, 9)}`,
-      name: spot.name,
-      description: spot.description,
-      category: spot.category,
-      address: `${spot.latitude.toFixed(4)}, ${spot.longitude.toFixed(4)}`,
-      latitude: spot.latitude,
-      longitude: spot.longitude,
-      
-      hasKidsMenu: true,
-      hasHighChair: true,
-      hasNursingRoom: false,
-      isStrollerFriendly: true,
-      hasDiaperChanging: false,
-      hasPlayArea: false,
-      
-      tabelogUrl: spot.tabelogUrl,
-      gurunaviUrl: spot.gurunaviUrl,
-      rettyUrl: spot.rettyUrl,
-      instagramUrl: spot.instagramUrl,
-      twitterUrl: spot.twitterUrl,
-      
-      isTrending: spot.isTrending,
-      trendingSource: spot.trendingSource,
-      
-      childFriendlyScore: 85, // トレンドスポットは高スコア
-      ageAppropriate: { baby: 70, toddler: 80, child: 75 },
-      crowdLevel: '🟡 やや混雑（人気店）',
-      isCurrentlyOpen: true,
-      
-      rating: 4.5,
-      reviewCount: 150,
-      source: 'SNSトレンド',
-      
-      createdAt: new Date(),
-      updatedAt: new Date()
-    }))
-  }
+      if (filters.minChildScore) {
+        allSpots = allSpots.filter(spot => spot.childFriendlyScore >= filters.minChildScore!)
+      }
 
-  // AI生成による説明文
-  static generateSmartDescription(
-    tags: Record<string, string>, 
-    childScore: number, 
-    ageScores: { baby: number; toddler: number; child: number }
-  ): string {
-    const { amenity, cuisine, leisure } = tags
-    const desc = []
+      if (filters.ageGroup) {
+        allSpots = allSpots.filter(spot => {
+          const ageScore = spot.ageAppropriate[filters.ageGroup as keyof typeof spot.ageAppropriate]
+          return ageScore >= 60
+        })
+      }
 
-    // 基本説明
-    if (amenity === 'restaurant' && cuisine) {
-      desc.push(`${cuisine}料理のレストラン`)
-    } else if (amenity === 'cafe') {
-      desc.push('カフェ')
-    } else if (leisure === 'park') {
-      desc.push('公園・緑地')
+      // 人気順にソート（子連れスコア + トレンド補正）
+      allSpots.sort((a, b) => {
+        const scoreA = a.childFriendlyScore + (a.isTrending ? 20 : 0)
+        const scoreB = b.childFriendlyScore + (b.isTrending ? 20 : 0)
+        return scoreB - scoreA
+      })
+
+      // 重複除去（名前ベース）
+      const uniqueSpots = allSpots.filter((spot, index) => 
+        allSpots.findIndex(s => s.name === spot.name) === index
+      )
+
+      return uniqueSpots.slice(0, 30) // 最大30件
+
+    } catch (error) {
+      console.error('Comprehensive search error:', error)
+      return []
     }
-
-    // 子連れ向け特徴
-    if (childScore >= 80) {
-      desc.push('子連れに非常におすすめ')
-    } else if (childScore >= 60) {
-      desc.push('子連れ向け設備あり')
-    }
-
-    // 年齢別推奨
-    if (ageScores.baby >= 70) desc.push('赤ちゃん連れOK')
-    if (ageScores.toddler >= 70) desc.push('幼児向け')
-    if (ageScores.child >= 70) desc.push('小学生におすすめ')
-
-    return desc.join(' - ') || tags.description || '詳細情報なし'
   }
 }

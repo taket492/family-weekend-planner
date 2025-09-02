@@ -26,17 +26,17 @@ export class DataQualityChecker {
       result.isValid = false
     }
 
-    if (!spot.latitude || !spot.longitude) {
-      result.issues.push('位置情報が不正です')
+    if (!spot.address?.trim()) {
+      result.issues.push('住所情報が不正です')
       result.score -= 25
       result.isValid = false
     }
 
-    // 座標の妥当性チェック（静岡県の範囲）
-    if (spot.latitude && spot.longitude) {
-      const isInShizuoka = this.isInShizuokaPrefecture(spot.latitude, spot.longitude)
+    // 地域の妥当性チェック（静岡県）
+    if (spot.address) {
+      const isInShizuoka = this.isInShizuokaPrefecture(spot.address)
       if (!isInShizuoka) {
-        result.issues.push('静岡県外の座標です')
+        result.issues.push('静岡県外の住所です')
         result.score -= 20
       }
     }
@@ -77,10 +77,10 @@ export class DataQualityChecker {
     return result
   }
 
-  // 静岡県内座標チェック
-  private static isInShizuokaPrefecture(lat: number, lng: number): boolean {
-    // 静岡県の大まかな範囲
-    return lat >= 34.5 && lat <= 35.5 && lng >= 137.5 && lng <= 139.5
+  // 静岡県内住所チェック
+  private static isInShizuokaPrefecture(address: string): boolean {
+    // 静岡県を含む住所かチェック
+    return address.includes('静岡県') || address.includes('静岡')
   }
 
   // 名前品質チェック
@@ -170,7 +170,7 @@ export class DataQualityChecker {
     isDuplicate: boolean
     similarSpots: { id: string; name: string; similarity: number }[]
   }> {
-    if (!spot.name || !spot.latitude || !spot.longitude) {
+    if (!spot.name) {
       return { isDuplicate: false, similarSpots: [] }
     }
 
@@ -191,22 +191,17 @@ export class DataQualityChecker {
         }
       }
 
-      // 位置による近似チェック（100m以内）
-      const nearbySpots = await prisma.spot.findMany({
+      // 住所による近似チェック
+      const addressSpots = spot.address ? await prisma.spot.findMany({
         where: {
-          latitude: {
-            gte: spot.latitude - 0.001,
-            lte: spot.latitude + 0.001
-          },
-          longitude: {
-            gte: spot.longitude - 0.001,
-            lte: spot.longitude + 0.001
+          address: {
+            contains: spot.address.split('県')[0] + '県' // 都道府県レベルでの類似性チェック
           }
         },
-        take: 5
-      })
+        take: 10
+      }) : []
 
-      const similarSpots = nearbySpots.map(existing => ({
+      const similarSpots = addressSpots.map(existing => ({
         id: existing.id,
         name: existing.name,
         similarity: this.calculateNameSimilarity(spot.name!, existing.name)

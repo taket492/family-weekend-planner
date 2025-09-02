@@ -10,9 +10,8 @@ export async function GET(request: NextRequest) {
     const category = searchParams.get('category')
     
     let spots = await AdvancedSpotSearch.comprehensiveSearch(
-      34.9756, // 静岡市中心座標
-      138.3828,
-      50000, // 50km radius
+      region.includes('県') ? region.replace('県', '') : region,
+      '静岡県',
       { 
         categories: category ? [category as SpotCategory] : undefined,
         minChildScore: 50 

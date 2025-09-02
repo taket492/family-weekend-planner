@@ -10,16 +10,12 @@ class AdvancedCache {
   private maxSize = 1000 // 最大キャッシュ数
   private defaultTTL = 300000 // 5分
 
-  // インテリジェントキーの生成
-  generateKey(latitude: number, longitude: number, filters: Record<string, unknown>): string {
-    // 座標を100m単位で丸める（近隣検索の最適化）
-    const roundedLat = Math.round(latitude * 1000) / 1000
-    const roundedLng = Math.round(longitude * 1000) / 1000
-    
+  // インテリジェントキーの生成（地域ベース）
+  generateKey(region: string, prefecture: string, filters: Record<string, unknown>): string {
     const filterHash = JSON.stringify({
       ...filters,
-      lat: roundedLat,
-      lng: roundedLng
+      region,
+      prefecture
     })
     
     return Buffer.from(filterHash).toString('base64').slice(0, 32)

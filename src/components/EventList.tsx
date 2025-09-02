@@ -4,8 +4,8 @@ import { useState, useEffect } from 'react'
 import { Event, EventCategory } from '@/types'
 
 interface EventListProps {
-  latitude?: number
-  longitude?: number
+  region?: string
+  prefecture?: string
   spotId?: string
 }
 
@@ -18,16 +18,16 @@ const eventCategoryLabels = {
   [EventCategory.CULTURAL]: '🎭 文化イベント'
 }
 
-export default function EventList({ latitude, longitude, spotId }: EventListProps) {
+export default function EventList({ region, prefecture, spotId }: EventListProps) {
   const [events, setEvents] = useState<Event[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    if (latitude && longitude) {
+    if (region) {
       fetchEvents()
     }
-  }, [latitude, longitude, spotId])
+  }, [region, prefecture, spotId])
 
   const fetchEvents = async () => {
     setIsLoading(true)
@@ -35,8 +35,8 @@ export default function EventList({ latitude, longitude, spotId }: EventListProp
 
     try {
       const params = new URLSearchParams()
-      if (latitude) params.append('lat', latitude.toString())
-      if (longitude) params.append('lng', longitude.toString())
+      if (region) params.append('region', region)
+      if (prefecture) params.append('prefecture', prefecture)
       if (spotId) params.append('spotId', spotId)
       params.append('isChildFriendly', 'true')
 
