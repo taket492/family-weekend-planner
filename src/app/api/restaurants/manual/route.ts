@@ -14,24 +14,16 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // 重複チェック
+    // 重複チェック（名前のみ）
     const existing = await prisma.spot.findFirst({
       where: {
-        OR: [
-          { name: body.name },
-          {
-            AND: [
-              { latitude: { gte: body.latitude - 0.001, lte: body.latitude + 0.001 } },
-              { longitude: { gte: body.longitude - 0.001, lte: body.longitude + 0.001 } }
-            ]
-          }
-        ]
+        name: body.name
       }
     })
 
     if (existing) {
       return NextResponse.json(
-        { error: '同じ名前または近い位置のレストランが既に存在します' },
+        { error: '同じ名前のレストランが既に存在します' },
         { status: 409 }
       )
     }
@@ -46,8 +38,6 @@ export async function POST(request: NextRequest) {
         description: body.description || '',
         category: SpotCategory.RESTAURANT,
         address: body.address,
-        latitude: body.latitude || 35.0,
-        longitude: body.longitude || 138.0,
         
         // 連絡先情報
         phoneNumber: body.phoneNumber || null,
