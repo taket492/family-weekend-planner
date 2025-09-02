@@ -6,9 +6,6 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
     
-    const latitude = parseFloat(searchParams.get('lat') || '0')
-    const longitude = parseFloat(searchParams.get('lng') || '0')
-    const radius = parseInt(searchParams.get('radius') || '5')
     const categories = searchParams.get('categories')?.split(',') as SpotCategory[]
     const priceRanges = searchParams.get('priceRanges')?.split(',') as PriceRange[]
     
@@ -38,20 +35,6 @@ export async function GET(request: NextRequest) {
     if (hasDiaperChanging) whereClause.hasDiaperChanging = true
     if (hasPlayArea) whereClause.hasPlayArea = true
 
-    // 地理的範囲フィルター（簡易版）
-    if (latitude && longitude && radius) {
-      const latDelta = radius / 111.0 // 緯度1度 ≈ 111km
-      const lngDelta = radius / (111.0 * Math.cos(latitude * Math.PI / 180))
-      
-      whereClause.latitude = {
-        gte: latitude - latDelta,
-        lte: latitude + latDelta
-      }
-      whereClause.longitude = {
-        gte: longitude - lngDelta,
-        lte: longitude + lngDelta
-      }
-    }
 
     const spots = await prisma.spot.findMany({
       where: whereClause,
@@ -81,8 +64,6 @@ export async function POST(request: NextRequest) {
         description: body.description,
         category: body.category,
         address: body.address,
-        latitude: body.latitude,
-        longitude: body.longitude,
         hasKidsMenu: body.hasKidsMenu || false,
         hasHighChair: body.hasHighChair || false,
         hasNursingRoom: body.hasNursingRoom || false,
