@@ -98,7 +98,7 @@ model Bookmark {
   userId    String
   spotId    String
   notes     String?
-  tags      String[]
+  tags      String?
   
   spot      Spot @relation(fields: [spotId], references: [id], onDelete: Cascade)
   
