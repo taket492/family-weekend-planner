@@ -13,8 +13,6 @@ model Spot {
   description String?
   category    SpotCategory
   address     String
-  latitude    Float
-  longitude   Float
   
   // 子連れ向け設備
   hasKidsMenu       Boolean @default(false)
