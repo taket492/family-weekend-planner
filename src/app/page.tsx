@@ -18,6 +18,7 @@ export default function Home() {
     address: string
   } | null>(null)
   const [activeTab, setActiveTab] = useState<'search' | 'add-spot' | 'add-restaurant'>('search')
+  const [showFilters, setShowFilters] = useState(false)
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -81,7 +82,12 @@ export default function Home() {
                 <LocationSelector 
                   onLocationSelect={setSelectedLocation}
                 />
-                <FilterPanel />
+                <div className="hidden lg:block">
+                  <FilterPanel />
+                </div>
+                <div className="lg:hidden">
+                  <Button variant="secondary" size="sm" onClick={() => setShowFilters(true)}>🔧 フィルターを開く</Button>
+                </div>
               </div>
               
               <div className="lg:col-span-3 space-y-6">
@@ -107,5 +113,18 @@ export default function Home() {
         )}
       </main>
     </div>
+    {/* モバイル用フィルタードロワー */}
+    {showFilters && (
+      <div className="fixed inset-0 z-50 lg:hidden">
+        <div className="absolute inset-0 bg-black/40" onClick={() => setShowFilters(false)} />
+        <div className="absolute right-0 top-0 h-full w-5/6 max-w-sm bg-white shadow-xl p-4 overflow-y-auto">
+          <div className="flex justify-between items-center mb-2">
+            <h3 className="text-base font-semibold">検索フィルター</h3>
+            <Button variant="ghost" size="sm" onClick={() => setShowFilters(false)}>閉じる</Button>
+          </div>
+          <FilterPanel />
+        </div>
+      </div>
+    )}
   )
 }

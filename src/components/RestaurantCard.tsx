@@ -137,10 +137,7 @@ export default function RestaurantCard({ restaurant, userId = 'default-user' }: 
           <h4 className="text-sm font-medium text-gray-700 mb-2">👶 子連れ向け設備</h4>
           <div className="flex flex-wrap gap-2">
             {facilities.map((facility) => (
-              <span
-                key={facility}
-                className="text-xs bg-blue-100 text-blue-700 px-3 py-1 rounded-full font-medium"
-              >
+              <span key={facility} className="inline-flex items-center gap-1 rounded-full bg-gray-100 text-gray-800 border border-gray-200 px-2.5 py-1 text-xs">
                 {facility}
               </span>
             ))}

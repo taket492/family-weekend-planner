@@ -5,6 +5,7 @@ import { SpotCategory, PriceRange, SearchFilters, SeasonalEventType } from '@/ty
 import { useEffect, useMemo } from 'react'
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
+import { Checkbox } from '@/components/ui/Checkbox'
 import { Select } from '@/components/ui/Select'
 
 const categoryLabels = {
@@ -148,15 +149,12 @@ export default function FilterPanel() {
           <h3 className="text-sm font-medium text-gray-700 mb-2 md:mb-3">カテゴリ</h3>
           <div className="grid grid-cols-2 md:grid-cols-1 gap-1 md:gap-2">
             {Object.entries(categoryLabels).map(([value, label]) => (
-              <label key={value} className="flex items-center touch-none">
-                <input
-                  type="checkbox"
-                  checked={filters.category?.includes(value as SpotCategory) || false}
-                  onChange={(e) => handleCategoryChange(value as SpotCategory, e.target.checked)}
-                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 focus:ring-2 w-4 h-4 md:w-auto md:h-auto"
-                />
-                <span className="ml-2 text-xs md:text-sm text-gray-700 select-none">{label}</span>
-              </label>
+              <Checkbox
+                key={value}
+                checked={filters.category?.includes(value as SpotCategory) || false}
+                onChange={(e) => handleCategoryChange(value as SpotCategory, (e.target as HTMLInputElement).checked)}
+                label={<span className="text-xs md:text-sm">{label}</span>}
+              />
             ))}
           </div>
         </div>
@@ -165,15 +163,12 @@ export default function FilterPanel() {
           <h3 className="text-sm font-medium text-gray-700 mb-2 md:mb-3">価格帯</h3>
           <div className="grid grid-cols-1 gap-1 md:gap-2">
             {Object.entries(priceRangeLabels).map(([value, label]) => (
-              <label key={value} className="flex items-center touch-none">
-                <input
-                  type="checkbox"
-                  checked={filters.priceRange?.includes(value as PriceRange) || false}
-                  onChange={(e) => handlePriceRangeChange(value as PriceRange, e.target.checked)}
-                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 focus:ring-2 w-4 h-4 md:w-auto md:h-auto"
-                />
-                <span className="ml-2 text-xs md:text-sm text-gray-700 select-none">{label}</span>
-              </label>
+              <Checkbox
+                key={value}
+                checked={filters.priceRange?.includes(value as PriceRange) || false}
+                onChange={(e) => handlePriceRangeChange(value as PriceRange, (e.target as HTMLInputElement).checked)}
+                label={<span className="text-xs md:text-sm">{label}</span>}
+              />
             ))}
           </div>
         </div>
@@ -181,65 +176,12 @@ export default function FilterPanel() {
         <div>
           <h3 className="text-sm font-medium text-gray-700 mb-2 md:mb-3">子連れ向け設備</h3>
           <div className="grid grid-cols-2 md:grid-cols-1 gap-1 md:gap-2">
-            <label className="flex items-center touch-none">
-              <input
-                type="checkbox"
-                checked={filters.hasKidsMenu || false}
-                onChange={(e) => handleFacilityChange('hasKidsMenu', e.target.checked)}
-                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 focus:ring-2 w-4 h-4 md:w-auto md:h-auto"
-              />
-              <span className="ml-2 text-xs md:text-sm text-gray-700 select-none">キッズメニュー</span>
-            </label>
-            
-            <label className="flex items-center touch-none">
-              <input
-                type="checkbox"
-                checked={filters.hasHighChair || false}
-                onChange={(e) => handleFacilityChange('hasHighChair', e.target.checked)}
-                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 focus:ring-2 w-4 h-4 md:w-auto md:h-auto"
-              />
-              <span className="ml-2 text-xs md:text-sm text-gray-700 select-none">ハイチェア</span>
-            </label>
-            
-            <label className="flex items-center touch-none">
-              <input
-                type="checkbox"
-                checked={filters.hasNursingRoom || false}
-                onChange={(e) => handleFacilityChange('hasNursingRoom', e.target.checked)}
-                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 focus:ring-2 w-4 h-4 md:w-auto md:h-auto"
-              />
-              <span className="ml-2 text-xs md:text-sm text-gray-700 select-none">授乳室</span>
-            </label>
-            
-            <label className="flex items-center touch-none">
-              <input
-                type="checkbox"
-                checked={filters.isStrollerFriendly || false}
-                onChange={(e) => handleFacilityChange('isStrollerFriendly', e.target.checked)}
-                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 focus:ring-2 w-4 h-4 md:w-auto md:h-auto"
-              />
-              <span className="ml-2 text-xs md:text-sm text-gray-700 select-none">ベビーカー対応</span>
-            </label>
-            
-            <label className="flex items-center touch-none">
-              <input
-                type="checkbox"
-                checked={filters.hasDiaperChanging || false}
-                onChange={(e) => handleFacilityChange('hasDiaperChanging', e.target.checked)}
-                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 focus:ring-2 w-4 h-4 md:w-auto md:h-auto"
-              />
-              <span className="ml-2 text-xs md:text-sm text-gray-700 select-none">おむつ交換台</span>
-            </label>
-            
-            <label className="flex items-center touch-none">
-              <input
-                type="checkbox"
-                checked={filters.hasPlayArea || false}
-                onChange={(e) => handleFacilityChange('hasPlayArea', e.target.checked)}
-                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 focus:ring-2 w-4 h-4 md:w-auto md:h-auto"
-              />
-              <span className="ml-2 text-xs md:text-sm text-gray-700 select-none">キッズスペース</span>
-            </label>
+            <Checkbox checked={filters.hasKidsMenu || false} onChange={(e) => handleFacilityChange('hasKidsMenu', (e.target as HTMLInputElement).checked)} label={<span className="text-xs md:text-sm">キッズメニュー</span>} />
+            <Checkbox checked={filters.hasHighChair || false} onChange={(e) => handleFacilityChange('hasHighChair', (e.target as HTMLInputElement).checked)} label={<span className="text-xs md:text-sm">ハイチェア</span>} />
+            <Checkbox checked={filters.hasNursingRoom || false} onChange={(e) => handleFacilityChange('hasNursingRoom', (e.target as HTMLInputElement).checked)} label={<span className="text-xs md:text-sm">授乳室</span>} />
+            <Checkbox checked={filters.isStrollerFriendly || false} onChange={(e) => handleFacilityChange('isStrollerFriendly', (e.target as HTMLInputElement).checked)} label={<span className="text-xs md:text-sm">ベビーカー対応</span>} />
+            <Checkbox checked={filters.hasDiaperChanging || false} onChange={(e) => handleFacilityChange('hasDiaperChanging', (e.target as HTMLInputElement).checked)} label={<span className="text-xs md:text-sm">おむつ交換台</span>} />
+            <Checkbox checked={filters.hasPlayArea || false} onChange={(e) => handleFacilityChange('hasPlayArea', (e.target as HTMLInputElement).checked)} label={<span className="text-xs md:text-sm">キッズスペース</span>} />
           </div>
         </div>
 
@@ -299,25 +241,8 @@ export default function FilterPanel() {
         <div>
           <h3 className="text-sm font-medium text-gray-700 mb-2 md:mb-3">静岡エリア</h3>
           <div className="space-y-2">
-            <label className="flex items-center touch-none">
-              <input
-                type="checkbox"
-                checked={filters.showOnlyShizuoka || false}
-                onChange={(e) => setFilters({ ...filters, showOnlyShizuoka: e.target.checked })}
-                className="rounded border-gray-300 text-green-600 focus:ring-green-500 focus:ring-2 w-4 h-4 md:w-auto md:h-auto"
-              />
-              <span className="ml-2 text-xs md:text-sm text-gray-700 select-none">静岡県内のみ表示</span>
-            </label>
-            
-            <label className="flex items-center touch-none">
-              <input
-                type="checkbox"
-                checked={filters.showTrending || false}
-                onChange={(e) => setFilters({ ...filters, showTrending: e.target.checked })}
-                className="rounded border-gray-300 text-orange-600 focus:ring-orange-500 focus:ring-2 w-4 h-4 md:w-auto md:h-auto"
-              />
-              <span className="ml-2 text-xs md:text-sm text-gray-700 select-none">トレンドスポットを優先</span>
-            </label>
+            <Checkbox checked={filters.showOnlyShizuoka || false} onChange={(e) => setFilters({ ...filters, showOnlyShizuoka: (e.target as HTMLInputElement).checked })} label={<span className="text-xs md:text-sm">静岡県内のみ表示</span>} />
+            <Checkbox checked={filters.showTrending || false} onChange={(e) => setFilters({ ...filters, showTrending: (e.target as HTMLInputElement).checked })} label={<span className="text-xs md:text-sm">トレンドスポットを優先</span>} />
           </div>
         </div>
 
@@ -337,70 +262,18 @@ export default function FilterPanel() {
         <div>
           <h3 className="text-sm font-medium text-gray-700 mb-2 md:mb-3">施設タイプ</h3>
           <div className="grid grid-cols-2 gap-2">
-            <label className="flex items-center touch-none">
-              <input
-                type="checkbox"
-                checked={filters.isIndoor || false}
-                onChange={(e) => setFilters({ ...filters, isIndoor: e.target.checked })}
-                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 focus:ring-2 w-4 h-4"
-              />
-              <span className="ml-2 text-xs text-gray-700 select-none">🏢 屋内</span>
-            </label>
-            
-            <label className="flex items-center touch-none">
-              <input
-                type="checkbox"
-                checked={filters.isOutdoor || false}
-                onChange={(e) => setFilters({ ...filters, isOutdoor: e.target.checked })}
-                className="rounded border-gray-300 text-green-600 focus:ring-green-500 focus:ring-2 w-4 h-4"
-              />
-              <span className="ml-2 text-xs text-gray-700 select-none">🌳 屋外</span>
-            </label>
+            <Checkbox checked={filters.isIndoor || false} onChange={(e) => setFilters({ ...filters, isIndoor: (e.target as HTMLInputElement).checked })} label={<span className="text-xs">🏢 屋内</span>} />
+            <Checkbox checked={filters.isOutdoor || false} onChange={(e) => setFilters({ ...filters, isOutdoor: (e.target as HTMLInputElement).checked })} label={<span className="text-xs">🌳 屋外</span>} />
           </div>
         </div>
 
         <div>
           <h3 className="text-sm font-medium text-gray-700 mb-2 md:mb-3">料金・設備</h3>
           <div className="grid grid-cols-2 gap-2">
-            <label className="flex items-center touch-none">
-              <input
-                type="checkbox"
-                checked={filters.isFree || false}
-                onChange={(e) => setFilters({ ...filters, isFree: e.target.checked })}
-                className="rounded border-gray-300 text-green-600 focus:ring-green-500 focus:ring-2 w-4 h-4"
-              />
-              <span className="ml-2 text-xs text-gray-700 select-none">💰 無料</span>
-            </label>
-            
-            <label className="flex items-center touch-none">
-              <input
-                type="checkbox"
-                checked={filters.hasParking || false}
-                onChange={(e) => setFilters({ ...filters, hasParking: e.target.checked })}
-                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 focus:ring-2 w-4 h-4"
-              />
-              <span className="ml-2 text-xs text-gray-700 select-none">🚗 駐車場</span>
-            </label>
-            
-            <label className="flex items-center touch-none">
-              <input
-                type="checkbox"
-                checked={filters.hasPrivateRoom || false}
-                onChange={(e) => setFilters({ ...filters, hasPrivateRoom: e.target.checked })}
-                className="rounded border-gray-300 text-purple-600 focus:ring-purple-500 focus:ring-2 w-4 h-4"
-              />
-              <span className="ml-2 text-xs text-gray-700 select-none">🏠 個室</span>
-            </label>
-            
-            <label className="flex items-center touch-none">
-              <input
-                type="checkbox"
-                checked={filters.hasTatamiSeating || false}
-                onChange={(e) => setFilters({ ...filters, hasTatamiSeating: e.target.checked })}
-                className="rounded border-gray-300 text-amber-600 focus:ring-amber-500 focus:ring-2 w-4 h-4"
-              />
-              <span className="ml-2 text-xs text-gray-700 select-none">🥢 座敷</span>
-            </label>
+            <Checkbox checked={filters.isFree || false} onChange={(e) => setFilters({ ...filters, isFree: (e.target as HTMLInputElement).checked })} label={<span className="text-xs">💰 無料</span>} />
+            <Checkbox checked={filters.hasParking || false} onChange={(e) => setFilters({ ...filters, hasParking: (e.target as HTMLInputElement).checked })} label={<span className="text-xs">🚗 駐車場</span>} />
+            <Checkbox checked={filters.hasPrivateRoom || false} onChange={(e) => setFilters({ ...filters, hasPrivateRoom: (e.target as HTMLInputElement).checked })} label={<span className="text-xs">🏠 個室</span>} />
+            <Checkbox checked={filters.hasTatamiSeating || false} onChange={(e) => setFilters({ ...filters, hasTatamiSeating: (e.target as HTMLInputElement).checked })} label={<span className="text-xs">🥢 座敷</span>} />
           </div>
         </div>
       </div>

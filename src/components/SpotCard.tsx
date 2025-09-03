@@ -116,15 +116,9 @@ export default function SpotCard({ spot, onAddToPlan, isSelected, userId = 'defa
       {ageScores && (
         <div className="mb-2">
           <div className="flex gap-1 text-xs">
-            <span className={`px-2 py-1 rounded ${ageScores.baby >= 70 ? 'bg-pink-100 text-pink-700' : 'bg-gray-100 text-gray-500'}`}>
-              👶 {ageScores.baby}
-            </span>
-            <span className={`px-2 py-1 rounded ${ageScores.toddler >= 70 ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-500'}`}>
-              🧒 {ageScores.toddler}
-            </span>
-            <span className={`px-2 py-1 rounded ${ageScores.child >= 70 ? 'bg-purple-100 text-purple-700' : 'bg-gray-100 text-gray-500'}`}>
-              👦 {ageScores.child}
-            </span>
+            <Badge>👶 {ageScores.baby}</Badge>
+            <Badge>🧒 {ageScores.toddler}</Badge>
+            <Badge>👦 {ageScores.child}</Badge>
           </div>
         </div>
       )}
@@ -149,12 +143,7 @@ export default function SpotCard({ spot, onAddToPlan, isSelected, userId = 'defa
           <h4 className="text-sm font-medium text-gray-700 mb-2">🧸 子連れ向け設備</h4>
           <div className="flex flex-wrap gap-2">
             {facilities.map((facility) => (
-              <span
-                key={facility}
-                className="text-xs bg-green-100 text-green-700 px-3 py-1 rounded-full font-medium"
-              >
-                {facility}
-              </span>
+              <Badge key={facility}>{facility}</Badge>
             ))}
           </div>
         </div>
