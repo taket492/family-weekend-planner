@@ -3,6 +3,11 @@
 import { useEffect, useRef, useState } from 'react'
 import { SpotCategory, SeasonalEventType, PriceRange } from '@/types'
 import { useToast } from '@/components/ui/ToastProvider'
+import { Input } from '@/components/ui/Input'
+import { Select } from '@/components/ui/Select'
+import { Checkbox } from '@/components/ui/Checkbox'
+import { Button } from '@/components/ui/Button'
+import { Card } from '@/components/ui/Card'
 
 interface SpotFormData {
   name: string
@@ -106,7 +111,7 @@ export function ManualSpotForm() {
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-6">
+    <Card>
       <h2 className="text-xl font-bold mb-6">📝 スポット手動登録</h2>
       
       {message && (
@@ -122,19 +127,14 @@ export function ManualSpotForm() {
         <div className="space-y-4">
           <div>
             <label className="block text-sm font-medium mb-1">スポット名 *</label>
-            <input
-              type="text"
+            <Input
               value={formData.name}
               onChange={(e) => handleChange('name', e.target.value)}
               onBlur={() => setTouched((p) => ({ ...p, name: true }))}
               ref={firstInvalidRef}
               aria-invalid={touched.name && !formData.name.trim()}
               aria-describedby="spot-name-hint"
-              className={`w-full p-3 rounded-md text-base border ${
-                touched.name && !formData.name.trim()
-                  ? 'border-red-500 focus:outline-red-500'
-                  : 'border-gray-300'
-              }`}
+              invalid={touched.name && !formData.name.trim()}
               required
             />
             <p id="spot-name-hint" className="text-xs text-gray-500 mt-1">例: 親子カフェ 〇〇</p>
@@ -142,10 +142,9 @@ export function ManualSpotForm() {
 
           <div>
             <label className="block text-sm font-medium mb-1">カテゴリ *</label>
-            <select
+            <Select
               value={formData.category}
               onChange={(e) => handleChange('category', e.target.value as SpotCategory)}
-              className="w-full p-3 border rounded-md text-base"
               required
             >
               <option value={SpotCategory.RESTAURANT}>🍽️ レストラン</option>
@@ -156,7 +155,7 @@ export function ManualSpotForm() {
               <option value={SpotCategory.SHOPPING}>🛍️ ショッピング</option>
               <option value={SpotCategory.ENTERTAINMENT}>🎭 エンタメ</option>
               <option value={SpotCategory.TOURIST_SPOT}>📍 観光スポット</option>
-            </select>
+            </Select>
           </div>
         </div>
 
@@ -172,17 +171,12 @@ export function ManualSpotForm() {
 
         <div>
           <label className="block text-sm font-medium mb-1">住所 *</label>
-            <input
-              type="text"
+            <Input
               value={formData.address}
               onChange={(e) => handleChange('address', e.target.value)}
               onBlur={() => setTouched((p) => ({ ...p, address: true }))}
               aria-invalid={touched.address && !formData.address.trim()}
-              className={`w-full p-2 rounded-md border ${
-                touched.address && !formData.address.trim()
-                  ? 'border-red-500 focus:outline-red-500'
-                  : 'border-gray-300'
-              }`}
+              invalid={touched.address && !formData.address.trim()}
               placeholder="静岡県〇〇市..."
               required
             />
@@ -193,22 +187,20 @@ export function ManualSpotForm() {
         <div className="space-y-4">
           <div>
             <label className="block text-sm font-medium mb-1">電話番号</label>
-            <input
+            <Input
               type="tel"
               value={formData.phoneNumber}
               onChange={(e) => handleChange('phoneNumber', e.target.value)}
-              className="w-full p-3 border rounded-md text-base"
               placeholder="054-123-4567"
             />
           </div>
 
           <div>
             <label className="block text-sm font-medium mb-1">ウェブサイト</label>
-            <input
+            <Input
               type="url"
               value={formData.website}
               onChange={(e) => handleChange('website', e.target.value)}
-              className="w-full p-3 border rounded-md text-base"
               placeholder="https://example.com"
             />
           </div>
@@ -217,27 +209,24 @@ export function ManualSpotForm() {
         <div className="space-y-4">
           <div>
             <label className="block text-sm font-medium mb-1">営業時間</label>
-            <input
-              type="text"
+            <Input
               value={formData.openingHours}
               onChange={(e) => handleChange('openingHours', e.target.value)}
-              className="w-full p-3 border rounded-md text-base"
               placeholder="10:00-22:00"
             />
           </div>
 
           <div>
             <label className="block text-sm font-medium mb-1">価格帯</label>
-            <select
+            <Select
               value={formData.priceRange || ''}
-              onChange={(e) => handleChange('priceRange', e.target.value || undefined)}
-              className="w-full p-3 border rounded-md text-base"
+              onChange={(e) => handleChange('priceRange', (e.target as HTMLSelectElement).value || undefined)}
             >
               <option value="">選択してください</option>
               <option value={PriceRange.BUDGET}>💰 リーズナブル</option>
               <option value={PriceRange.MODERATE}>💰💰 普通</option>
               <option value={PriceRange.EXPENSIVE}>💰💰💰 高め</option>
-            </select>
+            </Select>
           </div>
         </div>
 
@@ -253,15 +242,12 @@ export function ManualSpotForm() {
               { key: 'hasDiaperChanging', label: '👶 おむつ交換台' },
               { key: 'hasPlayArea', label: '🎠 キッズスペース' }
             ].map(({ key, label }) => (
-              <label key={key} className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
-                  checked={formData[key as keyof SpotFormData] as boolean}
-                  onChange={(e) => handleChange(key as keyof SpotFormData, e.target.checked)}
-                  className="rounded"
-                />
-                <span className="text-sm">{label}</span>
-              </label>
+              <Checkbox
+                key={key}
+                checked={formData[key as keyof SpotFormData] as boolean}
+                onChange={(e) => handleChange(key as keyof SpotFormData, (e.target as HTMLInputElement).checked)}
+                label={label}
+              />
             ))}
           </div>
         </div>
@@ -278,15 +264,12 @@ export function ManualSpotForm() {
               { key: 'hasPrivateRoom', label: '🚪 個室' },
               { key: 'hasTatamiSeating', label: '🌾 座敷' }
             ].map(({ key, label }) => (
-              <label key={key} className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
-                  checked={formData[key as keyof SpotFormData] as boolean}
-                  onChange={(e) => handleChange(key as keyof SpotFormData, e.target.checked)}
-                  className="rounded"
-                />
-                <span className="text-sm">{label}</span>
-              </label>
+              <Checkbox
+                key={key}
+                checked={formData[key as keyof SpotFormData] as boolean}
+                onChange={(e) => handleChange(key as keyof SpotFormData, (e.target as HTMLInputElement).checked)}
+                label={label}
+              />
             ))}
           </div>
         </div>
@@ -294,10 +277,9 @@ export function ManualSpotForm() {
         {/* 季節イベント */}
         <div>
           <label className="block text-sm font-medium mb-1">🌸 季節イベント</label>
-          <select
+          <Select
             value={formData.seasonalEventType || ''}
-            onChange={(e) => handleChange('seasonalEventType', e.target.value || undefined)}
-            className="w-full p-2 border rounded-md"
+            onChange={(e) => handleChange('seasonalEventType', (e.target as HTMLSelectElement).value || undefined)}
           >
             <option value="">なし</option>
             <option value={SeasonalEventType.FIREWORKS}>🎆 花火大会</option>
@@ -308,28 +290,19 @@ export function ManualSpotForm() {
             <option value={SeasonalEventType.AUTUMN_LEAVES}>🍁 紅葉</option>
             <option value={SeasonalEventType.SUMMER_FESTIVAL}>🏮 夏祭り</option>
             <option value={SeasonalEventType.WINTER_ILLUMINATION}>✨ イルミネーション</option>
-          </select>
+          </Select>
         </div>
 
         <div className="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-4 pt-4">
-          <button
-            type="button"
-            onClick={() => setFormData(initialFormData)}
-            className="w-full sm:w-auto px-4 py-3 border border-gray-300 rounded-md hover:bg-gray-50 text-base"
-            disabled={isSubmitting}
-          >
+          <Button type="button" variant="secondary" onClick={() => setFormData(initialFormData)} disabled={isSubmitting}>
             リセット
-          </button>
+          </Button>
           
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="w-full sm:w-auto px-6 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 text-base font-medium"
-          >
+          <Button type="submit" disabled={isSubmitting}>
             {isSubmitting ? '登録中...' : '📝 スポット登録'}
-          </button>
+          </Button>
         </div>
       </form>
-    </div>
+    </Card>
   )
 }

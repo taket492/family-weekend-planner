@@ -55,16 +55,10 @@ export default function SpotList({ region, prefecture }: SpotListProps) {
           <p className="text-red-600 font-medium mb-2">検索に失敗しました</p>
           <p className="text-red-500 text-sm">{error}</p>
           <div className="mt-4 flex justify-center gap-3">
-            <button
-              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-              onClick={() => searchSpots(region, prefecture)}
-            >
+            <button className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700" onClick={() => searchSpots(region, prefecture)}>
               再試行
             </button>
-            <button
-              className="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50"
-              onClick={() => window.dispatchEvent(new CustomEvent('filters:clear'))}
-            >
+            <button className="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50" onClick={() => window.dispatchEvent(new CustomEvent('filters:clear'))}>
               フィルターをリセット
             </button>
           </div>
@@ -100,16 +94,10 @@ export default function SpotList({ region, prefecture }: SpotListProps) {
             フィルター条件を調整してみてください
           </p>
           <div className="mt-4 flex justify-center gap-3">
-            <button
-              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-              onClick={() => searchSpots(region, prefecture)}
-            >
+            <button className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700" onClick={() => searchSpots(region, prefecture)}>
               再検索
             </button>
-            <button
-              className="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50"
-              onClick={() => window.dispatchEvent(new CustomEvent('filters:clear'))}
-            >
+            <button className="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50" onClick={() => window.dispatchEvent(new CustomEvent('filters:clear'))}>
               フィルターをリセット
             </button>
           </div>
