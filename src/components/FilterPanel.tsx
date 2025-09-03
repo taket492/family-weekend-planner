@@ -5,6 +5,7 @@ import { SpotCategory, PriceRange, SearchFilters, SeasonalEventType } from '@/ty
 import { useEffect, useMemo } from 'react'
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
+import { Select } from '@/components/ui/Select'
 
 const categoryLabels = {
   [SpotCategory.RESTAURANT]: 'レストラン',
@@ -244,59 +245,55 @@ export default function FilterPanel() {
 
         <div>
           <h3 className="text-sm font-medium text-gray-700 mb-2 md:mb-3">対象年齢</h3>
-          <select
+          <Select
             value={filters.ageGroup || ''}
-            onChange={(e) => setFilters({ ...filters, ageGroup: e.target.value as 'baby' | 'toddler' | 'child' || undefined })}
-            className="w-full px-3 py-2 text-sm md:text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 touch-manipulation"
+            onChange={(e) => setFilters({ ...filters, ageGroup: (e.target as HTMLSelectElement).value as 'baby' | 'toddler' | 'child' || undefined })}
           >
             <option value="">全年齢</option>
             <option value="baby">👶 赤ちゃん (0-2歳)</option>
             <option value="toddler">🧒 幼児 (2-5歳)</option>
             <option value="child">👦 小学生 (5-12歳)</option>
-          </select>
+          </Select>
         </div>
 
         <div>
           <h3 className="text-sm font-medium text-gray-700 mb-2 md:mb-3">子連れ適性</h3>
-          <select
+          <Select
             value={filters.minChildScore || 30}
-            onChange={(e) => setFilters({ ...filters, minChildScore: parseInt(e.target.value) })}
-            className="w-full px-3 py-2 text-sm md:text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 touch-manipulation"
+            onChange={(e) => setFilters({ ...filters, minChildScore: parseInt((e.target as HTMLSelectElement).value) })}
           >
             <option value={0}>すべて表示</option>
             <option value={30}>30点以上</option>
             <option value={50}>50点以上 (推奨)</option>
             <option value={70}>70点以上 (高評価)</option>
             <option value={90}>90点以上 (最高評価)</option>
-          </select>
+          </Select>
         </div>
 
         <div>
           <h3 className="text-sm font-medium text-gray-700 mb-2 md:mb-3">検索範囲</h3>
-          <select
+          <Select
             value={filters.radius || 5}
-            onChange={(e) => setFilters({ ...filters, radius: parseInt(e.target.value) })}
-            className="w-full px-3 py-2 text-sm md:text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 touch-manipulation"
+            onChange={(e) => setFilters({ ...filters, radius: parseInt((e.target as HTMLSelectElement).value) })}
           >
             <option value={1}>1km以内</option>
             <option value={3}>3km以内</option>
             <option value={5}>5km以内</option>
             <option value={10}>10km以内</option>
             <option value={20}>20km以内</option>
-          </select>
+          </Select>
         </div>
 
         <div>
           <h3 className="text-sm font-medium text-gray-700 mb-2 md:mb-3">並び替え</h3>
-          <select
+          <Select
             value={filters.sortBy || 'popularity'}
-            onChange={(e) => setFilters({ ...filters, sortBy: e.target.value as 'popularity' | 'rating' | 'recent' })}
-            className="w-full px-3 py-2 text-sm md:text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 touch-manipulation"
+            onChange={(e) => setFilters({ ...filters, sortBy: (e.target as HTMLSelectElement).value as 'popularity' | 'rating' | 'recent' })}
           >
             <option value="popularity">🔥 人気順</option>
             <option value="rating">⭐ 評価順</option>
             <option value="recent">🆕 新着順</option>
-          </select>
+          </Select>
         </div>
 
         <div>
@@ -326,16 +323,15 @@ export default function FilterPanel() {
 
         <div>
           <h3 className="text-sm font-medium text-gray-700 mb-2 md:mb-3">季節イベント</h3>
-          <select
+          <Select
             value={filters.seasonalEvent || ''}
-            onChange={(e) => setFilters({ ...filters, seasonalEvent: e.target.value as SeasonalEventType || undefined })}
-            className="w-full px-3 py-2 text-sm md:text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 touch-manipulation"
+            onChange={(e) => setFilters({ ...filters, seasonalEvent: (e.target as HTMLSelectElement).value as SeasonalEventType || undefined })}
           >
             <option value="">すべて表示</option>
             {Object.entries(seasonalEventLabels).map(([value, label]) => (
               <option key={value} value={value}>{label}</option>
             ))}
-          </select>
+          </Select>
         </div>
 
         <div>
