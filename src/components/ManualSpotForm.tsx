@@ -1,7 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { SpotCategory, SeasonalEventType, PriceRange } from '@/types'
+import { useToast } from '@/components/ui/ToastProvider'
 
 interface SpotFormData {
   name: string
@@ -53,6 +54,9 @@ export function ManualSpotForm() {
   const [formData, setFormData] = useState<SpotFormData>(initialFormData)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [message, setMessage] = useState('')
+  const [touched, setTouched] = useState<Record<string, boolean>>({})
+  const firstInvalidRef = useRef<HTMLInputElement | null>(null)
+  const { show } = useToast()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -60,6 +64,19 @@ export function ManualSpotForm() {
     setMessage('')
 
     try {
+      // 簡易バリデーション
+      const invalids: string[] = []
+      if (!formData.name.trim()) invalids.push('name')
+      if (!formData.address.trim()) invalids.push('address')
+      if (invalids.length) {
+        setTouched((prev) => ({ ...prev, name: true, address: true }))
+        setIsSubmitting(false)
+        setMessage('❌ 必須項目を入力してください')
+        show({ type: 'error', message: '必須項目を入力してください' })
+        firstInvalidRef.current?.focus()
+        return
+      }
+
       const response = await fetch('/api/spots/manual', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -68,13 +85,17 @@ export function ManualSpotForm() {
 
       if (response.ok) {
         setMessage('✅ スポットを登録しました！')
+        show({ type: 'success', message: 'スポットを登録しました' })
         setFormData(initialFormData)
       } else {
         const error = await response.json()
-        setMessage(`❌ 登録に失敗しました: ${error.error || error.message || '不明なエラー'}`)
+        const msg = `登録に失敗しました: ${error.error || error.message || '不明なエラー'}`
+        setMessage(`❌ ${msg}`)
+        show({ type: 'error', message: msg })
       }
     } catch (error) {
       setMessage('❌ 登録に失敗しました')
+      show({ type: 'error', message: '登録に失敗しました' })
     }
 
     setIsSubmitting(false)
@@ -105,9 +126,18 @@ export function ManualSpotForm() {
               type="text"
               value={formData.name}
               onChange={(e) => handleChange('name', e.target.value)}
-              className="w-full p-3 border rounded-md text-base"
+              onBlur={() => setTouched((p) => ({ ...p, name: true }))}
+              ref={firstInvalidRef}
+              aria-invalid={touched.name && !formData.name.trim()}
+              aria-describedby="spot-name-hint"
+              className={`w-full p-3 rounded-md text-base border ${
+                touched.name && !formData.name.trim()
+                  ? 'border-red-500 focus:outline-red-500'
+                  : 'border-gray-300'
+              }`}
               required
             />
+            <p id="spot-name-hint" className="text-xs text-gray-500 mt-1">例: 親子カフェ 〇〇</p>
           </div>
 
           <div>
@@ -142,14 +172,20 @@ export function ManualSpotForm() {
 
         <div>
           <label className="block text-sm font-medium mb-1">住所 *</label>
-          <input
-            type="text"
-            value={formData.address}
-            onChange={(e) => handleChange('address', e.target.value)}
-            className="w-full p-2 border rounded-md"
-            placeholder="静岡県〇〇市..."
-            required
-          />
+            <input
+              type="text"
+              value={formData.address}
+              onChange={(e) => handleChange('address', e.target.value)}
+              onBlur={() => setTouched((p) => ({ ...p, address: true }))}
+              aria-invalid={touched.address && !formData.address.trim()}
+              className={`w-full p-2 rounded-md border ${
+                touched.address && !formData.address.trim()
+                  ? 'border-red-500 focus:outline-red-500'
+                  : 'border-gray-300'
+              }`}
+              placeholder="静岡県〇〇市..."
+              required
+            />
         </div>
 
 

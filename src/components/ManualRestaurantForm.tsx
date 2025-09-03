@@ -1,7 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { SpotCategory, PriceRange } from '@/types'
+import { useToast } from '@/components/ui/ToastProvider'
 
 interface RestaurantFormData {
   name: string
@@ -56,6 +57,9 @@ export function ManualRestaurantForm() {
   const [formData, setFormData] = useState<RestaurantFormData>(initialFormData)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [message, setMessage] = useState('')
+  const [touched, setTouched] = useState<Record<string, boolean>>({})
+  const firstInvalidRef = useRef<HTMLInputElement | null>(null)
+  const { show } = useToast()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -63,6 +67,17 @@ export function ManualRestaurantForm() {
     setMessage('')
 
     try {
+      const invalids: string[] = []
+      if (!formData.name.trim()) invalids.push('name')
+      if (!formData.address.trim()) invalids.push('address')
+      if (invalids.length) {
+        setTouched((prev) => ({ ...prev, name: true, address: true }))
+        setIsSubmitting(false)
+        setMessage('❌ 必須項目を入力してください')
+        show({ type: 'error', message: '必須項目を入力してください' })
+        firstInvalidRef.current?.focus()
+        return
+      }
       const response = await fetch('/api/restaurants/manual', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -74,13 +89,17 @@ export function ManualRestaurantForm() {
 
       if (response.ok) {
         setMessage('✅ レストランを登録しました！')
+        show({ type: 'success', message: 'レストランを登録しました' })
         setFormData(initialFormData)
       } else {
         const error = await response.json()
-        setMessage(`❌ 登録に失敗しました: ${error.error || error.message || '不明なエラー'}`)
+        const msg = `登録に失敗しました: ${error.error || error.message || '不明なエラー'}`
+        setMessage(`❌ ${msg}`)
+        show({ type: 'error', message: msg })
       }
     } catch (error) {
       setMessage('❌ 登録に失敗しました')
+      show({ type: 'error', message: '登録に失敗しました' })
     }
 
     setIsSubmitting(false)
@@ -111,7 +130,14 @@ export function ManualRestaurantForm() {
               type="text"
               value={formData.name}
               onChange={(e) => handleChange('name', e.target.value)}
-              className="w-full p-3 border rounded-md text-base"
+              onBlur={() => setTouched((p) => ({ ...p, name: true }))}
+              ref={firstInvalidRef}
+              aria-invalid={touched.name && !formData.name.trim()}
+              className={`w-full p-3 rounded-md text-base border ${
+                touched.name && !formData.name.trim()
+                  ? 'border-red-500 focus:outline-red-500'
+                  : 'border-gray-300'
+              }`}
               required
             />
           </div>
@@ -140,14 +166,20 @@ export function ManualRestaurantForm() {
 
         <div>
           <label className="block text-sm font-medium mb-1">住所 *</label>
-          <input
-            type="text"
-            value={formData.address}
-            onChange={(e) => handleChange('address', e.target.value)}
-            className="w-full p-2 border rounded-md"
-            placeholder="静岡県〇〇市..."
-            required
-          />
+            <input
+              type="text"
+              value={formData.address}
+              onChange={(e) => handleChange('address', e.target.value)}
+              onBlur={() => setTouched((p) => ({ ...p, address: true }))}
+              aria-invalid={touched.address && !formData.address.trim()}
+              className={`w-full p-2 rounded-md border ${
+                touched.address && !formData.address.trim()
+                  ? 'border-red-500 focus:outline-red-500'
+                  : 'border-gray-300'
+              }`}
+              placeholder="静岡県〇〇市..."
+              required
+            />
         </div>
 
 
