@@ -123,3 +123,4 @@ function generateMockRestaurants(region: string): Restaurant[] {
   
   return mockRestaurants
 }
+export const runtime = 'nodejs'

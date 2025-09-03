@@ -3,6 +3,8 @@ import { RankingSystem } from '@/lib/ranking-system'
 import { AdvancedSpotSearch } from '@/lib/advanced-search'
 import { SpotCategory } from '@/types'
 
+export const runtime = 'nodejs'
+
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)

@@ -2,11 +2,11 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { SpotCategory, SeasonalEventType, PriceRange } from '@/types'
 
+export const runtime = 'nodejs'
+
 export async function POST(request: NextRequest) {
   let body: any
   try {
-    console.log('DATABASE_URL:', process.env.DATABASE_URL)
-    console.log('All env vars:', Object.keys(process.env).filter(k => k.includes('DATABASE')))
     body = await request.json()
     
     // 必須フィールドの検証

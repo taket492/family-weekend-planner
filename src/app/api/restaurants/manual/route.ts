@@ -116,3 +116,4 @@ function extractRegion(address: string): string {
   
   return '静岡県'
 }
+export const runtime = 'nodejs'
