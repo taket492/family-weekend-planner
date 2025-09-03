@@ -29,9 +29,16 @@ export default function SpotList({ region, prefecture }: SpotListProps) {
         <h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center">
           🔍 スポット検索中...
         </h2>
-        <div className="flex flex-col items-center justify-center py-12">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-4 border-blue-600 mb-4"></div>
-          <p className="text-gray-600">子連れ向けスポットを検索しています</p>
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="rounded-lg border border-gray-200 p-4 animate-pulse">
+              <div className="h-5 w-2/3 bg-gray-200 rounded mb-3" />
+              <div className="h-4 w-1/2 bg-gray-200 rounded mb-2" />
+              <div className="h-3 w-full bg-gray-200 rounded mb-2" />
+              <div className="h-3 w-5/6 bg-gray-200 rounded mb-2" />
+              <div className="h-8 w-28 bg-gray-200 rounded mt-4" />
+            </div>
+          ))}
         </div>
       </div>
     )
@@ -47,6 +54,20 @@ export default function SpotList({ region, prefecture }: SpotListProps) {
           <div className="text-4xl mb-3">😞</div>
           <p className="text-red-600 font-medium mb-2">検索に失敗しました</p>
           <p className="text-red-500 text-sm">{error}</p>
+          <div className="mt-4 flex justify-center gap-3">
+            <button
+              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+              onClick={() => searchSpots(region, prefecture)}
+            >
+              再試行
+            </button>
+            <button
+              className="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50"
+              onClick={() => window.dispatchEvent(new CustomEvent('filters:clear'))}
+            >
+              フィルターをリセット
+            </button>
+          </div>
         </div>
       </div>
     )
@@ -78,6 +99,20 @@ export default function SpotList({ region, prefecture }: SpotListProps) {
           <p className="text-gray-400">
             フィルター条件を調整してみてください
           </p>
+          <div className="mt-4 flex justify-center gap-3">
+            <button
+              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+              onClick={() => searchSpots(region, prefecture)}
+            >
+              再検索
+            </button>
+            <button
+              className="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50"
+              onClick={() => window.dispatchEvent(new CustomEvent('filters:clear'))}
+            >
+              フィルターをリセット
+            </button>
+          </div>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 max-h-[70vh] overflow-y-auto">
