@@ -91,65 +91,81 @@ export default function EventList({ region, prefecture, spotId }: EventListProps
       ) : (
         <div className="space-y-4">
           {events.map((event) => (
-            <div key={event.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
-              <div className="flex justify-between items-start mb-2">
-                <h3 className="font-semibold text-gray-900">{event.title}</h3>
-                <span className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded">
-                  {eventCategoryLabels[event.category]}
-                </span>
-              </div>
-              
-              {event.description && (
-                <p className="text-sm text-gray-600 mb-3">{event.description}</p>
-              )}
-              
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm text-gray-600 mb-3">
-                <div className="flex items-center gap-1">
-                  <span>📅</span>
-                  <span>{new Date(event.startDate).toLocaleDateString('ja-JP')}</span>
-                  {event.startDate !== event.endDate && (
-                    <span> ~ {new Date(event.endDate).toLocaleDateString('ja-JP')}</span>
+            <a
+              key={event.id}
+              href={event.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <div className="flex gap-4">
+                {event.imageUrl && (
+                  <img
+                    src={event.imageUrl}
+                    alt={`${event.title} のイメージ`}
+                    className="hidden sm:block w-28 h-28 object-cover rounded-md flex-shrink-0"
+                    loading="lazy"
+                  />
+                )}
+                <div className="flex-1 min-w-0">
+                  <div className="flex justify-between items-start mb-2">
+                    <h3 className="font-semibold text-gray-900 line-clamp-2">
+                      {event.title}
+                    </h3>
+                    <span className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded whitespace-nowrap ml-2">
+                      {eventCategoryLabels[event.category]}
+                    </span>
+                  </div>
+                  {event.description && (
+                    <p className="text-sm text-gray-600 mb-3 line-clamp-2">
+                      {event.description}
+                    </p>
                   )}
-                </div>
-                
-                {event.location && (
-                  <div className="flex items-center gap-1">
-                    <span>📍</span>
-                    <span>{event.location}</span>
-                  </div>
-                )}
-                
-                {event.price !== undefined && (
-                  <div className="flex items-center gap-1">
-                    <span>💰</span>
-                    <span>{event.price === 0 ? '無料' : `${event.price.toLocaleString()}円`}</span>
-                  </div>
-                )}
-                
-                {event.registrationRequired && (
-                  <div className="flex items-center gap-1 text-orange-600">
-                    <span>📝</span>
-                    <span>要予約</span>
-                    {event.maxParticipants && (
-                      <span>（定員{event.maxParticipants}名）</span>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm text-gray-600 mb-3">
+                    <div className="flex items-center gap-1">
+                      <span>📅</span>
+                      <span>{new Date(event.startDate).toLocaleDateString('ja-JP')}</span>
+                      {event.startDate !== event.endDate && (
+                        <span> ~ {new Date(event.endDate).toLocaleDateString('ja-JP')}</span>
+                      )}
+                    </div>
+                    {event.location && (
+                      <div className="flex items-center gap-1">
+                        <span>📍</span>
+                        <span className="truncate">{event.location}</span>
+                      </div>
+                    )}
+                    {event.price !== undefined && (
+                      <div className="flex items-center gap-1">
+                        <span>💰</span>
+                        <span>{event.price === 0 ? '無料' : `${event.price.toLocaleString()}円`}</span>
+                      </div>
+                    )}
+                    {event.registrationRequired && (
+                      <div className="flex items-center gap-1 text-orange-600">
+                        <span>📝</span>
+                        <span>要予約</span>
+                        {event.maxParticipants && (
+                          <span>（定員{event.maxParticipants}名）</span>
+                        )}
+                      </div>
                     )}
                   </div>
-                )}
+                  <div className="flex gap-2 items-center">
+                    {event.isChildFriendly && (
+                      <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">
+                        👶 子連れ歓迎
+                      </span>
+                    )}
+                    {event.url && (
+                      <span className="text-xs text-blue-600 hover:underline">
+                        公式ページを開く ↗
+                      </span>
+                    )}
+                  </div>
+                </div>
               </div>
-              
-              <div className="flex gap-2">
-                {event.isChildFriendly && (
-                  <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">
-                    👶 子連れ歓迎
-                  </span>
-                )}
-                {event.registrationRequired && (
-                  <button className="text-xs bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700">
-                    予約する
-                  </button>
-                )}
-              </div>
-            </div>
+            </a>
           ))}
         </div>
       )}
