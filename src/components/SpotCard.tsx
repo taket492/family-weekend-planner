@@ -6,6 +6,8 @@ import { useBookmarkStore } from '@/lib/stores/useBookmarkStore'
 import CalendarIntegration from './CalendarIntegration'
 import ShareModal from './ShareModal'
 import AffiliateLinks from './AffiliateLinks'
+import { Button } from '@/components/ui/Button'
+import { Badge } from '@/components/ui/Badge'
 
 interface SpotCardProps {
   spot: Spot
@@ -81,18 +83,8 @@ export default function SpotCard({ spot, onAddToPlan, isSelected, userId = 'defa
           )}
         </div>
         <div className="flex gap-1 flex-wrap">
-          <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">
-            {categoryLabels[spot.category]}
-          </span>
-          {childScore && (
-            <span className={`text-xs px-2 py-1 rounded font-medium ${
-              childScore >= 80 ? 'bg-green-100 text-green-700' :
-              childScore >= 60 ? 'bg-yellow-100 text-yellow-700' :
-              'bg-gray-100 text-gray-600'
-            }`}>
-              子連れ度{childScore}
-            </span>
-          )}
+          <Badge>{categoryLabels[spot.category]}</Badge>
+          {childScore && (<Badge>子連れ度{childScore}</Badge>)}
         </div>
       </div>
       
@@ -196,31 +188,21 @@ export default function SpotCard({ spot, onAddToPlan, isSelected, userId = 'defa
           </button>
           
           {/* カレンダー追加ボタン */}
-          <button
-            onClick={() => setShowCalendar(true)}
-            className="flex items-center justify-center gap-1 bg-blue-600 text-white px-3 py-2 rounded-md hover:bg-blue-700 transition-colors text-sm font-medium"
-          >
-            📅 予定に追加
-          </button>
+          <Button onClick={() => setShowCalendar(true)} size="sm">📅 予定に追加</Button>
           
           {/* 共有ボタン */}
-          <button
-            onClick={() => setShowShare(true)}
-            className="flex items-center justify-center gap-1 bg-emerald-600 text-white px-3 py-2 rounded-md hover:bg-emerald-700 transition-colors text-sm font-medium"
-          >
-            📤 共有
-          </button>
+          <Button onClick={() => setShowShare(true)} size="sm">📤 共有</Button>
           
           {/* 周辺レストラン検索ボタン */}
-          <button
+          <Button
             onClick={() => {
               const restaurantUrl = `/restaurants?region=${encodeURIComponent(spot.region || '静岡')}&spotName=${encodeURIComponent(spot.name)}`
               window.open(restaurantUrl, '_blank')
             }}
-            className="flex items-center justify-center gap-1 bg-purple-600 text-white px-3 py-2 rounded-md hover:bg-purple-700 transition-colors text-sm font-medium"
+            size="sm"
           >
             🍽️ 周辺レストラン
-          </button>
+          </Button>
           
           {/* レビューサイトリンク */}
           {extendedSpot.tabelogUrl && (
@@ -286,18 +268,8 @@ export default function SpotCard({ spot, onAddToPlan, isSelected, userId = 'defa
               rows={2}
             />
             <div className="flex gap-2 mt-2">
-              <button
-                onClick={handleBookmarkSave}
-                className="bg-yellow-500 text-white px-3 py-1 rounded text-sm hover:bg-yellow-600"
-              >
-                保存
-              </button>
-              <button
-                onClick={() => setShowBookmarkForm(false)}
-                className="bg-gray-300 text-gray-700 px-3 py-1 rounded text-sm hover:bg-gray-400"
-              >
-                キャンセル
-              </button>
+              <Button size="sm" onClick={handleBookmarkSave}>保存</Button>
+              <Button size="sm" variant="secondary" onClick={() => setShowBookmarkForm(false)}>キャンセル</Button>
             </div>
           </div>
         )}
