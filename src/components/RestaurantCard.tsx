@@ -80,7 +80,7 @@ export default function RestaurantCard({ restaurant, userId = 'default-user' }: 
           <h3 className="text-lg font-bold text-gray-900 mb-1">{restaurant.name}</h3>
           <div className="flex flex-wrap gap-1 mb-2">
             {restaurant.cuisine.map(cuisine => (
-              <span key={cuisine} className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded">
+              <span key={cuisine} className="inline-flex items-center gap-1 rounded-full bg-gray-100 text-gray-800 border border-gray-200 px-2.5 py-1 text-xs">
                 {cuisineLabels[cuisine]}
               </span>
             ))}
@@ -115,15 +115,11 @@ export default function RestaurantCard({ restaurant, userId = 'default-user' }: 
         </div>
         <div className="flex items-center gap-2">
           {restaurant.priceRange && (
-            <span className="text-sm font-medium text-gray-700 bg-white px-2 py-1 rounded">
+            <span className="inline-flex items-center gap-1 rounded-full bg-gray-100 text-gray-800 border border-gray-200 px-2.5 py-1 text-xs">
               {priceRangeLabels[restaurant.priceRange]}
             </span>
           )}
-          <span className={`text-xs px-2 py-1 rounded ${
-            restaurant.smokingPolicy === 'non_smoking' ? 'bg-green-100 text-green-700' :
-            restaurant.smokingPolicy === 'smoking_section' ? 'bg-yellow-100 text-yellow-700' :
-            'bg-red-100 text-red-700'
-          }`}>
+          <span className="inline-flex items-center gap-1 rounded-full bg-gray-100 text-gray-800 border border-gray-200 px-2.5 py-1 text-xs">
             {smokingPolicyLabels[restaurant.smokingPolicy]}
           </span>
         </div>
@@ -153,40 +149,20 @@ export default function RestaurantCard({ restaurant, userId = 'default-user' }: 
       
       <div className="border-t pt-4 mt-4">
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-3">
-          <button
-            onClick={handleBookmarkToggle}
-            className={`flex items-center justify-center gap-1 px-3 py-2 rounded-md transition-colors text-sm font-medium ${
-              bookmarked 
-                ? 'bg-yellow-500 text-white hover:bg-yellow-600' 
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-            }`}
-          >
+          <Button onClick={handleBookmarkToggle} size="sm" variant="secondary">
             {bookmarked ? '⭐' : '☆'}
-          </button>
-          
-          <button
-            onClick={() => setShowCalendar(true)}
-            className="flex items-center justify-center gap-1 bg-blue-600 text-white px-3 py-2 rounded-md hover:bg-blue-700 transition-colors text-sm font-medium"
-          >
-            📅
-          </button>
-          
-          <button
-            onClick={() => setShowShare(true)}
-            className="flex items-center justify-center gap-1 bg-emerald-600 text-white px-3 py-2 rounded-md hover:bg-emerald-700 transition-colors text-sm font-medium"
-          >
-            📤
-          </button>
-          
-          <button
+          </Button>
+          <Button onClick={() => setShowCalendar(true)} size="sm">📅</Button>
+          <Button onClick={() => setShowShare(true)} size="sm">📤</Button>
+          <Button
             onClick={() => {
               const url = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(restaurant.address)}`
               window.open(url, '_blank')
             }}
-            className="flex items-center justify-center gap-1 bg-green-600 text-white px-3 py-2 rounded-md hover:bg-green-700 transition-colors text-sm font-medium"
+            size="sm"
           >
             🗺️
-          </button>
+          </Button>
         </div>
         
         {/* レビューサイトリンク */}
@@ -237,18 +213,8 @@ export default function RestaurantCard({ restaurant, userId = 'default-user' }: 
               rows={2}
             />
             <div className="flex gap-2 mt-2">
-              <button
-                onClick={handleBookmarkSave}
-                className="bg-yellow-500 text-white px-3 py-1 rounded text-sm hover:bg-yellow-600"
-              >
-                保存
-              </button>
-              <button
-                onClick={() => setShowBookmarkForm(false)}
-                className="bg-gray-300 text-gray-700 px-3 py-1 rounded text-sm hover:bg-gray-400"
-              >
-                キャンセル
-              </button>
+              <Button size="sm" onClick={handleBookmarkSave}>保存</Button>
+              <Button size="sm" variant="secondary" onClick={() => setShowBookmarkForm(false)}>キャンセル</Button>
             </div>
           </div>
         )}
