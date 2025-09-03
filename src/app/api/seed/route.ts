@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { SpotCategory, PriceRange } from '@/types'
 
@@ -87,7 +87,14 @@ const sampleSpots = [
   }
 ]
 
-export async function POST() {
+export async function POST(request: NextRequest) {
+  // 本番ではトークン必須
+  if (process.env.NODE_ENV === 'production') {
+    const auth = request.headers.get('authorization') || request.headers.get('Authorization')
+    if (auth !== `Bearer ${process.env.DATA_COLLECTION_SECRET}`) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+  }
   try {
     await prisma.spot.deleteMany()
     
