@@ -6,6 +6,7 @@ import { useBookmarkStore } from '@/lib/stores/useBookmarkStore'
 import { Button } from '@/components/ui/Button'
 import { Badge } from '@/components/ui/Badge'
 import { Card } from '@/components/ui/Card'
+import { Dropdown, DropdownItem } from '@/components/ui/Dropdown'
 import AffiliateLinks from './AffiliateLinks'
 import CalendarIntegration from './CalendarIntegration'
 import ShareModal from './ShareModal'
@@ -69,6 +70,11 @@ export default function RestaurantCard({ restaurant, userId = 'default-user' }: 
     setBookmarkNotes('')
   }
 
+  const openMaps = () => {
+    const url = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(restaurant.address)}`
+    window.open(url, '_blank')
+  }
+
   const getKidsFriendlyColor = (rating: number) => {
     if (rating >= 4.5) return 'bg-green-100 text-green-700'
     if (rating >= 4.0) return 'bg-yellow-100 text-yellow-700'
@@ -87,10 +93,30 @@ export default function RestaurantCard({ restaurant, userId = 'default-user' }: 
             ))}
           </div>
         </div>
-        <div className="flex gap-1 flex-wrap">
+        <div className="flex gap-2 items-start">
+          {/* Small-screen overflow menu */}
+          <div className="md:hidden">
+            <Dropdown trigger={<span aria-hidden>⋯</span>} buttonAriaLabel="その他のアクション">
+              <DropdownItem onClick={handleBookmarkToggle}>{bookmarked ? '⭐ お気に入り解除' : '☆ お気に入り追加'}</DropdownItem>
+              <DropdownItem onClick={() => setShowCalendar(true)}>📅 予定に追加</DropdownItem>
+              <DropdownItem onClick={() => setShowShare(true)}>📤 共有</DropdownItem>
+              <DropdownItem onClick={openMaps}>🗺️ ナビ開始 (Google Maps)</DropdownItem>
+              {restaurant.tabelogUrl && (
+                <DropdownItem href={restaurant.tabelogUrl}>🍽️ 食べログ</DropdownItem>
+              )}
+              {restaurant.gurunaviUrl && (
+                <DropdownItem href={restaurant.gurunaviUrl}>🍴 ぐるなび</DropdownItem>
+              )}
+              {restaurant.website && (
+                <DropdownItem href={restaurant.website}>🌐 公式サイト</DropdownItem>
+              )}
+            </Dropdown>
+          </div>
+          <div className="flex gap-1 flex-wrap">
           <span className={`text-xs px-2 py-1 rounded font-medium ${getKidsFriendlyColor(restaurant.kidsFriendlyRating)}`}>
             子連れ度 {restaurant.kidsFriendlyRating.toFixed(1)}
           </span>
+          </div>
         </div>
       </div>
       
@@ -142,19 +168,13 @@ export default function RestaurantCard({ restaurant, userId = 'default-user' }: 
       )}
       
       <div className="border-t pt-4 mt-4">
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-3">
+        <div className="hidden md:grid grid-cols-2 sm:grid-cols-4 gap-2 mb-3">
           <Button onClick={handleBookmarkToggle} size="sm" variant="secondary">
             {bookmarked ? '⭐' : '☆'}
           </Button>
           <Button onClick={() => setShowCalendar(true)} size="sm">📅</Button>
           <Button onClick={() => setShowShare(true)} size="sm">📤</Button>
-          <Button
-            onClick={() => {
-              const url = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(restaurant.address)}`
-              window.open(url, '_blank')
-            }}
-            size="sm"
-          >
+          <Button onClick={openMaps} size="sm">
             🗺️
           </Button>
         </div>

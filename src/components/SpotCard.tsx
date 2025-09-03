@@ -9,6 +9,7 @@ import AffiliateLinks from './AffiliateLinks'
 import { Button } from '@/components/ui/Button'
 import { Badge } from '@/components/ui/Badge'
 import { Card } from '@/components/ui/Card'
+import { Dropdown, DropdownItem } from '@/components/ui/Dropdown'
 
 interface SpotCardProps {
   spot: Spot
@@ -72,6 +73,16 @@ export default function SpotCard({ spot, onAddToPlan, isSelected, userId = 'defa
     setBookmarkNotes('')
   }
 
+  const openMaps = () => {
+    const url = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(spot.address)}`
+    window.open(url, '_blank')
+  }
+
+  const openNearbyRestaurants = () => {
+    const restaurantUrl = `/restaurants?region=${encodeURIComponent(spot.region || '静岡')}&spotName=${encodeURIComponent(spot.name)}`
+    window.open(restaurantUrl, '_blank')
+  }
+
   return (
     <Card className="border border-gray-200 transition-all hover:shadow-md hover:border-gray-300">
       <div className="flex justify-between items-start mb-3">
@@ -83,9 +94,33 @@ export default function SpotCard({ spot, onAddToPlan, isSelected, userId = 'defa
             </span>
           )}
         </div>
-        <div className="flex gap-1 flex-wrap">
-          <Badge>{categoryLabels[spot.category]}</Badge>
-          {childScore && (<Badge>子連れ度{childScore}</Badge>)}
+        <div className="flex gap-2 items-start">
+          {/* Small-screen overflow menu */}
+          <div className="md:hidden">
+            <Dropdown trigger={<span aria-hidden>⋯</span>} buttonAriaLabel="その他のアクション">
+              <DropdownItem onClick={handleBookmarkToggle}>{bookmarked ? '⭐ お気に入り解除' : '☆ お気に入り追加'}</DropdownItem>
+              <DropdownItem onClick={() => setShowCalendar(true)}>📅 予定に追加</DropdownItem>
+              <DropdownItem onClick={() => setShowShare(true)}>📤 共有</DropdownItem>
+              <DropdownItem onClick={openMaps}>🗺️ ナビ開始 (Google Maps)</DropdownItem>
+              <DropdownItem onClick={openNearbyRestaurants}>🍽️ 周辺レストラン</DropdownItem>
+              {extendedSpot.tabelogUrl && (
+                <DropdownItem href={extendedSpot.tabelogUrl}>🍽️ 食べログ</DropdownItem>
+              )}
+              {extendedSpot.gurunaviUrl && (
+                <DropdownItem href={extendedSpot.gurunaviUrl}>🍴 ぐるなび</DropdownItem>
+              )}
+              {extendedSpot.instagramUrl && (
+                <DropdownItem href={extendedSpot.instagramUrl}>📸 Instagram</DropdownItem>
+              )}
+              {spot.website && (
+                <DropdownItem href={spot.website}>🌐 公式サイト</DropdownItem>
+              )}
+            </Dropdown>
+          </div>
+          <div className="flex gap-1 flex-wrap">
+            <Badge>{categoryLabels[spot.category]}</Badge>
+            {childScore && (<Badge>子連れ度{childScore}</Badge>)}
+          </div>
         </div>
       </div>
       
@@ -152,7 +187,7 @@ export default function SpotCard({ spot, onAddToPlan, isSelected, userId = 'defa
       
       <div className="border-t pt-4 mt-4">
         <h4 className="text-sm font-medium text-gray-700 mb-3">🔗 詳細情報・アクション</h4>
-        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-2 xl:grid-cols-4 gap-2 mb-3">
+        <div className="hidden md:grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-2 xl:grid-cols-4 gap-2 mb-3">
           
           {/* ブックマークボタン */}
           <button
@@ -168,10 +203,7 @@ export default function SpotCard({ spot, onAddToPlan, isSelected, userId = 'defa
           
           {/* Google Maps ナビゲーションボタン */}
           <button
-            onClick={() => {
-              const url = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(spot.address)}`
-              window.open(url, '_blank')
-            }}
+            onClick={openMaps}
             className="flex items-center justify-center gap-1 bg-green-600 text-white px-3 py-2 rounded-md hover:bg-green-700 transition-colors text-sm font-medium"
           >
             🗺️ ナビ開始
@@ -184,13 +216,7 @@ export default function SpotCard({ spot, onAddToPlan, isSelected, userId = 'defa
           <Button onClick={() => setShowShare(true)} size="sm">📤 共有</Button>
           
           {/* 周辺レストラン検索ボタン */}
-          <Button
-            onClick={() => {
-              const restaurantUrl = `/restaurants?region=${encodeURIComponent(spot.region || '静岡')}&spotName=${encodeURIComponent(spot.name)}`
-              window.open(restaurantUrl, '_blank')
-            }}
-            size="sm"
-          >
+          <Button onClick={openNearbyRestaurants} size="sm">
             🍽️ 周辺レストラン
           </Button>
           
