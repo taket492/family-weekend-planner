@@ -8,6 +8,7 @@ import ShareModal from './ShareModal'
 import AffiliateLinks from './AffiliateLinks'
 import { Button } from '@/components/ui/Button'
 import { Badge } from '@/components/ui/Badge'
+import { Card } from '@/components/ui/Card'
 
 interface SpotCardProps {
   spot: Spot
@@ -72,7 +73,7 @@ export default function SpotCard({ spot, onAddToPlan, isSelected, userId = 'defa
   }
 
   return (
-    <div className="border border-gray-200 rounded-lg p-5 transition-all hover:shadow-md hover:border-gray-300 bg-white">
+    <Card className="border border-gray-200 transition-all hover:shadow-md hover:border-gray-300">
       <div className="flex justify-between items-start mb-3">
         <div className="flex-1">
           <h3 className="text-lg font-bold text-gray-900 mb-1">{spot.name}</h3>
@@ -279,6 +280,6 @@ export default function SpotCard({ spot, onAddToPlan, isSelected, userId = 'defa
           />
         )}
       </div>
-    </div>
+    </Card>
   )
 }

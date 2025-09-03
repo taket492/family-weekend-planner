@@ -4,6 +4,8 @@ import { useState } from 'react'
 import { Restaurant, CuisineType, PriceRange } from '@/types'
 import { useBookmarkStore } from '@/lib/stores/useBookmarkStore'
 import { Button } from '@/components/ui/Button'
+import { Badge } from '@/components/ui/Badge'
+import { Card } from '@/components/ui/Card'
 import AffiliateLinks from './AffiliateLinks'
 import CalendarIntegration from './CalendarIntegration'
 import ShareModal from './ShareModal'
@@ -75,15 +77,13 @@ export default function RestaurantCard({ restaurant, userId = 'default-user' }: 
   }
 
   return (
-    <div className="border border-gray-200 rounded-lg p-5 transition-all hover:shadow-md hover:border-gray-300 bg-white">
+    <Card className="border border-gray-200 transition-all hover:shadow-md hover:border-gray-300">
       <div className="flex justify-between items-start mb-3">
         <div className="flex-1">
           <h3 className="text-lg font-bold text-gray-900 mb-1">{restaurant.name}</h3>
           <div className="flex flex-wrap gap-1 mb-2">
             {restaurant.cuisine.map(cuisine => (
-              <span key={cuisine} className="inline-flex items-center gap-1 rounded-full bg-gray-100 text-gray-800 border border-gray-200 px-2.5 py-1 text-xs">
-                {cuisineLabels[cuisine]}
-              </span>
+              <Badge key={cuisine}>{cuisineLabels[cuisine]}</Badge>
             ))}
           </div>
         </div>
@@ -116,13 +116,9 @@ export default function RestaurantCard({ restaurant, userId = 'default-user' }: 
         </div>
         <div className="flex items-center gap-2">
           {restaurant.priceRange && (
-            <span className="inline-flex items-center gap-1 rounded-full bg-gray-100 text-gray-800 border border-gray-200 px-2.5 py-1 text-xs">
-              {priceRangeLabels[restaurant.priceRange]}
-            </span>
+            <Badge>{priceRangeLabels[restaurant.priceRange]}</Badge>
           )}
-          <span className="inline-flex items-center gap-1 rounded-full bg-gray-100 text-gray-800 border border-gray-200 px-2.5 py-1 text-xs">
-            {smokingPolicyLabels[restaurant.smokingPolicy]}
-          </span>
+          <Badge>{smokingPolicyLabels[restaurant.smokingPolicy]}</Badge>
         </div>
       </div>
       
@@ -233,6 +229,6 @@ export default function RestaurantCard({ restaurant, userId = 'default-user' }: 
           />
         )}
       </div>
-    </div>
+    </Card>
   )
 }

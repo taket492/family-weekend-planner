@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
 import { Checkbox } from '@/components/ui/Checkbox'
 import { Select } from '@/components/ui/Select'
+import { Collapse } from '@/components/ui/Collapse'
 
 const categoryLabels = {
   [SpotCategory.RESTAURANT]: 'レストラン',
@@ -146,8 +147,8 @@ export default function FilterPanel() {
       
       <div className="space-y-4 md:space-y-6">
         <div>
-          <h3 className="text-sm font-medium text-gray-700 mb-2 md:mb-3">カテゴリ</h3>
-          <div className="grid grid-cols-2 md:grid-cols-1 gap-1 md:gap-2">
+          <Collapse title="カテゴリ">
+          <div className="grid grid-cols-2 md:grid-cols-1 gap-1 md:gap-2 mt-1">
             {Object.entries(categoryLabels).map(([value, label]) => (
               <Checkbox
                 key={value}
@@ -157,11 +158,12 @@ export default function FilterPanel() {
               />
             ))}
           </div>
+          </Collapse>
         </div>
 
         <div>
-          <h3 className="text-sm font-medium text-gray-700 mb-2 md:mb-3">価格帯</h3>
-          <div className="grid grid-cols-1 gap-1 md:gap-2">
+          <Collapse title="価格帯">
+          <div className="grid grid-cols-1 gap-1 md:gap-2 mt-1">
             {Object.entries(priceRangeLabels).map(([value, label]) => (
               <Checkbox
                 key={value}
@@ -171,11 +173,12 @@ export default function FilterPanel() {
               />
             ))}
           </div>
+          </Collapse>
         </div>
 
         <div>
-          <h3 className="text-sm font-medium text-gray-700 mb-2 md:mb-3">子連れ向け設備</h3>
-          <div className="grid grid-cols-2 md:grid-cols-1 gap-1 md:gap-2">
+          <Collapse title="子連れ向け設備">
+          <div className="grid grid-cols-2 md:grid-cols-1 gap-1 md:gap-2 mt-1">
             <Checkbox checked={filters.hasKidsMenu || false} onChange={(e) => handleFacilityChange('hasKidsMenu', (e.target as HTMLInputElement).checked)} label={<span className="text-xs md:text-sm">キッズメニュー</span>} />
             <Checkbox checked={filters.hasHighChair || false} onChange={(e) => handleFacilityChange('hasHighChair', (e.target as HTMLInputElement).checked)} label={<span className="text-xs md:text-sm">ハイチェア</span>} />
             <Checkbox checked={filters.hasNursingRoom || false} onChange={(e) => handleFacilityChange('hasNursingRoom', (e.target as HTMLInputElement).checked)} label={<span className="text-xs md:text-sm">授乳室</span>} />
@@ -183,6 +186,7 @@ export default function FilterPanel() {
             <Checkbox checked={filters.hasDiaperChanging || false} onChange={(e) => handleFacilityChange('hasDiaperChanging', (e.target as HTMLInputElement).checked)} label={<span className="text-xs md:text-sm">おむつ交換台</span>} />
             <Checkbox checked={filters.hasPlayArea || false} onChange={(e) => handleFacilityChange('hasPlayArea', (e.target as HTMLInputElement).checked)} label={<span className="text-xs md:text-sm">キッズスペース</span>} />
           </div>
+          </Collapse>
         </div>
 
         <div>
@@ -239,11 +243,12 @@ export default function FilterPanel() {
         </div>
 
         <div>
-          <h3 className="text-sm font-medium text-gray-700 mb-2 md:mb-3">静岡エリア</h3>
-          <div className="space-y-2">
+          <Collapse title="静岡エリア">
+          <div className="space-y-2 mt-1">
             <Checkbox checked={filters.showOnlyShizuoka || false} onChange={(e) => setFilters({ ...filters, showOnlyShizuoka: (e.target as HTMLInputElement).checked })} label={<span className="text-xs md:text-sm">静岡県内のみ表示</span>} />
             <Checkbox checked={filters.showTrending || false} onChange={(e) => setFilters({ ...filters, showTrending: (e.target as HTMLInputElement).checked })} label={<span className="text-xs md:text-sm">トレンドスポットを優先</span>} />
           </div>
+          </Collapse>
         </div>
 
         <div>
@@ -260,21 +265,23 @@ export default function FilterPanel() {
         </div>
 
         <div>
-          <h3 className="text-sm font-medium text-gray-700 mb-2 md:mb-3">施設タイプ</h3>
-          <div className="grid grid-cols-2 gap-2">
+          <Collapse title="施設タイプ">
+          <div className="grid grid-cols-2 gap-2 mt-1">
             <Checkbox checked={filters.isIndoor || false} onChange={(e) => setFilters({ ...filters, isIndoor: (e.target as HTMLInputElement).checked })} label={<span className="text-xs">🏢 屋内</span>} />
             <Checkbox checked={filters.isOutdoor || false} onChange={(e) => setFilters({ ...filters, isOutdoor: (e.target as HTMLInputElement).checked })} label={<span className="text-xs">🌳 屋外</span>} />
           </div>
+          </Collapse>
         </div>
 
         <div>
-          <h3 className="text-sm font-medium text-gray-700 mb-2 md:mb-3">料金・設備</h3>
-          <div className="grid grid-cols-2 gap-2">
+          <Collapse title="料金・設備">
+          <div className="grid grid-cols-2 gap-2 mt-1">
             <Checkbox checked={filters.isFree || false} onChange={(e) => setFilters({ ...filters, isFree: (e.target as HTMLInputElement).checked })} label={<span className="text-xs">💰 無料</span>} />
             <Checkbox checked={filters.hasParking || false} onChange={(e) => setFilters({ ...filters, hasParking: (e.target as HTMLInputElement).checked })} label={<span className="text-xs">🚗 駐車場</span>} />
             <Checkbox checked={filters.hasPrivateRoom || false} onChange={(e) => setFilters({ ...filters, hasPrivateRoom: (e.target as HTMLInputElement).checked })} label={<span className="text-xs">🏠 個室</span>} />
             <Checkbox checked={filters.hasTatamiSeating || false} onChange={(e) => setFilters({ ...filters, hasTatamiSeating: (e.target as HTMLInputElement).checked })} label={<span className="text-xs">🥢 座敷</span>} />
           </div>
+          </Collapse>
         </div>
       </div>
     </div>
