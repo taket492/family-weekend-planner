@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { Restaurant, CuisineType, PriceRange } from '@/types'
 import { useBookmarkStore } from '@/lib/stores/useBookmarkStore'
+import { Button } from '@/components/ui/Button'
 import AffiliateLinks from './AffiliateLinks'
 import CalendarIntegration from './CalendarIntegration'
 import ShareModal from './ShareModal'
