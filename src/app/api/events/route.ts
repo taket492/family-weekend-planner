@@ -63,7 +63,9 @@ function generateMockEvents(region: string, prefecture: string): Event[] {
       isChildFriendly: true,
       category: EventCategory.FESTIVAL,
       registrationRequired: false,
-      price: 0
+      price: 0,
+      url: 'https://example.com/events/shizuoka-kids-fes',
+      imageUrl: 'https://images.unsplash.com/photo-1548199973-03cce0bbc87b?q=80&w=1200&auto=format&fit=crop'
     },
     {
       id: 'event_2',
@@ -75,7 +77,9 @@ function generateMockEvents(region: string, prefecture: string): Event[] {
       isChildFriendly: true,
       category: EventCategory.FESTIVAL,
       registrationRequired: false,
-      price: 500
+      price: 500,
+      url: 'https://example.com/events/hamamatsu-gyoza-fes',
+      imageUrl: 'https://images.unsplash.com/photo-1498654077810-12f23b533a5f?q=80&w=1200&auto=format&fit=crop'
     },
     {
       id: 'event_3',
@@ -88,7 +92,9 @@ function generateMockEvents(region: string, prefecture: string): Event[] {
       category: EventCategory.WORKSHOP,
       registrationRequired: true,
       maxParticipants: 20,
-      price: 1500
+      price: 1500,
+      url: 'https://example.com/events/kids-cooking',
+      imageUrl: 'https://images.unsplash.com/photo-1556911261-6bd341186b63?q=80&w=1200&auto=format&fit=crop'
     },
     {
       id: 'event_4',
@@ -100,7 +106,9 @@ function generateMockEvents(region: string, prefecture: string): Event[] {
       isChildFriendly: true,
       category: EventCategory.EXHIBITION,
       registrationRequired: false,
-      price: 300
+      price: 300,
+      url: 'https://example.com/events/fuji-photo-exhibition',
+      imageUrl: 'https://images.unsplash.com/photo-1589301760014-d929f3979dbc?q=80&w=1200&auto=format&fit=crop'
     },
     {
       id: 'event_5',
@@ -112,7 +120,9 @@ function generateMockEvents(region: string, prefecture: string): Event[] {
       isChildFriendly: true,
       category: EventCategory.SEASONAL,
       registrationRequired: false,
-      price: 0
+      price: 0,
+      url: 'https://example.com/events/numazu-seafood-fes',
+      imageUrl: 'https://images.unsplash.com/photo-1544025162-d76694265947?q=80&w=1200&auto=format&fit=crop'
     }
   ]
 

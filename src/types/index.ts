@@ -165,6 +165,8 @@ export interface Event {
   registrationRequired?: boolean
   maxParticipants?: number
   price?: number
+  url?: string
+  imageUrl?: string
 }
 
 export enum EventCategory {
