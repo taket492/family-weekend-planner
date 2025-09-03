@@ -3,6 +3,11 @@
 import { useRef, useState } from 'react'
 import { SpotCategory, PriceRange } from '@/types'
 import { useToast } from '@/components/ui/ToastProvider'
+import { Input } from '@/components/ui/Input'
+import { Select } from '@/components/ui/Select'
+import { Checkbox } from '@/components/ui/Checkbox'
+import { Button } from '@/components/ui/Button'
+import { Card } from '@/components/ui/Card'
 
 interface RestaurantFormData {
   name: string
@@ -110,7 +115,7 @@ export function ManualRestaurantForm() {
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-6">
+    <Card>
       <h2 className="text-xl font-bold mb-6">🍽️ レストラン手動登録</h2>
       
       {message && (
