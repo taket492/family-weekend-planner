@@ -190,56 +190,68 @@ export default function FilterPanel() {
         </div>
 
         <div>
-          <h3 className="text-sm font-medium text-gray-700 mb-2 md:mb-3">対象年齢</h3>
-          <Select
-            value={filters.ageGroup || ''}
-            onChange={(e) => setFilters({ ...filters, ageGroup: (e.target as HTMLSelectElement).value as 'baby' | 'toddler' | 'child' || undefined })}
-          >
-            <option value="">全年齢</option>
-            <option value="baby">👶 赤ちゃん (0-2歳)</option>
-            <option value="toddler">🧒 幼児 (2-5歳)</option>
-            <option value="child">👦 小学生 (5-12歳)</option>
-          </Select>
+          <Collapse title="対象年齢">
+          <div className="mt-1">
+            <Select
+              value={filters.ageGroup || ''}
+              onChange={(e) => setFilters({ ...filters, ageGroup: (e.target as HTMLSelectElement).value as 'baby' | 'toddler' | 'child' || undefined })}
+            >
+              <option value="">全年齢</option>
+              <option value="baby">👶 赤ちゃん (0-2歳)</option>
+              <option value="toddler">🧒 幼児 (2-5歳)</option>
+              <option value="child">👦 小学生 (5-12歳)</option>
+            </Select>
+          </div>
+          </Collapse>
         </div>
 
         <div>
-          <h3 className="text-sm font-medium text-gray-700 mb-2 md:mb-3">子連れ適性</h3>
-          <Select
-            value={filters.minChildScore || 30}
-            onChange={(e) => setFilters({ ...filters, minChildScore: parseInt((e.target as HTMLSelectElement).value) })}
-          >
-            <option value={0}>すべて表示</option>
-            <option value={30}>30点以上</option>
-            <option value={50}>50点以上 (推奨)</option>
-            <option value={70}>70点以上 (高評価)</option>
-            <option value={90}>90点以上 (最高評価)</option>
-          </Select>
+          <Collapse title="子連れ適性">
+          <div className="mt-1">
+            <Select
+              value={filters.minChildScore || 30}
+              onChange={(e) => setFilters({ ...filters, minChildScore: parseInt((e.target as HTMLSelectElement).value) })}
+            >
+              <option value={0}>すべて表示</option>
+              <option value={30}>30点以上</option>
+              <option value={50}>50点以上 (推奨)</option>
+              <option value={70}>70点以上 (高評価)</option>
+              <option value={90}>90点以上 (最高評価)</option>
+            </Select>
+          </div>
+          </Collapse>
         </div>
 
         <div>
-          <h3 className="text-sm font-medium text-gray-700 mb-2 md:mb-3">検索範囲</h3>
-          <Select
-            value={filters.radius || 5}
-            onChange={(e) => setFilters({ ...filters, radius: parseInt((e.target as HTMLSelectElement).value) })}
-          >
-            <option value={1}>1km以内</option>
-            <option value={3}>3km以内</option>
-            <option value={5}>5km以内</option>
-            <option value={10}>10km以内</option>
-            <option value={20}>20km以内</option>
-          </Select>
+          <Collapse title="検索範囲">
+          <div className="mt-1">
+            <Select
+              value={filters.radius || 5}
+              onChange={(e) => setFilters({ ...filters, radius: parseInt((e.target as HTMLSelectElement).value) })}
+            >
+              <option value={1}>1km以内</option>
+              <option value={3}>3km以内</option>
+              <option value={5}>5km以内</option>
+              <option value={10}>10km以内</option>
+              <option value={20}>20km以内</option>
+            </Select>
+          </div>
+          </Collapse>
         </div>
 
         <div>
-          <h3 className="text-sm font-medium text-gray-700 mb-2 md:mb-3">並び替え</h3>
-          <Select
-            value={filters.sortBy || 'popularity'}
-            onChange={(e) => setFilters({ ...filters, sortBy: (e.target as HTMLSelectElement).value as 'popularity' | 'rating' | 'recent' })}
-          >
-            <option value="popularity">🔥 人気順</option>
-            <option value="rating">⭐ 評価順</option>
-            <option value="recent">🆕 新着順</option>
-          </Select>
+          <Collapse title="並び替え">
+          <div className="mt-1">
+            <Select
+              value={filters.sortBy || 'popularity'}
+              onChange={(e) => setFilters({ ...filters, sortBy: (e.target as HTMLSelectElement).value as 'popularity' | 'rating' | 'recent' })}
+            >
+              <option value="popularity">🔥 人気順</option>
+              <option value="rating">⭐ 評価順</option>
+              <option value="recent">🆕 新着順</option>
+            </Select>
+          </div>
+          </Collapse>
         </div>
 
         <div>
@@ -252,16 +264,19 @@ export default function FilterPanel() {
         </div>
 
         <div>
-          <h3 className="text-sm font-medium text-gray-700 mb-2 md:mb-3">季節イベント</h3>
-          <Select
-            value={filters.seasonalEvent || ''}
-            onChange={(e) => setFilters({ ...filters, seasonalEvent: (e.target as HTMLSelectElement).value as SeasonalEventType || undefined })}
-          >
-            <option value="">すべて表示</option>
-            {Object.entries(seasonalEventLabels).map(([value, label]) => (
-              <option key={value} value={value}>{label}</option>
-            ))}
-          </Select>
+          <Collapse title="季節イベント">
+          <div className="mt-1">
+            <Select
+              value={filters.seasonalEvent || ''}
+              onChange={(e) => setFilters({ ...filters, seasonalEvent: (e.target as HTMLSelectElement).value as SeasonalEventType || undefined })}
+            >
+              <option value="">すべて表示</option>
+              {Object.entries(seasonalEventLabels).map(([value, label]) => (
+                <option key={value} value={value}>{label}</option>
+              ))}
+            </Select>
+          </div>
+          </Collapse>
         </div>
 
         <div>
