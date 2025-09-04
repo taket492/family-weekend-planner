@@ -127,7 +127,7 @@ export default function Home() {
                   <Button variant={viewMode === 'map' ? 'primary' : 'ghost'} size="sm" onClick={() => setViewMode('map')}>🗺️ 地図</Button>
                 </div>
                 {viewMode === 'map' ? (
-                  <MapView />
+                  <MapView region={selectedLocation.region} prefecture={selectedLocation.prefecture} />
                 ) : (
                   <SpotList 
                     region={selectedLocation.region}

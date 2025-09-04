@@ -28,10 +28,13 @@ function loadLeaflet(): Promise<void> {
   })
 }
 
-export default function MapView() {
-  const { spots } = useSpotStore()
+interface MapViewProps { region: string; prefecture: string }
+
+export default function MapView({ region, prefecture }: MapViewProps) {
+  const { spots, searchSpotsInBBox } = useSpotStore()
   const mapRef = useRef<HTMLDivElement>(null)
   const [ready, setReady] = useState(false)
+  const debounceRef = useRef<number | null>(null)
 
   useEffect(() => {
     loadLeaflet().then(() => setReady(true)).catch(() => setReady(false))
@@ -90,7 +93,22 @@ export default function MapView() {
       map.fitBounds(latlngs as any, { padding: [20, 20] })
     }
 
-    return () => map.remove()
+    // bbox fetch on moveend
+    const onMoveEnd = () => {
+      const b = map.getBounds()
+      const minLat = b.getSouth()
+      const maxLat = b.getNorth()
+      const minLon = b.getWest()
+      const maxLon = b.getEast()
+      const bbox: [number, number, number, number] = [minLon, minLat, maxLon, maxLat]
+      if (debounceRef.current) window.clearTimeout(debounceRef.current)
+      debounceRef.current = window.setTimeout(() => {
+        searchSpotsInBBox(region, prefecture, bbox)
+      }, 400)
+    }
+    map.on('moveend', onMoveEnd)
+
+    return () => { map.off('moveend', onMoveEnd); map.remove() }
   }, [ready, spots])
 
   return (
@@ -103,4 +121,3 @@ export default function MapView() {
     </div>
   )
 }
-

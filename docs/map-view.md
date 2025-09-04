@@ -6,7 +6,7 @@ Map View (Beta)
 
 Notes
 - No API keys required. Uses public OpenStreetMap tiles.
-- BBox parameter is supported in `/api/spots/external` via `bbox=minLon,minLat,maxLon,maxLat`, but UI does not yet reload on map move.
+- BBox parameter is supported in `/api/spots/external` via `bbox=minLon,minLat,maxLon,maxLat`. Map moves now trigger bbox refetch with a small debounce.
 - Coordinates are supplied by Overpass (OSM) and added to each spot when available.
 
 Next Steps
