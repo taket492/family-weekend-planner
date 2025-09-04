@@ -78,6 +78,10 @@ model Plan {
   
   // プランに含まれるスポット
   spots       PlanSpot[]
+  // 共同編集
+  invites     PlanInvite[]
+  comments    PlanComment[]
+  checklist   PlanChecklistItem[]
   
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -109,6 +113,41 @@ model Bookmark {
   createdAt DateTime @default(now())
   
   @@unique([userId, spotId])
+}
+
+// 共同編集: 招待トークン
+model PlanInvite {
+  id        String   @id @default(cuid())
+  planId    String
+  email     String?
+  role      String   @default("editor")
+  token     String   @unique
+  createdAt DateTime @default(now())
+
+  plan      Plan     @relation(fields: [planId], references: [id], onDelete: Cascade)
+}
+
+// 共同編集: コメント
+model PlanComment {
+  id        String   @id @default(cuid())
+  planId    String
+  author    String?
+  text      String
+  hidden    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  plan      Plan     @relation(fields: [planId], references: [id], onDelete: Cascade)
+}
+
+// 共同編集: チェックリスト
+model PlanChecklistItem {
+  id        String   @id @default(cuid())
+  planId    String
+  text      String
+  done      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  plan      Plan     @relation(fields: [planId], references: [id], onDelete: Cascade)
 }
 
 model Event {
