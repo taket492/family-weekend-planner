@@ -18,6 +18,7 @@ interface SpotCardProps {
   onAddToPlan: () => void
   isSelected: boolean
   userId?: string
+  density?: 'comfortable' | 'compact'
 }
 
 const categoryLabels = {
@@ -37,7 +38,7 @@ const priceRangeLabels = {
   [PriceRange.EXPENSIVE]: '3,000円〜'
 }
 
-export default function SpotCard({ spot, onAddToPlan, isSelected, userId = 'default-user' }: SpotCardProps) {
+export default function SpotCard({ spot, onAddToPlan, isSelected, userId = 'default-user', density = 'comfortable' }: SpotCardProps) {
   const [showBookmarkForm, setShowBookmarkForm] = useState(false)
   const [showCalendar, setShowCalendar] = useState(false)
   const [showShare, setShowShare] = useState(false)
@@ -92,13 +93,34 @@ export default function SpotCard({ spot, onAddToPlan, isSelected, userId = 'defa
     window.open(restaurantUrl, '_blank')
   }
 
+  const categoryEmojis: Record<SpotCategory, string> = {
+    [SpotCategory.RESTAURANT]: '🍽️',
+    [SpotCategory.CAFE]: '☕',
+    [SpotCategory.PLAYGROUND]: '🎠',
+    [SpotCategory.PARK]: '🌳',
+    [SpotCategory.MUSEUM]: '🏛️',
+    [SpotCategory.SHOPPING]: '🛍️',
+    [SpotCategory.ENTERTAINMENT]: '🎬',
+    [SpotCategory.TOURIST_SPOT]: '📍',
+  }
+
+  // facilities summary (max 3 + more)
+  const FACILITY_LIMIT = density === 'compact' ? 2 : 3
+  const visibleFacilities = facilities.slice(0, FACILITY_LIMIT)
+  const restCount = Math.max(0, facilities.length - visibleFacilities.length)
+
   return (
-    <Card className={`border transition-all hover:shadow-md ${isSelected ? 'border-blue-500 ring-2 ring-blue-200' : 'border-gray-200 hover:border-gray-300'}`}>
-      <div className="flex justify-between items-start mb-3">
+    <Card className={`border transition-all overflow-hidden ${isSelected ? 'border-[color-mix(in_oklab,var(--brand),white_50%)] ring-2 ring-[color-mix(in_oklab,var(--brand),white_70%)]' : 'border-gray-200/70 dark:border-white/10 hover:border-gray-300/80'}`}>
+      {/* Stylized header band */}
+      <div className="relative mb-3">
+        <div className="h-16 rounded-md bg-[color-mix(in_oklab,var(--brand),white_85%)]/60 dark:bg-[color-mix(in_oklab,var(--brand),black_60%)]" />
+        <div className="absolute -bottom-4 left-4 size-10 rounded-full grid place-items-center text-lg bg-white dark:bg-white/10 border border-gray-200/70 dark:border-white/10 shadow">{categoryEmojis[spot.category]}</div>
+      </div>
+      <div className="flex justify-between items-start mb-2 mt-2">
         <div className="flex-1">
-          <h3 className="text-lg font-bold text-gray-900 mb-1">{spot.name}</h3>
+          <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-1">{spot.name}</h3>
           {extendedSpot.isTrending && (
-            <span className="inline-flex items-center text-xs bg-red-100 text-red-700 px-2 py-1 rounded-full mt-1">
+            <span className="inline-flex items-center text-xs bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300 px-2 py-1 rounded-full mt-1">
               🔥 話題のスポット
             </span>
           )}
@@ -128,20 +150,18 @@ export default function SpotCard({ spot, onAddToPlan, isSelected, userId = 'defa
               )}
             </Dropdown>
           </div>
-          <div className="flex gap-1 flex-wrap">
-            <Badge>{categoryLabels[spot.category]}</Badge>
-            {childScore && (<Badge>子連れ度{childScore}</Badge>)}
+          <div className="flex gap-1 flex-wrap items-center">
+            {childScore && (<span className="text-xs bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300 px-2 py-1 rounded">★ {childScore}</span>)}
           </div>
         </div>
       </div>
-      
       {spot.description && (
-        <p className="text-sm text-gray-600 mb-2">{spot.description}</p>
+        <p className={`text-sm text-gray-600 dark:text-gray-300 ${density === 'compact' ? 'line-clamp-2' : 'line-clamp-3'} mb-2`}>{spot.description}</p>
       )}
       
       <div className="flex items-start gap-2 mb-3">
         <span className="text-gray-400 mt-1">📍</span>
-        <p className="text-sm text-gray-600 flex-1">{spot.address}</p>
+        <p className="text-sm text-gray-600 dark:text-gray-300 flex-1">{spot.address}</p>
       </div>
       {primaryLink && (
         <div className="flex items-start gap-2 mb-3">
@@ -150,7 +170,7 @@ export default function SpotCard({ spot, onAddToPlan, isSelected, userId = 'defa
             href={primaryLink}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-sm text-blue-600 hover:underline break-all"
+            className="text-sm text-blue-600 dark:text-blue-400 hover:underline break-all"
           >
             リンクを開く
           </a>
@@ -165,15 +185,15 @@ export default function SpotCard({ spot, onAddToPlan, isSelected, userId = 'defa
           </span>
         )}
         {crowdLevel && (
-          <span className="text-sm">{crowdLevel}</span>
+          <span className="text-sm text-gray-700 dark:text-gray-300">{crowdLevel}</span>
         )}
         {todayHours && (
-          <span className="text-xs text-gray-500">{todayHours}</span>
+          <span className="text-xs text-gray-500 dark:text-gray-400">{todayHours}</span>
         )}
       </div>
 
       {/* 年齢別推奨度 */}
-      {ageScores && (
+      {ageScores && density !== 'compact' && (
         <div className="mb-2">
           <div className="flex gap-1 text-xs">
             <Badge>👶 {ageScores.baby}</Badge>
@@ -184,14 +204,14 @@ export default function SpotCard({ spot, onAddToPlan, isSelected, userId = 'defa
       )}
       
       {spot.rating && (
-        <div className="flex items-center justify-between mb-3 p-2 bg-gray-50 rounded">
+        <div className="flex items-center justify-between mb-3 p-2 bg-gray-50 dark:bg-white/5 rounded">
           <div className="flex items-center">
             <span className="text-yellow-400 text-lg">★</span>
-            <span className="text-base font-bold ml-1 text-gray-900">{spot.rating.toFixed(1)}</span>
-            <span className="text-sm text-gray-500 ml-2">({spot.reviewCount}件のレビュー)</span>
+            <span className="text-base font-bold ml-1 text-gray-900 dark:text-gray-100">{spot.rating.toFixed(1)}</span>
+            <span className="text-sm text-gray-500 dark:text-gray-400 ml-2">({spot.reviewCount}件のレビュー)</span>
           </div>
           {spot.priceRange && (
-            <span className="text-sm font-medium text-gray-700 bg-white px-2 py-1 rounded">
+            <span className="text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-white/10 px-2 py-1 rounded">
               {priceRangeLabels[spot.priceRange]}
             </span>
           )}
@@ -215,7 +235,7 @@ export default function SpotCard({ spot, onAddToPlan, isSelected, userId = 'defa
         </div>
       )}
       {showReviewForm && (
-        <div className="mb-3 p-3 bg-gray-50 rounded">
+        <div className="mb-3 p-3 bg-gray-50 dark:bg-white/5 rounded">
           <div className="flex items-center gap-2 mb-2">
             <label className="text-sm">評価</label>
             <select value={reviewRating} onChange={(e)=>setReviewRating(Number(e.target.value))} className="border rounded px-2 py-1 text-sm">
@@ -224,13 +244,13 @@ export default function SpotCard({ spot, onAddToPlan, isSelected, userId = 'defa
           </div>
           <div className="flex flex-wrap gap-2 mb-2 text-xs">
             {['ベビーカー', '授乳室', '静かさ', '席間隔', '清潔さ'].map(tag => (
-              <label key={tag} className={`px-2 py-1 rounded border cursor-pointer ${reviewTags.includes(tag)?'bg-blue-600 text-white':'bg-white'}`}>
+              <label key={tag} className={`px-2 py-1 rounded border cursor-pointer ${reviewTags.includes(tag)?'bg-blue-600 text-white':'bg-white dark:bg-white/5'}`}>
                 <input type="checkbox" className="hidden" checked={reviewTags.includes(tag)} onChange={()=> setReviewTags(prev => prev.includes(tag)? prev.filter(t=>t!==tag) : [...prev, tag])} />
                 {tag}
               </label>
             ))}
           </div>
-          <textarea value={reviewText} onChange={(e)=>setReviewText(e.target.value)} placeholder="簡易レビュー" className="w-full border rounded p-2 text-sm" rows={2} />
+          <textarea value={reviewText} onChange={(e)=>setReviewText(e.target.value)} placeholder="簡易レビュー" className="w-full border rounded p-2 text-sm bg-white dark:bg-white/5" rows={2} />
           <div className="mt-2 flex gap-2">
             <Button size="sm" onClick={()=>{ addReview({ spotId: spot.id, rating: reviewRating, tags: reviewTags, text: reviewText }); setShowReviewForm(false); setReviewText(''); setReviewTags([]) }}>投稿</Button>
             <Button size="sm" variant="secondary" onClick={()=> setShowReviewForm(false)}>キャンセル</Button>
@@ -241,17 +261,48 @@ export default function SpotCard({ spot, onAddToPlan, isSelected, userId = 'defa
       {facilities.length > 0 && (
         <div className="mb-4">
           <h4 className="text-sm font-medium text-gray-700 mb-2">🧸 子連れ向け設備</h4>
-          <div className="flex flex-wrap gap-2">
-            {facilities.map((facility) => (
+          <div className="flex flex-wrap gap-2 items-center">
+            {visibleFacilities.map((facility) => (
               <Badge key={facility}>{facility}</Badge>
             ))}
+            {restCount > 0 && <span className="text-xs text-gray-500">+{restCount}</span>}
           </div>
         </div>
       )}
       
-      <div className="border-t pt-4 mt-4">
-        <h4 className="text-sm font-medium text-gray-700 mb-3">🔗 詳細情報・アクション</h4>
-        <div className="hidden md:grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-2 xl:grid-cols-4 gap-2 mb-3">
+      <div className="border-t border-gray-200/70 dark:border-white/10 pt-3 mt-3">
+        <div className="flex items-center gap-2 mb-2">
+          {authUser && (
+            <button
+              onClick={handleBookmarkToggle}
+              className={`px-2 py-1 rounded-md text-sm ${bookmarked ? 'bg-yellow-500 text-white' : 'bg-gray-100 dark:bg-white/10 text-gray-700 dark:text-gray-200'}`}
+              aria-label={bookmarked ? 'お気に入り解除' : 'お気に入り追加'}
+            >{bookmarked ? '⭐' : '☆'} 保存</button>
+          )}
+          <Button onClick={() => setShowCalendar(true)} size="sm" variant="secondary">📅 予定</Button>
+          <Button onClick={() => setShowShare(true)} size="sm" variant="secondary">📤 共有</Button>
+          <button onClick={openMaps} className="px-2 py-1 rounded-md text-sm bg-green-600 text-white">🗺️ ナビ</button>
+          <div className="ml-auto hidden md:block">
+            <Dropdown trigger={<span className="text-sm text-gray-600 dark:text-gray-300 cursor-pointer">その他</span>} buttonAriaLabel="その他のアクション">
+              <DropdownItem onClick={openNearbyRestaurants}>🍽️ 周辺レストラン</DropdownItem>
+              {extendedSpot.tabelogUrl && (
+                <DropdownItem href={extendedSpot.tabelogUrl}>🍽️ 食べログ</DropdownItem>
+              )}
+              {extendedSpot.gurunaviUrl && (
+                <DropdownItem href={extendedSpot.gurunaviUrl}>🍴 ぐるなび</DropdownItem>
+              )}
+              {extendedSpot.instagramUrl && (
+                <DropdownItem href={extendedSpot.instagramUrl}>📸 Instagram</DropdownItem>
+              )}
+              {spot.website && (
+                <DropdownItem href={spot.website}>🌐 公式サイト</DropdownItem>
+              )}
+            </Dropdown>
+          </div>
+        </div>
+        {/* legacy grid retained on wide screens when density is comfortable */}
+        {density === 'comfortable' && (
+          <div className="hidden md:grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-2 xl:grid-cols-4 gap-2 mb-3">
           
           {/* ブックマークボタン */}
           {authUser && (
@@ -328,7 +379,8 @@ export default function SpotCard({ spot, onAddToPlan, isSelected, userId = 'defa
               🌐 公式サイト
             </a>
           )}
-        </div>
+          </div>
+        )}
         
         {extendedSpot.source && (
           <div className="mt-3 text-xs text-gray-400 text-center">
@@ -341,12 +393,12 @@ export default function SpotCard({ spot, onAddToPlan, isSelected, userId = 'defa
         
         {/* ブックマーク追加フォーム */}
         {showBookmarkForm && (
-          <div className="mt-3 p-3 bg-gray-50 rounded-md">
+          <div className="mt-3 p-3 bg-gray-50 dark:bg-white/5 rounded-md">
             <textarea
               placeholder="メモを追加（任意）"
               value={bookmarkNotes}
               onChange={(e) => setBookmarkNotes(e.target.value)}
-              className="w-full p-2 text-sm border border-gray-300 rounded resize-none"
+              className="w-full p-2 text-sm border border-gray-300 dark:border-white/15 rounded resize-none bg-white dark:bg-white/5"
               rows={2}
             />
             <div className="flex gap-2 mt-2">

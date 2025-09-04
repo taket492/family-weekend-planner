@@ -119,8 +119,8 @@ export default function MapView({ region, prefecture }: MapViewProps) {
   }, [ready, spots])
 
   return (
-    <div className="bg-white rounded-lg shadow p-4">
-      <h2 className="text-xl font-bold text-gray-900 mb-4">🗺️ 地図ビュー（β）</h2>
+    <div className="surface radius elevate-md p-4">
+      <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4">🗺️ 地図ビュー（β）</h2>
       <div ref={mapRef} className="w-full h-[60vh] rounded-md" />
       {(!spots || spots.length === 0) && (
         <p className="text-sm text-gray-500 mt-2">検索後にスポットが地図に表示されます</p>

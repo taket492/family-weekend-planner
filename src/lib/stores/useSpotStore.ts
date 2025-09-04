@@ -6,6 +6,7 @@ interface SpotStore {
   spots: Spot[]
   selectedSpots: Spot[]
   filters: SearchFilters
+  bbox?: [number, number, number, number]
   isLoading: boolean
   error: string | null
   
@@ -16,6 +17,7 @@ interface SpotStore {
   reorderSelectedSpots: (spots: Spot[]) => void
   setSelectedSpots: (spots: Spot[]) => void
   setFilters: (filters: SearchFilters) => void
+  setBbox: (bbox?: [number, number, number, number]) => void
   setLoading: (loading: boolean) => void
   setError: (error: string | null) => void
 
@@ -32,6 +34,7 @@ export const useSpotStore = create<SpotStore>((set, get) => ({
   spots: [],
   selectedSpots: [],
   filters: {},
+  bbox: undefined,
   isLoading: false,
   error: null,
 
@@ -51,6 +54,7 @@ export const useSpotStore = create<SpotStore>((set, get) => ({
   setSelectedSpots: (spots) => set({ selectedSpots: spots }),
   
   setFilters: (filters) => set({ filters }),
+  setBbox: (bbox) => set({ bbox }),
   
   setLoading: (isLoading) => set({ isLoading }),
   
@@ -126,6 +130,13 @@ export const useSpotStore = create<SpotStore>((set, get) => ({
         }
       } catch {}
 
+      // keyword filter (client-side)
+      const kw = (get().filters.keyword || '').trim().toLowerCase()
+      if (kw) {
+        spots = spots.filter((s: any) =>
+          [s.name, s.description, s.address].some((v: any) => typeof v === 'string' && v.toLowerCase().includes(kw))
+        )
+      }
       set({ spots, isLoading: false })
     } catch (error) {
       set({ 
@@ -180,6 +191,12 @@ export const useSpotStore = create<SpotStore>((set, get) => ({
           })
         }
       } catch {}
+      const kw = (get().filters.keyword || '').trim().toLowerCase()
+      if (kw) {
+        spots = spots.filter((s: any) =>
+          [s.name, s.description, s.address].some((v: any) => typeof v === 'string' && v.toLowerCase().includes(kw))
+        )
+      }
       set({ spots, isLoading: false })
     } catch (error) {
       set({ error: error instanceof Error ? error.message : 'Unknown error', isLoading: false })

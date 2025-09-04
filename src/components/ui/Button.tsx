@@ -10,13 +10,13 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   size?: Size
 }
 
-const base = 'inline-flex items-center justify-center rounded-md font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none'
+const base = 'inline-flex items-center justify-center rounded-md font-medium transition-all focus:outline-none disabled:opacity-50 disabled:pointer-events-none active:scale-[0.98]'
 
 const variants: Record<Variant, string> = {
-  primary: 'bg-blue-600 text-white hover:bg-blue-700 focus-visible:ring-blue-500',
-  secondary: 'bg-gray-100 text-gray-900 hover:bg-gray-200 focus-visible:ring-gray-400',
-  ghost: 'bg-transparent text-gray-700 hover:bg-gray-100 focus-visible:ring-gray-300',
-  danger: 'bg-red-600 text-white hover:bg-red-700 focus-visible:ring-red-500',
+  primary: 'bg-[var(--brand)] text-[var(--brand-contrast)] shadow-sm hover:brightness-95 focus-visible:ring-2 focus-visible:ring-[color-mix(in_oklab,var(--brand),white_20%)]',
+  secondary: 'bg-white/80 dark:bg-white/10 text-gray-900 dark:text-gray-100 border border-gray-200/80 dark:border-white/15 hover:bg-white dark:hover:bg-white/5',
+  ghost: 'bg-transparent text-gray-700 dark:text-gray-200 hover:bg-gray-100/70 dark:hover:bg-white/5',
+  danger: 'bg-red-600 text-white hover:bg-red-700 focus-visible:ring-2 focus-visible:ring-red-400',
 }
 
 const sizes: Record<Size, string> = {
@@ -30,4 +30,3 @@ export function Button({ variant = 'primary', size = 'md', className = '', ...pr
     <button className={[base, variants[variant], sizes[size], className].join(' ')} {...props} />
   )
 }
-

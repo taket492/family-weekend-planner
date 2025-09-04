@@ -104,6 +104,7 @@ export interface SearchFilters {
   category?: SpotCategory[]
   priceRange?: PriceRange[]
   isOpen?: boolean
+  keyword?: string
   hasKidsMenu?: boolean
   hasHighChair?: boolean
   hasNursingRoom?: boolean

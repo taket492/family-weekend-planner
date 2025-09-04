@@ -3,6 +3,10 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ToastProvider } from "@/components/ui/ToastProvider";
 import PWAProvider from "@/components/PWAProvider";
+import AppHeader from "@/components/AppHeader";
+import AppFooter from "@/components/AppFooter";
+import ThemeProvider from "@/components/ThemeProvider";
+import CommandPalette from "@/components/CommandPalette";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -29,10 +33,18 @@ export default function RootLayout({
       <head>
         <link rel="manifest" href="/manifest.json" />
       </head>
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen bg-background text-foreground`}>
+        <a href="#main" className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 focus:bg-black focus:text-white focus:px-3 focus:py-2 focus:rounded">メインコンテンツへスキップ</a>
         <ToastProvider>
           <PWAProvider />
-          {children}
+          <ThemeProvider>
+            <AppHeader />
+            <div id="main" className="pb-16">
+              {children}
+            </div>
+            <AppFooter />
+            <CommandPalette />
+          </ThemeProvider>
         </ToastProvider>
       </body>
     </html>
