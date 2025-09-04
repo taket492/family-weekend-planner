@@ -55,6 +55,7 @@ export default function RestaurantCard({ restaurant, userId = 'default-user' }: 
   if (restaurant.acceptsReservations) facilities.push('予約可')
 
   const bookmarked = isBookmarked(restaurant.id)
+  const primaryLink = restaurant.website || restaurant.tabelogUrl || restaurant.gurunaviUrl
 
   const handleBookmarkToggle = async () => {
     if (bookmarked) {
@@ -128,6 +129,20 @@ export default function RestaurantCard({ restaurant, userId = 'default-user' }: 
         <span className="text-gray-400 mt-1">📍</span>
         <p className="text-sm text-gray-600 flex-1">{restaurant.address}</p>
       </div>
+
+      {primaryLink && (
+        <div className="flex items-start gap-2 mb-3">
+          <span className="text-gray-400 mt-1">🔗</span>
+          <a
+            href={primaryLink}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-sm text-blue-600 hover:underline break-all"
+          >
+            リンクを開く
+          </a>
+        </div>
+      )}
       
       
       <div className="flex items-center justify-between mb-3 p-2 bg-gray-50 rounded">

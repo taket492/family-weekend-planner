@@ -58,6 +58,7 @@ export default function SpotCard({ spot, onAddToPlan, isSelected, userId = 'defa
   const todayHours = extendedSpot.todayHours
   const ageScores = extendedSpot.ageAppropriate
   const bookmarked = isBookmarked(spot.id)
+  const primaryLink = spot.website || extendedSpot.tabelogUrl || extendedSpot.gurunaviUrl || extendedSpot.instagramUrl
 
   const handleBookmarkToggle = async () => {
     if (bookmarked) {
@@ -132,6 +133,19 @@ export default function SpotCard({ spot, onAddToPlan, isSelected, userId = 'defa
         <span className="text-gray-400 mt-1">📍</span>
         <p className="text-sm text-gray-600 flex-1">{spot.address}</p>
       </div>
+      {primaryLink && (
+        <div className="flex items-start gap-2 mb-3">
+          <span className="text-gray-400 mt-1">🔗</span>
+          <a
+            href={primaryLink}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-sm text-blue-600 hover:underline break-all"
+          >
+            リンクを開く
+          </a>
+        </div>
+      )}
       
       {/* 営業状況・混雑度表示 */}
       <div className="flex items-center gap-4 mb-2 text-sm">
