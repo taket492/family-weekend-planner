@@ -103,6 +103,7 @@ export enum PriceRange {
 export interface SearchFilters {
   category?: SpotCategory[]
   priceRange?: PriceRange[]
+  isOpen?: boolean
   hasKidsMenu?: boolean
   hasHighChair?: boolean
   hasNursingRoom?: boolean

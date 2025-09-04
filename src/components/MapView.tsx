@@ -22,7 +22,23 @@ function loadLeaflet(): Promise<void> {
     const script = document.createElement('script')
     script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js'
     script.async = true
-    script.onload = () => resolve()
+    script.onload = () => {
+      // Load markercluster plugin (best-effort)
+      const mcCss1 = document.createElement('link')
+      mcCss1.rel = 'stylesheet'
+      mcCss1.href = 'https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css'
+      document.head.appendChild(mcCss1)
+      const mcCss2 = document.createElement('link')
+      mcCss2.rel = 'stylesheet'
+      mcCss2.href = 'https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css'
+      document.head.appendChild(mcCss2)
+      const mc = document.createElement('script')
+      mc.src = 'https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js'
+      mc.async = true
+      mc.onload = () => resolve()
+      mc.onerror = () => resolve()
+      document.body.appendChild(mc)
+    }
     script.onerror = () => reject(new Error('Failed to load Leaflet'))
     document.body.appendChild(script)
   })
@@ -55,37 +71,23 @@ export default function MapView({ region, prefecture }: MapViewProps) {
     }).addTo(map)
 
     const validSpots = spots.filter(s => typeof s.latitude === 'number' && typeof s.longitude === 'number')
+    const normalIcon = L.divIcon({ className: 'leaflet-div-icon', html: '<div style="background:#4f46e5;color:#fff;border-radius:12px;padding:2px 6px;font-size:12px;">●</div>' })
+    const activeIcon = L.divIcon({ className: 'leaflet-div-icon', html: '<div style="background:#dc2626;color:#fff;border-radius:12px;padding:2px 6px;font-size:12px;">●</div>' })
+    const cluster = L.markerClusterGroup ? L.markerClusterGroup() : null
+    const markerMap: Record<string, any> = {}
+    const store = require('@/lib/stores/useSpotStore').useSpotStore
+    const { setHighlightedSpot, setActiveSpot } = store.getState()
 
-    if (validSpots.length > 50) {
-      // Simple grid-based clustering (approximate)
-      const clusters: Record<string, { count: number; latSum: number; lonSum: number; names: string[] }> = {}
-      for (const s of validSpots) {
-        const key = `${(s.latitude as number).toFixed(2)}_${(s.longitude as number).toFixed(2)}`
-        clusters[key] ||= { count: 0, latSum: 0, lonSum: 0, names: [] }
-        clusters[key].count++
-        clusters[key].latSum += s.latitude as number
-        clusters[key].lonSum += s.longitude as number
-        if (clusters[key].names.length < 5) clusters[key].names.push(s.name)
-      }
-      Object.values(clusters).forEach(c => {
-        const lat = c.latSum / c.count
-        const lon = c.lonSum / c.count
-        const marker = L.marker([lat, lon], {
-          icon: L.divIcon({
-            className: 'leaflet-div-icon',
-            html: `<div style="background:#4f46e5;color:#fff;border-radius:20px;padding:2px 8px;font-size:12px;">${c.count}</div>`,
-            iconSize: [30, 24],
-            iconAnchor: [15, 12]
-          })
-        })
-        marker.addTo(map).bindPopup(`${c.count}件\n${c.names.join('、')}`)
-      })
-    } else {
-      validSpots.forEach(s => {
-        const m = L.marker([s.latitude as number, s.longitude as number]).addTo(map)
-        m.bindPopup(`<b>${s.name}</b><br/>${s.address}`)
-      })
-    }
+    validSpots.forEach((s: any) => {
+      const m = L.marker([s.latitude, s.longitude], { icon: normalIcon })
+      m.on('mouseover', () => setHighlightedSpot(s.id))
+      m.on('mouseout', () => setHighlightedSpot(undefined))
+      m.on('click', () => setActiveSpot(s.id))
+      m.bindPopup(`<b>${s.name}</b><br/>${s.address}`)
+      markerMap[s.id] = m
+      if (cluster) cluster.addLayer(m); else m.addTo(map)
+    })
+    if (cluster) cluster.addTo(map)
 
     // Fit bounds if we have several points
     if (validSpots.length > 1) {
@@ -108,7 +110,12 @@ export default function MapView({ region, prefecture }: MapViewProps) {
     }
     map.on('moveend', onMoveEnd)
 
-    return () => { map.off('moveend', onMoveEnd); map.remove() }
+    // Sync active selection -> marker icon
+    const unsubscribe = store.subscribe((state: any) => state.activeSpotId, (id: string | undefined) => {
+      Object.entries(markerMap).forEach(([sid, m]) => m.setIcon(sid === id ? activeIcon : normalIcon))
+    })
+
+    return () => { map.off('moveend', onMoveEnd); if (cluster) cluster.clearLayers(); unsubscribe(); map.remove() }
   }, [ready, spots])
 
   return (

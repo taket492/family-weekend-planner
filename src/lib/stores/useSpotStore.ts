@@ -18,9 +18,14 @@ interface SpotStore {
   setFilters: (filters: SearchFilters) => void
   setLoading: (loading: boolean) => void
   setError: (error: string | null) => void
-  
+
   searchSpots: (region: string, prefecture: string) => Promise<void>
   searchSpotsInBBox: (region: string, prefecture: string, bbox: [number, number, number, number]) => Promise<void>
+  // hover/selection sync
+  highlightedSpotId?: string
+  activeSpotId?: string
+  setHighlightedSpot: (id?: string) => void
+  setActiveSpot: (id?: string) => void
 }
 
 export const useSpotStore = create<SpotStore>((set, get) => ({
@@ -50,6 +55,10 @@ export const useSpotStore = create<SpotStore>((set, get) => ({
   setLoading: (isLoading) => set({ isLoading }),
   
   setError: (error) => set({ error }),
+  highlightedSpotId: undefined,
+  activeSpotId: undefined,
+  setHighlightedSpot: (id) => set({ highlightedSpotId: id }),
+  setActiveSpot: (id) => set({ activeSpotId: id }),
 
   searchSpots: async (region: string, prefecture: string) => {
     const { filters } = get()
@@ -83,6 +92,7 @@ export const useSpotStore = create<SpotStore>((set, get) => ({
       if (filters.sortBy) params.append('sortBy', filters.sortBy)
       if (filters.showOnlyShizuoka) params.append('showOnlyShizuoka', 'true')
       if (filters.showTrending) params.append('showTrending', 'true')
+      if (filters.isOpen) params.append('isOpen', 'true')
 
       // 外部APIから実際のスポットデータを取得
       const response = await fetch(`/api/spots/external?${params}`)
@@ -143,6 +153,7 @@ export const useSpotStore = create<SpotStore>((set, get) => ({
       if (filters.showOnlyShizuoka) params.append('showOnlyShizuoka', 'true')
       if (filters.showTrending) params.append('showTrending', 'true')
       params.append('bbox', `${bbox[0]},${bbox[1]},${bbox[2]},${bbox[3]}`)
+      if (filters.isOpen) params.append('isOpen', 'true')
 
       const response = await fetch(`/api/spots/external?${params}`)
       if (!response.ok) throw new Error('Failed to fetch bbox spots')

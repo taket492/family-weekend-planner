@@ -16,6 +16,7 @@ export async function GET(request: NextRequest) {
     const sortBy = searchParams.get('sortBy') as 'popularity' | 'rating' | 'recent' || 'popularity'
     const showOnlyShizuoka = searchParams.get('showOnlyShizuoka') === 'true'
     const showTrending = searchParams.get('showTrending') === 'true'
+    const isOpen = searchParams.get('isOpen') === 'true'
     
     // 子連れ向けフィルター
     const hasKidsMenu = searchParams.get('hasKidsMenu') === 'true'
@@ -87,6 +88,11 @@ export async function GET(request: NextRequest) {
     // トレンドフィルター
     if (showTrending) {
       spots = spots.filter(spot => spot.isTrending)
+    }
+
+    // 営業中フィルタ
+    if (isOpen) {
+      spots = spots.filter(spot => spot.isCurrentlyOpen)
     }
 
     // 地域フィルタリング

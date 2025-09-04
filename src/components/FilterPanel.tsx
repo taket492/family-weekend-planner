@@ -79,6 +79,7 @@ export default function FilterPanel() {
       onClear: () => setFilters({ ...filters, priceRange: filters.priceRange!.filter(x => x !== p) })
     }))
     const flags: Array<[keyof SearchFilters, string]> = [
+      ['isOpen', '営業中'],
       ['hasKidsMenu', 'キッズメニュー'],
       ['hasHighChair', 'ハイチェア'],
       ['hasNursingRoom', '授乳室'],
@@ -172,6 +173,14 @@ export default function FilterPanel() {
                 label={<span className="text-xs md:text-sm">{label}</span>}
               />
             ))}
+          </div>
+          </Collapse>
+        </div>
+
+        <div>
+          <Collapse title="営業状況">
+          <div className="mt-1">
+            <Checkbox checked={filters.isOpen || false} onChange={(e) => setFilters({ ...filters, isOpen: (e.target as HTMLInputElement).checked })} label={<span className="text-xs md:text-sm">営業中のみ</span>} />
           </div>
           </Collapse>
         </div>

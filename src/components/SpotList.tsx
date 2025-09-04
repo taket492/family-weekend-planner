@@ -16,7 +16,10 @@ export default function SpotList({ region, prefecture }: SpotListProps) {
     filters, 
     isLoading, 
     error, 
-    searchSpots
+    searchSpots,
+    activeSpotId,
+    setActiveSpot,
+    setHighlightedSpot
   } = useSpotStore()
 
   useEffect(() => {
@@ -105,12 +108,17 @@ export default function SpotList({ region, prefecture }: SpotListProps) {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 max-h-[70vh] overflow-y-auto">
           {spots.map((spot) => (
-            <SpotCard
-              key={spot.id}
-              spot={spot}
-              onAddToPlan={() => {}}
-              isSelected={false}
-            />
+            <div key={spot.id}
+              onMouseEnter={() => setHighlightedSpot(spot.id)}
+              onMouseLeave={() => setHighlightedSpot(undefined)}
+              onClick={() => setActiveSpot(spot.id)}
+            >
+              <SpotCard
+                spot={spot}
+                onAddToPlan={() => {}}
+                isSelected={activeSpotId === spot.id}
+              />
+            </div>
           ))}
         </div>
       )}

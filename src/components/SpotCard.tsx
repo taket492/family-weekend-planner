@@ -93,7 +93,7 @@ export default function SpotCard({ spot, onAddToPlan, isSelected, userId = 'defa
   }
 
   return (
-    <Card className="border border-gray-200 transition-all hover:shadow-md hover:border-gray-300">
+    <Card className={`border transition-all hover:shadow-md ${isSelected ? 'border-blue-500 ring-2 ring-blue-200' : 'border-gray-200 hover:border-gray-300'}`}>
       <div className="flex justify-between items-start mb-3">
         <div className="flex-1">
           <h3 className="text-lg font-bold text-gray-900 mb-1">{spot.name}</h3>
