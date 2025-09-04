@@ -3,7 +3,7 @@ import { prisma } from '@/lib/prisma'
 
 export const runtime = 'nodejs'
 
-export async function POST(_req: NextRequest) {
+export async function handler() {
   try {
     // Best-effort DDL for Postgres
     // 1) Spot table: add latitude/longitude if missing
@@ -53,3 +53,11 @@ export async function POST(_req: NextRequest) {
   }
 }
 
+export async function POST(_req: NextRequest) {
+  return handler()
+}
+
+// Allow GET as well (to run from browser if POST is blocked)
+export async function GET(_req: NextRequest) {
+  return handler()
+}
