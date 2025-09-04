@@ -90,12 +90,19 @@ export default function EventList({ region, prefecture, spotId }: EventListProps
         </div>
       ) : (
         <div className="space-y-4">
-          {events.map((event) => (
-            <a
+          {events.map((event) => {
+            const Wrapper: any = event.url ? 'a' : 'div'
+            const wrapperProps = event.url
+              ? {
+                  href: event.url,
+                  target: '_blank',
+                  rel: 'noopener noreferrer',
+                }
+              : { role: 'article', 'aria-label': event.title }
+            return (
+            <Wrapper
               key={event.id}
-              href={event.url}
-              target="_blank"
-              rel="noopener noreferrer"
+              {...wrapperProps}
               className="block border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <div className="flex gap-4">
@@ -165,8 +172,8 @@ export default function EventList({ region, prefecture, spotId }: EventListProps
                   </div>
                 </div>
               </div>
-            </a>
-          ))}
+            </Wrapper>
+          )})}
         </div>
       )}
     </div>
