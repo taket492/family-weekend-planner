@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useSpotStore } from '@/lib/stores/useSpotStore'
 import { computeSegments, estimateTravelTimeHours, optimizeOrder, TravelMode } from '@/lib/route-optimizer'
