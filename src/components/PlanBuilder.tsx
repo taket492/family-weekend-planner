@@ -18,10 +18,38 @@ export default function PlanBuilder() {
   const { selectedSpots, removeSelectedSpot, clearSelectedSpots, reorderSelectedSpots } = useSpotStore()
   const [mode, setMode] = useState<TravelMode>('drive')
   const [segments, setSegments] = useState<{ distanceKm: number; hours: number }[]>([])
-  const { createPlan, isLoading } = usePlanStore()
+  const { createPlan, isLoading, currentPlan } = usePlanStore()
   const { comments, checklist, addComment, deleteComment, addChecklist, toggleChecklist, deleteChecklist } = usePlanCollabStore()
   const [commentText, setCommentText] = useState('')
   const [checkText, setCheckText] = useState('')
+  const [serverComments, setServerComments] = useState<any[]>([])
+  const [serverChecklist, setServerChecklist] = useState<any[]>([])
+  const [inviteToken, setInviteToken] = useState<string | null>(null)
+
+  // Detect invite token from URL
+  useEffect(() => {
+    try {
+      const sp = new URLSearchParams(location.search)
+      const t = sp.get('invite')
+      if (t) setInviteToken(t)
+    } catch {}
+  }, [])
+
+  // Load collab data from server when possible
+  useEffect(() => {
+    const load = async () => {
+      if (!currentPlan?.id || !inviteToken) return
+      try {
+        const res = await fetch(`/api/plans/${currentPlan.id}/collab`, { headers: { Authorization: `Bearer ${inviteToken}` }})
+        if (res.ok) {
+          const data = await res.json()
+          setServerComments(data.comments || [])
+          setServerChecklist(data.checklist || [])
+        }
+      } catch {}
+    }
+    load()
+  }, [currentPlan?.id, inviteToken])
   const [showForm, setShowForm] = useState(false)
   
   const { register, handleSubmit, reset, formState: { errors } } = useForm<PlanFormData>()
@@ -228,16 +256,23 @@ export default function PlanBuilder() {
             <div className="bg-gray-50 rounded p-3">
               <h4 className="font-medium text-gray-800 mb-2">💬 コメント</h4>
               <div className="space-y-2 max-h-40 overflow-y-auto mb-2">
-                {comments.map(c => (
+                {(inviteToken && currentPlan?.id ? serverComments : comments).map((c: any) => (
                   <div key={c.id} className="p-2 bg-white rounded border flex justify-between items-start gap-2">
                     <div>
-                      <div className="text-xs text-gray-500">{c.author}・{new Date(c.createdAt).toLocaleString('ja-JP')}</div>
+                      <div className="text-xs text-gray-500">{c.author || 'ゲスト'}・{new Date(c.createdAt).toLocaleString('ja-JP')}</div>
                       <div className="text-sm text-gray-800 whitespace-pre-wrap">{c.text}</div>
                     </div>
-                    <button onClick={() => deleteComment(c.id)} className="text-xs text-red-600">削除</button>
+                    {inviteToken && currentPlan?.id ? (
+                      <button onClick={async () => {
+                        await fetch(`/api/plans/${currentPlan.id}/comments/${c.id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${inviteToken}` }})
+                        setServerComments(prev => prev.filter((x:any) => x.id !== c.id))
+                      }} className="text-xs text-red-600">削除</button>
+                    ) : (
+                      <button onClick={() => deleteComment(c.id)} className="text-xs text-red-600">削除</button>
+                    )}
                   </div>
                 ))}
-                {comments.length === 0 && (
+                {(inviteToken && currentPlan?.id ? serverComments.length === 0 : comments.length === 0) && (
                   <div className="text-xs text-gray-500">まだコメントはありません</div>
                 )}
               </div>
@@ -249,7 +284,23 @@ export default function PlanBuilder() {
                   placeholder="コメントを入力"
                 />
                 <button
-                  onClick={() => { if (commentText.trim()) { addComment('ゲスト', commentText.trim()); setCommentText('') } }}
+                  onClick={async () => {
+                    if (!commentText.trim()) return
+                    if (inviteToken && currentPlan?.id) {
+                      const res = await fetch(`/api/plans/${currentPlan.id}/comments`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${inviteToken}` },
+                        body: JSON.stringify({ author: 'ゲスト', text: commentText.trim() })
+                      })
+                      if (res.ok) {
+                        const created = await res.json()
+                        setServerComments(prev => [created, ...prev])
+                        setCommentText('')
+                        return
+                      }
+                    }
+                    addComment('ゲスト', commentText.trim()); setCommentText('')
+                  }}
                   className="text-sm px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700"
                 >
                   送信
@@ -259,16 +310,33 @@ export default function PlanBuilder() {
             <div className="bg-gray-50 rounded p-3">
               <h4 className="font-medium text-gray-800 mb-2">✅ チェックリスト</h4>
               <div className="space-y-2 max-h-40 overflow-y-auto mb-2">
-                {checklist.map(i => (
+                {(inviteToken && currentPlan?.id ? serverChecklist : checklist).map((i: any) => (
                   <div key={i.id} className="flex items-center justify-between p-2 bg-white rounded border">
                     <label className="flex items-center gap-2 text-sm">
-                      <input type="checkbox" checked={i.done} onChange={() => toggleChecklist(i.id)} />
+                      <input type="checkbox" checked={i.done} onChange={async () => {
+                        if (inviteToken && currentPlan?.id) {
+                          const res = await fetch(`/api/plans/${currentPlan.id}/checklist/${i.id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${inviteToken}` }, body: JSON.stringify({ done: !i.done }) })
+                          if (res.ok) {
+                            const upd = await res.json()
+                            setServerChecklist(prev => prev.map((x:any) => x.id === i.id ? upd : x))
+                            return
+                          }
+                        }
+                        toggleChecklist(i.id)
+                      }} />
                       <span className={i.done ? 'line-through text-gray-400' : 'text-gray-800'}>{i.text}</span>
                     </label>
-                    <button onClick={() => deleteChecklist(i.id)} className="text-xs text-red-600">削除</button>
+                    <button onClick={async () => {
+                      if (inviteToken && currentPlan?.id) {
+                        await fetch(`/api/plans/${currentPlan.id}/checklist/${i.id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${inviteToken}` } })
+                        setServerChecklist(prev => prev.filter((x:any) => x.id !== i.id))
+                        return
+                      }
+                      deleteChecklist(i.id)
+                    }} className="text-xs text-red-600">削除</button>
                   </div>
                 ))}
-                {checklist.length === 0 && (
+                {(inviteToken && currentPlan?.id ? serverChecklist.length === 0 : checklist.length === 0) && (
                   <div className="text-xs text-gray-500">チェック項目はありません</div>
                 )}
               </div>
@@ -280,7 +348,19 @@ export default function PlanBuilder() {
                   placeholder="項目を追加"
                 />
                 <button
-                  onClick={() => { if (checkText.trim()) { addChecklist(checkText.trim()); setCheckText('') } }}
+                  onClick={async () => {
+                    if (!checkText.trim()) return
+                    if (inviteToken && currentPlan?.id) {
+                      const res = await fetch(`/api/plans/${currentPlan.id}/checklist`, { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${inviteToken}` }, body: JSON.stringify({ text: checkText.trim() }) })
+                      if (res.ok) {
+                        const created = await res.json()
+                        setServerChecklist(prev => [...prev, created])
+                        setCheckText('')
+                        return
+                      }
+                    }
+                    addChecklist(checkText.trim()); setCheckText('')
+                  }}
                   className="text-sm px-3 py-1 bg-gray-700 text-white rounded hover:bg-gray-800"
                 >
                   追加
