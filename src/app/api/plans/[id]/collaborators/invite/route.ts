@@ -5,9 +5,9 @@ function generateToken() {
   return Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2)
 }
 
-export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
+export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string }> }) {
   try {
-    const planId = params.id
+    const { id: planId } = await ctx.params
     const body = await req.json().catch(() => ({})) as { email?: string; role?: string }
 
     const plan = await prisma.plan.findUnique({ where: { id: planId } })
@@ -34,4 +34,3 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
 }
 
 export const runtime = 'nodejs'
-

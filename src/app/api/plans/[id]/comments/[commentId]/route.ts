@@ -7,10 +7,9 @@ async function verifyToken(planId: string, token?: string | null) {
   return !!inv
 }
 
-export async function DELETE(req: NextRequest, { params }: { params: { id: string, commentId: string } }) {
+export async function DELETE(req: NextRequest, ctx: { params: Promise<{ id: string, commentId: string }> }) {
   try {
-    const planId = params.id
-    const id = params.commentId
+    const { id: planId, commentId: id } = await ctx.params
     const plan = await prisma.plan.findUnique({ where: { id: planId } })
     if (!plan) return NextResponse.json({ error: 'Plan not found' }, { status: 404 })
     const auth = req.headers.get('authorization')
@@ -27,4 +26,3 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
 }
 
 export const runtime = 'nodejs'
-

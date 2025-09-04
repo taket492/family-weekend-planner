@@ -7,9 +7,9 @@ async function verifyToken(planId: string, token?: string | null) {
   return !!inv
 }
 
-export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string }> }) {
   try {
-    const planId = params.id
+    const { id: planId } = await ctx.params
     const plan = await prisma.plan.findUnique({ where: { id: planId } })
     if (!plan) return NextResponse.json({ error: 'Plan not found' }, { status: 404 })
     const auth = req.headers.get('authorization')
@@ -29,4 +29,3 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
 }
 
 export const runtime = 'nodejs'
-

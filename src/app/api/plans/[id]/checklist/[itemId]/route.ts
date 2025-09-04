@@ -7,10 +7,9 @@ async function verifyToken(planId: string, token?: string | null) {
   return !!inv
 }
 
-export async function PATCH(req: NextRequest, { params }: { params: { id: string, itemId: string } }) {
+export async function PATCH(req: NextRequest, ctx: { params: Promise<{ id: string, itemId: string }> }) {
   try {
-    const planId = params.id
-    const id = params.itemId
+    const { id: planId, itemId: id } = await ctx.params
     const plan = await prisma.plan.findUnique({ where: { id: planId } })
     if (!plan) return NextResponse.json({ error: 'Plan not found' }, { status: 404 })
     const auth = req.headers.get('authorization')
@@ -27,10 +26,9 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
   }
 }
 
-export async function DELETE(req: NextRequest, { params }: { params: { id: string, itemId: string } }) {
+export async function DELETE(req: NextRequest, ctx: { params: Promise<{ id: string, itemId: string }> }) {
   try {
-    const planId = params.id
-    const id = params.itemId
+    const { id: planId, itemId: id } = await ctx.params
     const plan = await prisma.plan.findUnique({ where: { id: planId } })
     if (!plan) return NextResponse.json({ error: 'Plan not found' }, { status: 404 })
     const auth = req.headers.get('authorization')
@@ -47,4 +45,3 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
 }
 
 export const runtime = 'nodejs'
-
