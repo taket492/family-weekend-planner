@@ -11,6 +11,7 @@ import { useAuthStore } from '@/lib/stores/useAuthStore'
 import { Badge } from '@/components/ui/Badge'
 import { Card } from '@/components/ui/Card'
 import { Dropdown, DropdownItem } from '@/components/ui/Dropdown'
+import { useReviewStore } from '@/lib/stores/useReviewStore'
 
 interface SpotCardProps {
   spot: Spot
@@ -43,6 +44,11 @@ export default function SpotCard({ spot, onAddToPlan, isSelected, userId = 'defa
   const [bookmarkNotes, setBookmarkNotes] = useState('')
   const { addBookmark, removeBookmark, isBookmarked } = useBookmarkStore()
   const authUser = useAuthStore(state => state.user)
+  const { reviews, addReview, hideReview } = useReviewStore()
+  const [showReviewForm, setShowReviewForm] = useState(false)
+  const [reviewRating, setReviewRating] = useState(5)
+  const [reviewText, setReviewText] = useState('')
+  const [reviewTags, setReviewTags] = useState<string[]>([])
   
   const facilities = []
   if (spot.hasKidsMenu) facilities.push('キッズメニュー')
@@ -189,6 +195,46 @@ export default function SpotCard({ spot, onAddToPlan, isSelected, userId = 'defa
               {priceRangeLabels[spot.priceRange]}
             </span>
           )}
+        </div>
+      )}
+      {/* Local reviews summary */}
+      {reviews[spot.id]?.length ? (
+        <div className="flex items-center gap-2 mb-2 text-sm text-gray-700">
+          <span>ユーザー評価: {(
+            reviews[spot.id].filter(r=>!r.hidden).reduce((a, r) => a + r.rating, 0) / Math.max(1, reviews[spot.id].filter(r=>!r.hidden).length)
+          ).toFixed(1)} / 5</span>
+          <button className="text-xs text-blue-600 hover:underline" onClick={() => setShowReviewForm(!showReviewForm)}>
+            {showReviewForm ? '閉じる' : 'レビューを書く'}
+          </button>
+        </div>
+      ) : (
+        <div className="mb-2">
+          <button className="text-xs text-blue-600 hover:underline" onClick={() => setShowReviewForm(!showReviewForm)}>
+            レビューを書く
+          </button>
+        </div>
+      )}
+      {showReviewForm && (
+        <div className="mb-3 p-3 bg-gray-50 rounded">
+          <div className="flex items-center gap-2 mb-2">
+            <label className="text-sm">評価</label>
+            <select value={reviewRating} onChange={(e)=>setReviewRating(Number(e.target.value))} className="border rounded px-2 py-1 text-sm">
+              {[5,4,3,2,1].map(v=> <option key={v} value={v}>{v}</option>)}
+            </select>
+          </div>
+          <div className="flex flex-wrap gap-2 mb-2 text-xs">
+            {['ベビーカー', '授乳室', '静かさ', '席間隔', '清潔さ'].map(tag => (
+              <label key={tag} className={`px-2 py-1 rounded border cursor-pointer ${reviewTags.includes(tag)?'bg-blue-600 text-white':'bg-white'}`}>
+                <input type="checkbox" className="hidden" checked={reviewTags.includes(tag)} onChange={()=> setReviewTags(prev => prev.includes(tag)? prev.filter(t=>t!==tag) : [...prev, tag])} />
+                {tag}
+              </label>
+            ))}
+          </div>
+          <textarea value={reviewText} onChange={(e)=>setReviewText(e.target.value)} placeholder="簡易レビュー" className="w-full border rounded p-2 text-sm" rows={2} />
+          <div className="mt-2 flex gap-2">
+            <Button size="sm" onClick={()=>{ addReview({ spotId: spot.id, rating: reviewRating, tags: reviewTags, text: reviewText }); setShowReviewForm(false); setReviewText(''); setReviewTags([]) }}>投稿</Button>
+            <Button size="sm" variant="secondary" onClick={()=> setShowReviewForm(false)}>キャンセル</Button>
+          </div>
         </div>
       )}
       
