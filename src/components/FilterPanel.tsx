@@ -2,12 +2,14 @@
 
 import { useSpotStore } from '@/lib/stores/useSpotStore'
 import { SpotCategory, PriceRange, SearchFilters, SeasonalEventType } from '@/types'
-import { useEffect, useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
 import { Checkbox } from '@/components/ui/Checkbox'
 import { Select } from '@/components/ui/Select'
 import { Collapse } from '@/components/ui/Collapse'
+import { useSavedSearchStore } from '@/lib/stores/useSavedSearchStore'
+import { serializeFiltersToQuery } from '@/lib/url-filters'
 
 const categoryLabels = {
   [SpotCategory.RESTAURANT]: 'レストラン',
@@ -39,6 +41,8 @@ const seasonalEventLabels = {
 
 export default function FilterPanel() {
   const { filters, setFilters } = useSpotStore()
+  const { items, save, remove } = useSavedSearchStore()
+  const [saveName, setSaveName] = useState('')
 
   // 永続化（ローカル）
   useEffect(() => {
@@ -307,6 +311,39 @@ export default function FilterPanel() {
           </div>
           </Collapse>
         </div>
+
+        <div className="mt-4 border-t pt-3 flex items-center justify-between">
+          <Button variant="secondary" onClick={() => setFilters({})}>リセット</Button>
+          <div className="flex items-center gap-2">
+            <input value={saveName} onChange={(e)=>setSaveName((e.target as HTMLInputElement).value)} placeholder="条件名" className="border rounded px-2 py-1 text-sm" />
+            <Button size="sm" onClick={()=>{ if(saveName.trim()){ save(saveName.trim(), filters as any); setSaveName('') } }}>保存</Button>
+            <Button size="sm" variant="ghost" onClick={()=>{
+              const params = serializeFiltersToQuery(filters as any)
+              const url = new URL(location.href)
+              const region = url.searchParams.get('region')
+              const prefecture = url.searchParams.get('prefecture')
+              url.search = ''
+              if (region) url.searchParams.set('region', region)
+              if (prefecture) url.searchParams.set('prefecture', prefecture)
+              params.forEach((v,k)=>url.searchParams.set(k,v))
+              navigator.clipboard.writeText(url.toString()).catch(()=>{})
+            }}>共有URLをコピー</Button>
+          </div>
+        </div>
+
+        {items.length > 0 && (
+          <div className="mt-3 border-t pt-3">
+            <div className="text-sm font-medium mb-2">保存済み検索</div>
+            <div className="flex flex-wrap gap-2">
+              {items.map(it => (
+                <div key={it.id} className="flex items-center gap-2 border rounded px-2 py-1">
+                  <button className="text-sm text-blue-700 hover:underline" onClick={()=> setFilters(it.filters)}>読み込み: {it.name}</button>
+                  <button className="text-xs text-red-600" onClick={()=> remove(it.id)}>削除</button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )

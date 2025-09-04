@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/Button'
 import LocationSelector from '@/components/LocationSelector'
 import SpotList from '@/components/SpotList'
@@ -16,6 +16,8 @@ import TemplateGenerator from '@/components/TemplateGenerator'
 import PlanBuilder from '@/components/PlanBuilder'
 import { useAuthStore } from '@/lib/stores/useAuthStore'
 import UrlImportPanel from '@/components/UrlImportPanel'
+import { useSpotStore } from '@/lib/stores/useSpotStore'
+import { parseFiltersFromQuery, serializeFiltersToQuery } from '@/lib/url-filters'
 
 function AuthControls() {
   const { user, signIn, signOut } = useAuthStore()
@@ -42,6 +44,35 @@ export default function Home() {
   const [activeTab, setActiveTab] = useState<'search' | 'add-spot' | 'add-restaurant'>('search')
   const [showFilters, setShowFilters] = useState(false)
   const [viewMode, setViewMode] = useState<'list' | 'map'>('list')
+  
+  // Load from URL on mount
+  const { filters, setFilters } = useSpotStore()
+  useEffect(() => {
+    try {
+      const sp = new URLSearchParams(location.search)
+      const region = sp.get('region')
+      const prefecture = sp.get('prefecture')
+      if (region && prefecture) {
+        setSelectedLocation({ region, prefecture, address: `${prefecture}${region}` })
+      }
+      const parsed = parseFiltersFromQuery(location.search)
+      if (Object.keys(parsed).length) setFilters({ ...filters, ...parsed })
+    } catch {}
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  // Sync URL when location/filters change
+  useEffect(() => {
+    const url = new URL(location.href)
+    url.search = ''
+    if (selectedLocation) {
+      url.searchParams.set('region', selectedLocation.region)
+      url.searchParams.set('prefecture', selectedLocation.prefecture)
+    }
+    const params = serializeFiltersToQuery(filters as any)
+    params.forEach((v,k)=>url.searchParams.set(k,v))
+    history.replaceState(null, '', url.toString())
+  }, [selectedLocation, filters])
 
   return (
     <>

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { Spot, SeasonalRecommendation } from '@/types'
 import SpotCard from './SpotCard'
+import { useProfileStore, ageToBucket } from '@/lib/stores/useProfileStore'
 
 interface WeeklyRankingData {
   weeklyRanking: Spot[]
@@ -16,13 +17,27 @@ export default function WeeklyRanking() {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
+  const { children } = useProfileStore()
+
   useEffect(() => {
     fetchWeeklyRanking()
-  }, [])
+  }, [children])
 
   const fetchWeeklyRanking = async () => {
     try {
-      const response = await fetch('/api/ranking/weekly?region=静岡県')
+      let weights = ' '
+      if (children.length) {
+        let baby = 0, toddler = 0, child = 0
+        for (const c of children) {
+          const b = ageToBucket(c)
+          if (b === 'baby') baby++
+          else if (b === 'toddler') toddler++
+          else child++
+        }
+        const sum = baby + toddler + child || 1
+        weights = `&weights=${(baby/sum).toFixed(2)},${(toddler/sum).toFixed(2)},${(child/sum).toFixed(2)}`
+      }
+      const response = await fetch(`/api/ranking/weekly?region=静岡県${weights}`)
       if (!response.ok) throw new Error('Failed to fetch ranking')
       
       const data = await response.json()
