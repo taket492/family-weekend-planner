@@ -5,6 +5,7 @@ import { useForm } from 'react-hook-form'
 import { useSpotStore } from '@/lib/stores/useSpotStore'
 import { computeSegments, estimateTravelTimeHours, optimizeOrder, TravelMode } from '@/lib/route-optimizer'
 import { usePlanStore } from '@/lib/stores/usePlanStore'
+import { usePlanCollabStore } from '@/lib/stores/usePlanCollabStore'
 
 interface PlanFormData {
   title: string
@@ -18,6 +19,9 @@ export default function PlanBuilder() {
   const [mode, setMode] = useState<TravelMode>('drive')
   const [segments, setSegments] = useState<{ distanceKm: number; hours: number }[]>([])
   const { createPlan, isLoading } = usePlanStore()
+  const { comments, checklist, addComment, deleteComment, addChecklist, toggleChecklist, deleteChecklist } = usePlanCollabStore()
+  const [commentText, setCommentText] = useState('')
+  const [checkText, setCheckText] = useState('')
   const [showForm, setShowForm] = useState(false)
   
   const { register, handleSubmit, reset, formState: { errors } } = useForm<PlanFormData>()
@@ -218,6 +222,86 @@ export default function PlanBuilder() {
               </div>
             </form>
           )}
+
+          {/* Collaboration: Comments and Checklist */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-t pt-4">
+            <div className="bg-gray-50 rounded p-3">
+              <h4 className="font-medium text-gray-800 mb-2">💬 コメント</h4>
+              <div className="space-y-2 max-h-40 overflow-y-auto mb-2">
+                {comments.map(c => (
+                  <div key={c.id} className="p-2 bg-white rounded border flex justify-between items-start gap-2">
+                    <div>
+                      <div className="text-xs text-gray-500">{c.author}・{new Date(c.createdAt).toLocaleString('ja-JP')}</div>
+                      <div className="text-sm text-gray-800 whitespace-pre-wrap">{c.text}</div>
+                    </div>
+                    <button onClick={() => deleteComment(c.id)} className="text-xs text-red-600">削除</button>
+                  </div>
+                ))}
+                {comments.length === 0 && (
+                  <div className="text-xs text-gray-500">まだコメントはありません</div>
+                )}
+              </div>
+              <div className="flex gap-2">
+                <input
+                  value={commentText}
+                  onChange={(e) => setCommentText(e.target.value)}
+                  className="flex-1 border border-gray-300 rounded px-2 py-1 text-sm"
+                  placeholder="コメントを入力"
+                />
+                <button
+                  onClick={() => { if (commentText.trim()) { addComment('ゲスト', commentText.trim()); setCommentText('') } }}
+                  className="text-sm px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700"
+                >
+                  送信
+                </button>
+              </div>
+            </div>
+            <div className="bg-gray-50 rounded p-3">
+              <h4 className="font-medium text-gray-800 mb-2">✅ チェックリスト</h4>
+              <div className="space-y-2 max-h-40 overflow-y-auto mb-2">
+                {checklist.map(i => (
+                  <div key={i.id} className="flex items-center justify-between p-2 bg-white rounded border">
+                    <label className="flex items-center gap-2 text-sm">
+                      <input type="checkbox" checked={i.done} onChange={() => toggleChecklist(i.id)} />
+                      <span className={i.done ? 'line-through text-gray-400' : 'text-gray-800'}>{i.text}</span>
+                    </label>
+                    <button onClick={() => deleteChecklist(i.id)} className="text-xs text-red-600">削除</button>
+                  </div>
+                ))}
+                {checklist.length === 0 && (
+                  <div className="text-xs text-gray-500">チェック項目はありません</div>
+                )}
+              </div>
+              <div className="flex gap-2">
+                <input
+                  value={checkText}
+                  onChange={(e) => setCheckText(e.target.value)}
+                  className="flex-1 border border-gray-300 rounded px-2 py-1 text-sm"
+                  placeholder="項目を追加"
+                />
+                <button
+                  onClick={() => { if (checkText.trim()) { addChecklist(checkText.trim()); setCheckText('') } }}
+                  className="text-sm px-3 py-1 bg-gray-700 text-white rounded hover:bg-gray-800"
+                >
+                  追加
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Share link placeholder */}
+          <div className="pt-2 flex justify-end">
+            <button
+              onClick={async () => {
+                const url = `${location.origin}${location.pathname}?share=plan`
+                try { await navigator.clipboard.writeText(url) } catch {}
+                alert('共有リンクをコピーしました')
+              }}
+              className="text-sm px-3 py-2 border border-gray-300 rounded hover:bg-gray-50"
+            >
+              共有リンクをコピー
+            </button>
+          </div>
         </div>
       )}
     </div>
