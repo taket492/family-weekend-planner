@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { Restaurant, CuisineType, PriceRange } from '@/types'
 import { useBookmarkStore } from '@/lib/stores/useBookmarkStore'
 import { Button } from '@/components/ui/Button'
+import { useAuthStore } from '@/lib/stores/useAuthStore'
 import { Badge } from '@/components/ui/Badge'
 import { Card } from '@/components/ui/Card'
 import { Dropdown, DropdownItem } from '@/components/ui/Dropdown'
@@ -46,6 +47,7 @@ export default function RestaurantCard({ restaurant, userId = 'default-user' }: 
   const [showShare, setShowShare] = useState(false)
   const [bookmarkNotes, setBookmarkNotes] = useState('')
   const { addBookmark, removeBookmark, isBookmarked } = useBookmarkStore()
+  const authUser = useAuthStore(state => state.user)
   
   const facilities = []
   if (restaurant.hasKidsChair) facilities.push('子供用椅子')
@@ -59,14 +61,14 @@ export default function RestaurantCard({ restaurant, userId = 'default-user' }: 
 
   const handleBookmarkToggle = async () => {
     if (bookmarked) {
-      await removeBookmark(userId, restaurant.id)
+      await removeBookmark(authUser?.id || userId, restaurant.id)
     } else {
       setShowBookmarkForm(true)
     }
   }
 
   const handleBookmarkSave = async () => {
-    await addBookmark(userId, restaurant, bookmarkNotes, ['restaurant'])
+    await addBookmark(authUser?.id || userId, restaurant, bookmarkNotes, ['restaurant'])
     setShowBookmarkForm(false)
     setBookmarkNotes('')
   }
@@ -98,7 +100,9 @@ export default function RestaurantCard({ restaurant, userId = 'default-user' }: 
           {/* Small-screen overflow menu */}
           <div className="md:hidden">
             <Dropdown trigger={<span aria-hidden>⋯</span>} buttonAriaLabel="その他のアクション">
-              <DropdownItem onClick={handleBookmarkToggle}>{bookmarked ? '⭐ お気に入り解除' : '☆ お気に入り追加'}</DropdownItem>
+              {authUser && (
+                <DropdownItem onClick={handleBookmarkToggle}>{bookmarked ? '⭐ お気に入り解除' : '☆ お気に入り追加'}</DropdownItem>
+              )}
               <DropdownItem onClick={() => setShowCalendar(true)}>📅 予定に追加</DropdownItem>
               <DropdownItem onClick={() => setShowShare(true)}>📤 共有</DropdownItem>
               <DropdownItem onClick={openMaps}>🗺️ ナビ開始 (Google Maps)</DropdownItem>
@@ -184,9 +188,11 @@ export default function RestaurantCard({ restaurant, userId = 'default-user' }: 
       
       <div className="border-t pt-4 mt-4">
         <div className="hidden md:grid grid-cols-2 sm:grid-cols-4 gap-2 mb-3">
-          <Button onClick={handleBookmarkToggle} size="sm" variant="secondary">
-            {bookmarked ? '⭐' : '☆'}
-          </Button>
+          {authUser && (
+            <Button onClick={handleBookmarkToggle} size="sm" variant="secondary">
+              {bookmarked ? '⭐' : '☆'}
+            </Button>
+          )}
           <Button onClick={() => setShowCalendar(true)} size="sm">📅</Button>
           <Button onClick={() => setShowShare(true)} size="sm">📤</Button>
           <Button onClick={openMaps} size="sm">

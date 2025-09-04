@@ -7,6 +7,7 @@ import CalendarIntegration from './CalendarIntegration'
 import ShareModal from './ShareModal'
 import AffiliateLinks from './AffiliateLinks'
 import { Button } from '@/components/ui/Button'
+import { useAuthStore } from '@/lib/stores/useAuthStore'
 import { Badge } from '@/components/ui/Badge'
 import { Card } from '@/components/ui/Card'
 import { Dropdown, DropdownItem } from '@/components/ui/Dropdown'
@@ -41,6 +42,7 @@ export default function SpotCard({ spot, onAddToPlan, isSelected, userId = 'defa
   const [showShare, setShowShare] = useState(false)
   const [bookmarkNotes, setBookmarkNotes] = useState('')
   const { addBookmark, removeBookmark, isBookmarked } = useBookmarkStore()
+  const authUser = useAuthStore(state => state.user)
   
   const facilities = []
   if (spot.hasKidsMenu) facilities.push('キッズメニュー')
@@ -62,14 +64,14 @@ export default function SpotCard({ spot, onAddToPlan, isSelected, userId = 'defa
 
   const handleBookmarkToggle = async () => {
     if (bookmarked) {
-      await removeBookmark(userId, spot.id)
+      await removeBookmark(authUser?.id || userId, spot.id)
     } else {
       setShowBookmarkForm(true)
     }
   }
 
   const handleBookmarkSave = async () => {
-    await addBookmark(userId, spot, bookmarkNotes)
+    await addBookmark(authUser?.id || userId, spot, bookmarkNotes)
     setShowBookmarkForm(false)
     setBookmarkNotes('')
   }
@@ -99,7 +101,9 @@ export default function SpotCard({ spot, onAddToPlan, isSelected, userId = 'defa
           {/* Small-screen overflow menu */}
           <div className="md:hidden">
             <Dropdown trigger={<span aria-hidden>⋯</span>} buttonAriaLabel="その他のアクション">
-              <DropdownItem onClick={handleBookmarkToggle}>{bookmarked ? '⭐ お気に入り解除' : '☆ お気に入り追加'}</DropdownItem>
+              {authUser && (
+                <DropdownItem onClick={handleBookmarkToggle}>{bookmarked ? '⭐ お気に入り解除' : '☆ お気に入り追加'}</DropdownItem>
+              )}
               <DropdownItem onClick={() => setShowCalendar(true)}>📅 予定に追加</DropdownItem>
               <DropdownItem onClick={() => setShowShare(true)}>📤 共有</DropdownItem>
               <DropdownItem onClick={openMaps}>🗺️ ナビ開始 (Google Maps)</DropdownItem>
@@ -204,16 +208,18 @@ export default function SpotCard({ spot, onAddToPlan, isSelected, userId = 'defa
         <div className="hidden md:grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-2 xl:grid-cols-4 gap-2 mb-3">
           
           {/* ブックマークボタン */}
-          <button
-            onClick={handleBookmarkToggle}
-            className={`flex items-center justify-center gap-1 px-3 py-2 rounded-md transition-colors text-sm font-medium ${
-              bookmarked 
-                ? 'bg-yellow-500 text-white hover:bg-yellow-600' 
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-            }`}
-          >
-            {bookmarked ? '⭐ お気に入り済み' : '☆ お気に入り追加'}
-          </button>
+          {authUser && (
+            <button
+              onClick={handleBookmarkToggle}
+              className={`flex items-center justify-center gap-1 px-3 py-2 rounded-md transition-colors text-sm font-medium ${
+                bookmarked 
+                  ? 'bg-yellow-500 text-white hover:bg-yellow-600' 
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              {bookmarked ? '⭐ お気に入り済み' : '☆ お気に入り追加'}
+            </button>
+          )}
           
           {/* Google Maps ナビゲーションボタン */}
           <button

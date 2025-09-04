@@ -14,6 +14,23 @@ import { RecentSpots } from '@/components/RecentSpots'
 import ProfilePanel from '@/components/ProfilePanel'
 import TemplateGenerator from '@/components/TemplateGenerator'
 import PlanBuilder from '@/components/PlanBuilder'
+import { useAuthStore } from '@/lib/stores/useAuthStore'
+
+function AuthControls() {
+  const { user, signIn, signOut } = useAuthStore()
+  return (
+    <div className="flex items-center gap-2">
+      {user ? (
+        <>
+          <span className="text-sm text-gray-700">こんにちは、{user.name}</span>
+          <Button size="sm" variant="secondary" onClick={signOut}>サインアウト</Button>
+        </>
+      ) : (
+        <Button size="sm" onClick={() => signIn('ゲスト')}>サインイン</Button>
+      )}
+    </div>
+  )
+}
 
 export default function Home() {
   const [selectedLocation, setSelectedLocation] = useState<{
@@ -30,12 +47,18 @@ export default function Home() {
     <div className="min-h-screen bg-gray-50">
       <header className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <h1 className="text-2xl font-bold text-gray-900">
-            ファミリースポット検索
-          </h1>
-          <p className="text-gray-600 mt-1">
-            子連れ向けのお出かけスポットを簡単に見つけよう
-          </p>
+          <div className="flex items-start justify-between">
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">
+                ファミリースポット検索
+              </h1>
+              <p className="text-gray-600 mt-1">
+                子連れ向けのお出かけスポットを簡単に見つけよう
+              </p>
+            </div>
+            {/* Mock Auth Controls */}
+            <AuthControls />
+          </div>
           
           {/* ナビゲーションタブ */}
           <div className="mt-4 border-b border-gray-200">
