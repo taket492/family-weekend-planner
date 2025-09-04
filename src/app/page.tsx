@@ -12,6 +12,8 @@ import { ManualSpotForm } from '@/components/ManualSpotForm'
 import { ManualRestaurantForm } from '@/components/ManualRestaurantForm'
 import { RecentSpots } from '@/components/RecentSpots'
 import ProfilePanel from '@/components/ProfilePanel'
+import TemplateGenerator from '@/components/TemplateGenerator'
+import PlanBuilder from '@/components/PlanBuilder'
 
 export default function Home() {
   const [selectedLocation, setSelectedLocation] = useState<{
@@ -108,6 +110,8 @@ export default function Home() {
                     prefecture={selectedLocation.prefecture}
                   />
                 )}
+                <TemplateGenerator />
+                <PlanBuilder />
                 <EventList 
                   region={selectedLocation.region}
                   prefecture={selectedLocation.prefecture}
