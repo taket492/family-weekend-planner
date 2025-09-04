@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { Spot, SearchFilters } from '@/types'
+import { useProfileStore, ageToBucket } from './useProfileStore'
 
 interface SpotStore {
   spots: Spot[]
@@ -87,7 +88,30 @@ export const useSpotStore = create<SpotStore>((set, get) => ({
         throw new Error('Failed to fetch spots from external API')
       }
       
-      const spots = await response.json()
+      let spots: Spot[] = await response.json()
+
+      // Apply family profile weighted sort (client-side)
+      try {
+        const { children } = useProfileStore.getState()
+        if (children.length && spots.length) {
+          const weights: Record<'baby' | 'toddler' | 'child', number> = { baby: 0, toddler: 0, child: 0 }
+          for (const c of children) {
+            weights[ageToBucket(c)] += 1
+          }
+          const total = Object.values(weights).reduce((a, b) => a + b, 0) || 1
+          // Normalize
+          Object.keys(weights).forEach(k => { weights[k as keyof typeof weights] /= total })
+
+          spots = spots.slice().sort((a: any, b: any) => {
+            const score = (s: any) => {
+              const ap = s.ageAppropriate || { baby: 0, toddler: 0, child: 0 }
+              return ap.baby * weights.baby + ap.toddler * weights.toddler + ap.child * weights.child
+            }
+            return score(b) - score(a)
+          })
+        }
+      } catch {}
+
       set({ spots, isLoading: false })
     } catch (error) {
       set({ 

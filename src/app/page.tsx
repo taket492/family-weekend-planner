@@ -11,6 +11,7 @@ import EventList from '@/components/EventList'
 import { ManualSpotForm } from '@/components/ManualSpotForm'
 import { ManualRestaurantForm } from '@/components/ManualRestaurantForm'
 import { RecentSpots } from '@/components/RecentSpots'
+import ProfilePanel from '@/components/ProfilePanel'
 
 export default function Home() {
   const [selectedLocation, setSelectedLocation] = useState<{
@@ -85,6 +86,7 @@ export default function Home() {
                 <LocationSelector 
                   onLocationSelect={setSelectedLocation}
                 />
+                <ProfilePanel />
                 <div className="hidden lg:block">
                   <FilterPanel />
                 </div>
