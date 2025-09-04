@@ -15,6 +15,7 @@ import ProfilePanel from '@/components/ProfilePanel'
 import TemplateGenerator from '@/components/TemplateGenerator'
 import PlanBuilder from '@/components/PlanBuilder'
 import { useAuthStore } from '@/lib/stores/useAuthStore'
+import UrlImportPanel from '@/components/UrlImportPanel'
 
 function AuthControls() {
   const { user, signIn, signOut } = useAuthStore()
@@ -148,6 +149,7 @@ export default function Home() {
           </div>
         ) : (
           <div className="max-w-4xl mx-auto">
+            <UrlImportPanel />
             <ManualRestaurantForm />
           </div>
         )}
