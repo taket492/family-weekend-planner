@@ -109,7 +109,8 @@ export const useSpotStore = create<SpotStore>((set, get) => ({
         if (children.length && spots.length) {
           const weights: Record<'baby' | 'toddler' | 'child', number> = { baby: 0, toddler: 0, child: 0 }
           for (const c of children) {
-            weights[ageToBucket(c)] += 1
+            const bucket = ageToBucket(c) as keyof typeof weights
+            weights[bucket] += 1
           }
           const total = Object.values(weights).reduce((a, b) => a + b, 0) || 1
           // Normalize
@@ -164,7 +165,10 @@ export const useSpotStore = create<SpotStore>((set, get) => ({
         const { ageToBucket } = require('./useProfileStore')
         if (children.length && spots.length) {
           const weights: Record<'baby' | 'toddler' | 'child', number> = { baby: 0, toddler: 0, child: 0 }
-          for (const c of children) weights[ageToBucket(c)] += 1
+          for (const c of children) {
+            const bucket = (ageToBucket as any)(c) as keyof typeof weights
+            weights[bucket] += 1
+          }
           const total = Object.values(weights).reduce((a, b) => a + b, 0) || 1
           Object.keys(weights).forEach(k => { weights[k as keyof typeof weights] /= total })
           spots = spots.slice().sort((a: any, b: any) => {
