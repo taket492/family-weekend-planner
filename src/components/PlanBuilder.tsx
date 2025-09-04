@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useSpotStore } from '@/lib/stores/useSpotStore'
+import { computeSegments, estimateTravelTimeHours, optimizeOrder, TravelMode } from '@/lib/route-optimizer'
 import { usePlanStore } from '@/lib/stores/usePlanStore'
 
 interface PlanFormData {
@@ -13,7 +14,9 @@ interface PlanFormData {
 }
 
 export default function PlanBuilder() {
-  const { selectedSpots, removeSelectedSpot, clearSelectedSpots } = useSpotStore()
+  const { selectedSpots, removeSelectedSpot, clearSelectedSpots, reorderSelectedSpots } = useSpotStore()
+  const [mode, setMode] = useState<TravelMode>('drive')
+  const [segments, setSegments] = useState<{ distanceKm: number; hours: number }[]>([])
   const { createPlan, isLoading } = usePlanStore()
   const [showForm, setShowForm] = useState(false)
   
@@ -50,6 +53,33 @@ export default function PlanBuilder() {
         <h2 className="text-lg font-semibold text-gray-900">
           プラン作成
         </h2>
+        {selectedSpots.length > 1 && (
+          <div className="flex items-center gap-2 mr-2">
+            <select
+              value={mode}
+              onChange={(e) => setMode(e.target.value as TravelMode)}
+              className="text-sm border border-gray-300 rounded px-2 py-1"
+              aria-label="移動手段"
+            >
+              <option value="drive">車</option>
+              <option value="walk">徒歩</option>
+            </select>
+            <button
+              onClick={() => {
+                const optimized = optimizeOrder(selectedSpots)
+                reorderSelectedSpots(optimized)
+                const segs = computeSegments(optimized).map(s => ({
+                  distanceKm: s.distanceKm,
+                  hours: estimateTravelTimeHours(s.distanceKm, mode)
+                }))
+                setSegments(segs)
+              }}
+              className="bg-blue-600 text-white px-3 py-2 rounded-md hover:bg-blue-700 text-sm"
+            >
+              順序を最適化
+            </button>
+          </div>
+        )}
         {selectedSpots.length > 0 && !showForm && (
           <button
             onClick={() => setShowForm(true)}
@@ -89,6 +119,11 @@ export default function PlanBuilder() {
                     <h3 className="font-medium text-gray-900 text-sm">{spot.name}</h3>
                   </div>
                   <p className="text-xs text-gray-500 mt-1">{spot.address}</p>
+                  {segments[index] && (
+                    <p className="text-xs text-gray-600 mt-1">
+                      → {segments[index].distanceKm.toFixed(1)} km / 約{Math.round(segments[index].hours * 60)}分
+                    </p>
+                  )}
                 </div>
                 
                 <button
@@ -100,6 +135,12 @@ export default function PlanBuilder() {
               </div>
             ))}
           </div>
+
+          {segments.length > 0 && (
+            <div className="flex justify-end text-sm text-gray-700">
+              合計: {segments.reduce((a, s) => a + s.distanceKm, 0).toFixed(1)} km / 約{Math.round(segments.reduce((a, s) => a + s.hours, 0) * 60)}分
+            </div>
+          )}
 
           {showForm && (
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 border-t pt-4">

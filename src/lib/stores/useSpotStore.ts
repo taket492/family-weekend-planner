@@ -12,6 +12,7 @@ interface SpotStore {
   addSelectedSpot: (spot: Spot) => void
   removeSelectedSpot: (spotId: string) => void
   clearSelectedSpots: () => void
+  reorderSelectedSpots: (spots: Spot[]) => void
   setFilters: (filters: SearchFilters) => void
   setLoading: (loading: boolean) => void
   setError: (error: string | null) => void
@@ -37,6 +38,8 @@ export const useSpotStore = create<SpotStore>((set, get) => ({
   })),
   
   clearSelectedSpots: () => set({ selectedSpots: [] }),
+  
+  reorderSelectedSpots: (spots) => set({ selectedSpots: spots }),
   
   setFilters: (filters) => set({ filters }),
   
