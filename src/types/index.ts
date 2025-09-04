@@ -4,6 +4,8 @@ export interface Spot {
   description?: string
   category: SpotCategory
   address: string
+  latitude?: number
+  longitude?: number
   
   hasKidsMenu: boolean
   hasHighChair: boolean

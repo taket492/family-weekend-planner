@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/Button'
 import LocationSelector from '@/components/LocationSelector'
 import SpotList from '@/components/SpotList'
+import MapView from '@/components/MapView'
 import FilterPanel from '@/components/FilterPanel'
 import WeeklyRanking from '@/components/WeeklyRanking'
 import EventList from '@/components/EventList'
@@ -19,6 +20,7 @@ export default function Home() {
   } | null>(null)
   const [activeTab, setActiveTab] = useState<'search' | 'add-spot' | 'add-restaurant'>('search')
   const [showFilters, setShowFilters] = useState(false)
+  const [viewMode, setViewMode] = useState<'list' | 'map'>('list')
 
   return (
     <>
@@ -92,10 +94,18 @@ export default function Home() {
               </div>
               
               <div className="lg:col-span-3 space-y-6">
-                <SpotList 
-                  region={selectedLocation.region}
-                  prefecture={selectedLocation.prefecture}
-                />
+                <div className="flex items-center gap-2">
+                  <Button variant={viewMode === 'list' ? 'primary' : 'ghost'} size="sm" onClick={() => setViewMode('list')}>📄 リスト</Button>
+                  <Button variant={viewMode === 'map' ? 'primary' : 'ghost'} size="sm" onClick={() => setViewMode('map')}>🗺️ 地図</Button>
+                </div>
+                {viewMode === 'map' ? (
+                  <MapView />
+                ) : (
+                  <SpotList 
+                    region={selectedLocation.region}
+                    prefecture={selectedLocation.prefecture}
+                  />
+                )}
                 <EventList 
                   region={selectedLocation.region}
                   prefecture={selectedLocation.prefecture}

@@ -339,7 +339,7 @@ export class AdvancedSpotSearch {
       // OSMデータの処理
       const osmSpots = (osmData.elements || [])
         .filter((el: { tags?: Record<string, string> }) => el.tags?.name)
-        .map((element: { type: string; id: number; tags: Record<string, string> }) => {
+        .map((element: { type: string; id: number; tags: Record<string, string>; lat?: number; lon?: number; center?: { lat: number; lon: number } }) => {
           const tags = element.tags
           const childScore = this.calculateChildFriendlyScore(element)
           const ageScores = this.calculateAgeAppropriate(tags)
@@ -347,6 +347,8 @@ export class AdvancedSpotSearch {
           const weatherMultiplier = this.adjustForWeather(this.mapCategory(tags), isOutdoor)
           const openingInfo = this.parseOpeningHours(tags.opening_hours || '')
           const crowdLevel = this.predictCrowdLevel(this.mapCategory(tags))
+          const latitude = element.lat ?? element.center?.lat
+          const longitude = element.lon ?? element.center?.lon
           
           // 高スコアスポットの一部をトレンド扱い（ランダム）
           const shouldMarkTrending = childScore >= 70 && Math.random() > 0.7
@@ -359,6 +361,8 @@ export class AdvancedSpotSearch {
             description: this.generateSmartDescription(tags, childScore, ageScores),
             category: this.mapCategory(tags),
             address: this.formatAddress(tags),
+            latitude,
+            longitude,
             
             // 子連れ向け設備（高精度判定）
             hasKidsMenu: tags.kids_menu === 'yes' || childScore >= 60,

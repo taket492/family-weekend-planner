@@ -9,6 +9,7 @@ export async function GET(request: NextRequest) {
     
     const region = searchParams.get('region') || '静岡市'
     const prefecture = searchParams.get('prefecture') || '静岡県'
+    const bbox = searchParams.get('bbox') // format: minLon,minLat,maxLon,maxLat
     const categories = searchParams.get('categories')?.split(',') as SpotCategory[]
     const minChildScore = parseInt(searchParams.get('minChildScore') || '30')
     const ageGroup = searchParams.get('ageGroup') as 'baby' | 'toddler' | 'child'
@@ -94,6 +95,20 @@ export async function GET(request: NextRequest) {
       spot.address.includes(region) || 
       spot.address.includes(prefecture)
     )
+
+    // bboxフィルタリング（緯度経度があるデータのみ）
+    if (bbox) {
+      const parts = bbox.split(',').map(Number)
+      if (parts.length === 4 && parts.every(n => !Number.isNaN(n))) {
+        const [minLon, minLat, maxLon, maxLat] = parts
+        spots = spots.filter(spot => {
+          const lat = (spot as any).latitude
+          const lon = (spot as any).longitude
+          if (typeof lat !== 'number' || typeof lon !== 'number') return false
+          return lon >= minLon && lon <= maxLon && lat >= minLat && lat <= maxLat
+        })
+      }
+    }
 
     // ソート機能
     switch (sortBy) {
